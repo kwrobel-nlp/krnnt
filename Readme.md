@@ -94,5 +94,20 @@ real    190m44,568s
 krnnt]$ time python3 krnnt_run.py -p weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues < train-analyzed.xces
 real	7m38.660s
 ```
+## Testing
 
+Trained models are available with releases: https://github.com/kwrobel-nlp/krnnt/releases
 
+```
+krnnt]$ pip3 install -e .
+```
+
+`reana.zip` contains model trained with reanalyzed data:
+```
+krnnt]$ python3 krnnt_run.py reana/weights_reana.hdf5 reana/lemmatisation_reana.pkl reana/dictionary_reana.pkl < test-raw.txt > test-raw.krnnt.xml
+```
+
+`preana.zip` contains model trained with reanalyzed data:
+```
+krnnt]$ python3 krnnt_run.py -p preana/weights_preana.hdf5 preana/lemmatisation_preana.pkl preana/dictionary_preana.pkl < test-analyzed.xml > test-analyzed.krnnt.xml
+```
