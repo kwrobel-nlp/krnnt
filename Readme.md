@@ -1,5 +1,11 @@
 # KRNNT
 
+Accuracy tested with 10-fold cross validation on National Corpus of Polish.
+
+Accuracy lower bound | Accuracy lower bound for unknown tokens
+------------ | -------------
+93.72% | 69.03%
+
 ## PolEval
 
 ### Training
