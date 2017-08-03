@@ -12,6 +12,7 @@ import traceback
 import collections
 import numpy as np
 import regex
+import sys
 from keras.callbacks import Callback
 from keras.preprocessing import sequence
 from progress.bar import Bar
@@ -684,7 +685,7 @@ def k_hot(tags, unique_tags_dict, zero=0):
         try:
             result[unique_tags_dict[tag]]=1
         except KeyError:
-            print('KeyError:', tag)
+            print('KeyError:', tag, file=sys.stderr)
     return result
 
 def predictions_to_classes(unique_tags_dict, predictions):
