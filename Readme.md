@@ -6,7 +6,9 @@
 
 1. Install KRNNT.
 
-```krnnt]$ pip3 install -e .```
+```
+krnnt]$ pip3 install -e .
+```
 
 
 2. Prepare training data.
@@ -87,11 +89,6 @@ real    190m44,568s
 ```
 
 5. Testing.
-
-```
-krnnt]$ time python3 krnnt_single.py -p -w weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5 -d train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues -l lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl test-analyzed.xml
-```
-
 
 ```
 krnnt]$ time python3 krnnt_run.py -p weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues < train-analyzed.xces
