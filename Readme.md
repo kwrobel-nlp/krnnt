@@ -113,7 +113,20 @@ krnnt]$ pip3 install -e .
 krnnt]$ python3 krnnt_run.py reana/weights_reana.hdf5 reana/lemmatisation_reana.pkl reana/dictionary_reana.pkl < test-raw.txt > test-raw.krnnt.xml
 ```
 
-`preana.zip` contains model trained with reanalyzed data:
+`preana.zip` contains model trained with preanalyzed data:
 ```
 krnnt]$ python3 krnnt_run.py -p preana/weights_preana.hdf5 preana/lemmatisation_preana.pkl preana/dictionary_preana.pkl < test-analyzed.xml > test-analyzed.krnnt.xml
+```
+
+### Voting
+
+Training more models and processing simple voting increase accuracy. Voting over 10 models achieves about 94.30% accuracy lower bound.
+
+`reana10.zip` and `preana10.zip` contain 10 models each.
+```
+for i in {0..9}
+do
+   krnnt]$ python3 krnnt_run.py reana/$i.hdf5 reana/lemmatisation.pkl  reana/dictionary.pkl < test-raw.txt > reana/$i.xml
+done
+krnnt]$ python3 voting.py reana/ > reana/test-raw.krnnt.voting.xml
 ```
