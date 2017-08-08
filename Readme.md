@@ -120,7 +120,7 @@ krnnt]$ python3 krnnt_run.py -p preana/weights_preana.hdf5 preana/lemmatisation_
 
 ### Voting
 
-Training more models and processing simple voting increase accuracy. Voting over 10 models achieves about 94.30% accuracy lower bound.
+Training more models and performing simple voting increase accuracy. Voting over 10 models achieves about 94.30% accuracy lower bound.
 
 `reana10.zip` and `preana10.zip` contain 10 models each.
 ```
