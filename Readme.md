@@ -130,3 +130,5 @@ do
 done
 krnnt]$ python3 voting.py reana/ > reana/test-raw.krnnt.voting.xml
 ```
+
+KRNNT is licensed under GNU LGPL v3.0.
