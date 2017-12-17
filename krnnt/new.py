@@ -1427,7 +1427,6 @@ def read_xces(file_path):
             else:
                 continue
 
-            print(xml_sentences)
             for xml_sentence in xml_sentences:
                 sentence=Sentence()
                 paragraph.add_sentence(sentence)
