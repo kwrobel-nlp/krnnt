@@ -1406,12 +1406,17 @@ def escape_xml(s):
 def read_xces(file_path):
     paragraphs_defined = True
     ns=False
-    first=True
+
+    for event, elem in ET.iterparse(file_path, events=("start",)):
+        if elem.tag == 'chunk':
+            if elem.get('type') == 's':
+                paragraphs_defined = False
+            break
+
+    # print('Paragrpahs defined:', paragraphs_defined)
+
     for event, elem in ET.iterparse(file_path, events=("end",)):
         if elem.tag == 'chunk':
-            if first and elem.get('type')=='s':
-                paragraphs_defined = False
-            first=False
 
             xml_sentences=[]
             paragraph=Paragraph()
@@ -1419,8 +1424,10 @@ def read_xces(file_path):
                 xml_sentences = elem.getchildren()
             elif (not paragraphs_defined) and elem.tag == 'chunk' and elem.get('type')=='s':
                 xml_sentences = [elem]
+            else:
+                continue
 
-
+            print(xml_sentences)
             for xml_sentence in xml_sentences:
                 sentence=Sentence()
                 paragraph.add_sentence(sentence)
