@@ -53,7 +53,6 @@ Lemmatisation model is saved under: lemmatisation_1810e860-6351-11e7-ae0b-a00002
 Dictionary is saved under: train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues
 real    197m44,568s
 ```
-Zeros on output indicates some problem `(0, 0, 0.0, 0, 0, 0.0, 0, 0, 0.0, 0, 0, 0.0, 0, 0, 0.0, 0.0)`.
 Check `~/.keras/keras.json` for `"image_dim_ordering": "th"` (for old Keras) and `"image_data_format": "channels_first"` (for Keras 2).
 
 6. Testing.
