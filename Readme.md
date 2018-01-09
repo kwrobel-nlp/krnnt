@@ -29,9 +29,12 @@ real	0m37.769s
 
 ```
 krnnt]$ python3 reanalyze.py train-gold.spickle train-reanalyzed.spickle
+0 MACA 9 10
+1 MACA 7 8
+...
 real	26m35.013s
 ```
-
+Ensure that last two numbers in each row are usually the same. 
 
 4. Shuffle data (optional).
 
