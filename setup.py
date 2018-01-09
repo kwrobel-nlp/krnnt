@@ -10,6 +10,6 @@ setup(name='krnnt',
       license='GPL',
       python_requires='>=3, <4',
       install_requires=[
-          'h5py','Keras','numpy','progress','progressbar2','regex','requests','setproctitle','Theano'
+          'h5py','Keras','numpy','progress','progressbar2','regex','requests','setproctitle','Theano','termcolor'
       ],
       zip_safe=False)
