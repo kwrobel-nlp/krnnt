@@ -70,7 +70,7 @@ if __name__ == '__main__':
         parameters = ExperimentParameters(pref)
         km = keras_model_class(parameters)
 
-        print('Model will be saved under: %s' % parameters.pref['weight_path'])
+        print('Model will be saved under: %s.final' % parameters.pref['weight_path'])
         print('Lemmatisation model will be saved under: %s' % parameters.pref['lemmatisation_path'])
 
         kd = KerasData(pref['corpus_path'], pref['reanalyze'])
