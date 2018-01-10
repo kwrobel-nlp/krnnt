@@ -44,11 +44,11 @@ real	1m26.350s
 ```
 
 
-5. Train.
+5. Train for 100 epochs. Add `-d 0.1` for using 10% of training data as development data set. 
 
 ```
-krnnt]$ time python3 krnnt_train.py train-reanalyzed.shuf.spickle
-Model is saved under: weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5
+krnnt]$ time python3 krnnt_train.py train-reanalyzed.shuf.spickle --patience 100
+Model is saved under: weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final
 Lemmatisation model is saved under: lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl
 Dictionary is saved under: train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues
 real    197m44,568s
@@ -87,11 +87,11 @@ real	1m41.192s
 ```
 
 
-4. Train.
+4. Train for 100 epochs.
 
 ```
-krnnt]$ time python3 krnnt_train.py -p train-merged.shuf.spickle
-Model is saved under: weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5
+krnnt]$ time python3 krnnt_train.py -p train-merged.shuf.spickle --patience 100
+Model is saved under: weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final
 Lemmatisation model is saved under: lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl
 Dictionary is saved under: train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues
 real    190m44,568s
