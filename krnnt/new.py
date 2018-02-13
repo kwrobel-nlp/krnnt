@@ -31,7 +31,7 @@ class Module(object):
 
     def load(self):
         output_path=self.output_path()
-        if not os.path.isfile(output_path):
+        if not os.path.isfile(output_path) or os.path.getmtime(output_path) < os.path.getmtime(self.input_path):
             try:
                 self._create()
             except BaseException as exception:
