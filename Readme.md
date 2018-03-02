@@ -8,6 +8,8 @@ Accuracy lower bound | Accuracy lower bound for unknown tokens
 
 ## PolEval
 
+There is some problem with Keras version higher than 2.1.2.
+
 ### Training
 
 1. Install KRNNT.
