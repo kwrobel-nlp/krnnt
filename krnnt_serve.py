@@ -31,7 +31,7 @@ class MyHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         results = krnnt.tag_sentences(post_data.decode('utf-8').split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
-        self.wfile.write(bytes(results_to_xces_str(results), "utf-8"))
+        self.wfile.write(bytes(results_to_plain_str(results), "utf-8"))
 
 
 if __name__ == '__main__':
