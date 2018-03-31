@@ -1368,37 +1368,46 @@ def shape(word): #TODO zredukowac czas
     word = regex.sub(u'[^A-Za-z0-9]','x', word, regex.LOCALE)
     return unix_uniq(list(word))
 
+def results_to_xces(results):
+    print(results_to_xces_str(results))
 
 def results_to_plain(results):
+    print(results_to_plain_str(results))
+
+def results_to_plain_str(results):
+    result_str = ""
     for sentence in results:
         for token in sentence:
-            print('%s\t%s' % (token['token'], token['sep']))
+            result_str += ('%s\t%s' % (token['token'], token['sep'])) + "\n"
             for lemma in token['lemmas']:
-                print('\t%s\t%s\tdisamb' % (lemma, token['tag']))
-        print()
+                result_str += ('\t%s\t%s\tdisamb' % (lemma, token['tag'])) + "\n"
+        result_str += "\n"
+    return result_str
 
-def results_to_xces(results):
-    print('<?xml version="1.0" encoding="UTF-8"?>\n'
+def results_to_xces_str(results):
+    result_str = ""
+    result_str += ('<?xml version="1.0" encoding="UTF-8"?>\n'
           '<!DOCTYPE cesAna SYSTEM "xcesAnaIPI.dtd">\n'
           '<cesAna xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" type="lex disamb">\n'
-          '<chunkList>')
+          '<chunkList>') + "\n"
 
     for sentence in results:
-        print(' <chunk type="p">\n'
-              '  <chunk type="s">')
+        result_str += (' <chunk type="p">\n'
+              '  <chunk type="s">') + "\n"
         for token in sentence:
             if token['sep']=='none':
-                print('   <ns/>')
-            print('   <tok>')
-            print('    <orth>%s</orth>' % escape_xml(token['token']))
+                result_str += ('   <ns/>') + "\n"
+            result_str += ('   <tok>') + "\n"
+            result_str += ('    <orth>%s</orth>' % escape_xml(token['token'])) + "\n"
             for lemma in token['lemmas']:
-                print('    <lex disamb="1"><base>%s</base><ctag>%s</ctag></lex>' % (escape_xml(lemma), token['tag']))
-            print('   </tok>')
-        print('  </chunk>\n'
-              ' </chunk>')
-    print('</chunkList>\n'
-        '</cesAna>')
-
+                result_str += ('    <lex disamb="1"><base>%s</base><ctag>%s</ctag></lex>' % (escape_xml(lemma),
+                    token['tag'])) + "\n"
+            result_str += ('   </tok>') + "\n"
+        result_str += ('  </chunk>\n'
+              ' </chunk>') + "\n"
+    result_str += ('</chunkList>\n'
+        '</cesAna>') + "\n"
+    return result_str
 
 def escape_xml(s):
     return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;').replace('\'','&apos;')
