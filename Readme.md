@@ -1,5 +1,93 @@
 # KRNNT
 
+KRNNT is a morphological tagger for Polish based on recurrent naural networks. It was presented at 8th Language & Technology Conference. More details are available in the paper:
+```
+@inproceedings{salam,
+  author       = "Wróbel, Krzysztof",
+  editor       = "Vetulani, Zygmunt and Paroubek, Patrick",
+  title        = "KRNNT: Polish Recurrent Neural Network Tagger",
+  year         = "2017",
+  booktitle    = "Proceedings of the 8th Language \& Technology Conference: Human Language Technologies as a Challenge for Computer Science and Linguistics",
+  publisher    = "Fundacja Uniwersytetu im. Adama Mickiewicza w~Poznaniu",
+  pages        = {386-391},
+  pdf          = "http://ltc.amu.edu.pl/book/papers/PolEval1-6.pdf"
+}
+```
+
+Online version is available at: http://ltc.amu.edu.pl/book/papers/PolEval1-6.pdf
+
+## External tools
+
+The tagger uses external tools: tokenizer Toki and morphological analyzer Morfeusz. Maca (http://nlp.pwr.wroc.pl/redmine/projects/libpltagger/wiki) integrates both tools.
+
+The tagset is described here: http://nkjp.pl/poliqarp/help/ense2.html
+
+## Getting started
+
+You can run KRNNT using docker or by manual installation.
+
+### Docker
+
+Docker image was prepared by Aleksander Smywiński-Pohl and instrutions are available at: https://hub.docker.com/r/apohllo/krnnt/
+
+1. Download and starte the server.
+```bash
+docker run -it -p 9200:9200 apohllo/krnnt:0.1 python3 /home/krnnt/krnnt/krnnt_serve.py /home/krnnt/krnnt/data
+```
+2. Tag a text usig POST request.
+```bash
+curl -XPOST localhost:9200 -d "Ala ma kota."
+Ala    none
+    Ala    subst:sg:nom:f    disamb
+ma    space
+    mieć    fin:sg:ter:imperf    disamb
+kota    space
+    kot    subst:sg:acc:m2    disamb
+.    none
+    .    interp    disamb
+```
+
+### Manual installation
+
+1. Install Maca: http://nlp.pwr.wroc.pl/redmine/projects/libpltagger/wiki
+
+Make sure that command `maca-analyse` works:
+```bash
+echo "Ala ma kota." | maca-analyse -qc morfeusz-nkjp-official
+Ala	newline
+	Al	subst:sg:gen:m1
+	Al	subst:sg:acc:m1
+	Ala	subst:sg:nom:f
+	Alo	subst:sg:gen:m1
+	Alo	subst:sg:acc:m1
+ma	space
+	mieć	fin:sg:ter:imperf
+	mój	adj:sg:nom:f:pos
+	mój	adj:sg:voc:f:pos
+kota	space
+	Kot	subst:sg:gen:m1
+	Kot	subst:sg:acc:m1
+	kot	subst:sg:gen:m1
+	kot	subst:sg:acc:m1
+	kot	subst:sg:gen:m2
+	kot	subst:sg:acc:m2
+	kota	subst:sg:nom:f
+.	none
+	.	interp
+```
+
+2. Clone KRNNT repository:
+```bash
+git clone https://github.com/kwrobel-nlp/krnnt.git
+```
+
+3. Install dependencies.
+```bash
+pip3 install -e .
+```
+
+## Evaluation
+
 Accuracy tested with 10-fold cross validation on National Corpus of Polish.
 
 Accuracy lower bound | Accuracy lower bound for unknown tokens
@@ -7,6 +95,8 @@ Accuracy lower bound | Accuracy lower bound for unknown tokens
 93.72% | 69.03%
 
 ## PolEval
+
+The tagger particaipated in PolEval 2017 competition: http://poleval.pl/
 
 There is some problem with Keras version higher than 2.1.2.
 
