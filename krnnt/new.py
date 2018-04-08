@@ -659,6 +659,9 @@ def batch_generator(generator, batch_size=32, return_all=False, sort=False):
 
 def pad_generator(generator,sequence_length=20):
     for batch_X,batch_y, sentences,sentences_orig in generator:
+        if not batch_X or not batch_y:
+            continue
+
         #TODO pad multi inputs
         max_sentence_length = max([len(x) for x in batch_X])
         # print('max_sentence_length',max_sentence_length)
@@ -666,6 +669,9 @@ def pad_generator(generator,sequence_length=20):
 
 def pad_generatorE(generator,sequence_length=20):
     for batch_X,batch_y, sentences,sentences_orig,batch_X_e  in generator:
+        if not batch_X or not batch_y or not batch_X_e:
+            continue
+
         #TODO pad multi inputs
         max_sentence_length = max([len(x) for x in batch_X])
         # print('max_sentence_length',max_sentence_length)
