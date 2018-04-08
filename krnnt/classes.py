@@ -87,10 +87,10 @@ def uniq(seq):
     return [ x for x in seq if not (x in seen or seen.add(x))]
 
 # def shape(word):
-#     word = regex.sub(u'(?V1)\p{Lowercase}','l', word, regex.U)
-#     word = regex.sub(u'(?V1)\p{Uppercase}','u', word, regex.U)
-#     word = regex.sub(u'\p{gc=Decimal_Number}','d', word, regex.U)
-#     word = regex.sub(u'[^A-Za-z0-9]','x', word, regex.LOCALE)
+#     word = regex.sub(u'(?V1)\p{Lowercase}','l', word, flags=regex.U)
+#     word = regex.sub(u'(?V1)\p{Uppercase}','u', word, flags=regex.U)
+#     word = regex.sub(u'\p{gc=Decimal_Number}','d', word, flags=regex.U)
+#     word = regex.sub(u'[^A-Za-z0-9]','x', word, flags=regex.LOCALE)
 #     return unix_uniq(list(word))
 #
 # def unix_uniq(l):
