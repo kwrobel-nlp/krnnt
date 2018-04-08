@@ -302,6 +302,9 @@ class Preprocess:
 
     @staticmethod
     def pad(batch, unique_features_dict, feature_name):
+        if not batch:
+            return []
+
         #feature_name='tags4e3'
         result_batchX = []
         # print('batch len',len(batch))
@@ -321,6 +324,9 @@ class Preprocess:
 
 
 def chunk(l, batch_size):
+    if not l:
+        return
+
     n=max(len(l)//batch_size,1)
     # print('n', n)
     k, m = divmod(len(l), n)
