@@ -5,34 +5,60 @@ import io
 import sys
 from optparse import OptionParser
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from flask import Flask
+from flask import request
+from flask import g, current_app
 
 from krnnt.keras_models import BEST
 from krnnt.new import results_to_plain_str, results_to_xces_str, read_xces
 from krnnt.pipeline import KRNNTSingle
 
-HOST_NAME = 'localhost'
-PORT_NUMBER = 9200
+app = Flask(__name__)
 
 
-class MyHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        """Respond to a GET request."""
-        self.send_response(200)
-        self.send_header("Content-type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(bytes("<html><body><h1>Tagger KRNNT</h1><p>Send a POST request and you will receive a tagged response</p></body></html>", "utf8"))
+def render(text='', str_results=''):
+    return """
+<html>
+<head>
+<meta charset="utf-8">
+<title>KRNNT</title>
+</head>
+<body>
+<h1>KRNNT: Polish Recurrent Neural Network Tagger</h1>
+<form action="/" method="post">
+<textarea name="text" rows=10 cols=100>%s</textarea><br>
+<input type="submit">
+</form>
+<pre>%s</pre>
+<p>Wróbel Krzysztof, <a href="http://ltc.amu.edu.pl/book/papers/PolEval1-6.pdf">KRNNT: Polish Recurrent Neural Network Tagger</a></p>
+</body>
+</html>""" % (text, str_results)
 
-    def do_POST(self):
-        """Respond to a POST request."""
-        self.send_response(200)
-        self.send_header("Content-type", "text/html; charset=utf-8")
-        self.end_headers()
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        results = krnnt.tag_sentences(post_data.decode('utf-8').split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
-        self.wfile.write(bytes(results_to_plain_str(results), "utf-8"))
+@app.route('/', methods=['GET'])
+def gui():
+    return render()
 
+@app.route('/', methods=['POST'])
+def tag_raw():
+    global krnnt
+    request.get_data()
+    if 'text' in request.form:
+        text=request.form['text']
+        results = krnnt.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+        return render(text, results_to_plain_str(results))
+    else:
+        print('wtf')
+        text = request.get_data()
+        print(text)
+        results = krnnt.tag_sentences(text.decode('utf-8').split('\n\n'))
+        return results_to_plain_str(results)
+
+@app.route('/tag/', methods=['POST'])
+def tag():
+    global krnnt
+    text=request.form['text']
+    results = krnnt.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+    return render(text, results_to_plain_str(results))
 
 if __name__ == '__main__':
     parser = OptionParser(usage='HTTP Tagger server')
@@ -40,7 +66,7 @@ if __name__ == '__main__':
                       default=9200, dest='port',
                       help='server port (defaults to 9200)')
     parser.add_option('-t', '--host', action='store',
-                      default='localhost', dest='host',
+                      default='0.0.0.0', dest='host',
                       help='server host (defaults to localhost)')
     (options, args) = parser.parse_args()
 
@@ -60,13 +86,7 @@ if __name__ == '__main__':
 
 
     krnnt = KRNNTSingle(pref)
-
-    host_port = ('0.0.0.0', options.port)
-    httpd = HTTPServer(host_port, MyHandler)
-    print(time.asctime(), "Server Starts - %s:%s" % host_port)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    print(time.asctime(), "Server Stops - %s:%s" % host_port)
+    
+    krnnt.tag_sentences( ['Ala'] )
+    
+    app.run(host=options.host, port=options.port, debug=True)
