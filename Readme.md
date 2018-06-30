@@ -28,13 +28,13 @@ You can run KRNNT using docker or by manual installation.
 
 ### Docker
 
-Docker image was prepared by Aleksander Smywiński-Pohl and instrutions are available at: https://hub.docker.com/r/apohllo/krnnt/
+Docker image was prepared by Aleksander Smywiński-Pohl and instrutions are available at: https://hub.docker.com/r/djstrong/krnnt/
 
 1. Download and starte the server.
 ```bash
-docker run -it -p 9200:9200 apohllo/krnnt:0.1 python3 /home/krnnt/krnnt/krnnt_serve.py /home/krnnt/krnnt/data
+docker run -it -p 9200:9200 djstrong/krnnt:0.1 python3 /home/krnnt/krnnt/krnnt_serve.py /home/krnnt/krnnt/data
 ```
-2. Tag a text usig POST request.
+2. Tag a text usig POST request or open http://localhost:9200 in a browser.
 ```bash
 curl -XPOST localhost:9200 -d "Ala ma kota."
 Ala    none
