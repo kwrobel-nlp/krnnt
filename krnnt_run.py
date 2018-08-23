@@ -5,7 +5,7 @@ import sys
 from optparse import OptionParser
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain, results_to_xces, read_xces
+from krnnt.new import results_to_plain, results_to_xces, read_xces, results_to_conll
 from krnnt.pipeline import KRNNTSingle
 
 usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     #                   help='input format of preanalyzed data: xces')
     parser.add_option('-o', '--output-format', action='store',
                       default='xces', dest='output_format',
-                      help='output format: xces, plain')
+                      help='output format: xces, plain, conll')
     parser.add_option('-g', '--debug', action='store_true', dest='debug_mode')  # TODO
     (options, args) = parser.parse_args()
 
@@ -59,6 +59,8 @@ if __name__ == '__main__':
         conversion = results_to_xces
     elif options.output_format == 'plain':
         conversion = results_to_plain
+    elif options.output_format == 'conll':
+        conversion = results_to_conll
     else:
         print('Wrong output format.')
         sys.exit(1)
