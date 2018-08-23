@@ -156,7 +156,10 @@ class Preprocess:
     def maca(batch):
         p = Popen(['maca-analyse', '-c', 'morfeusz-nkjp-official', '-l'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         stdout = p.communicate(input='\n'.join(batch).encode('utf-8'))[0]
-        return  [i for i in stdout.decode('utf-8').split('\n\n') if len(i) > 0]
+        for i in stdout.decode('utf-8').split('\n\n'):
+            if len(i) > 0:
+                yield i
+#        return  [i for i in stdout.decode('utf-8').split('\n\n') if len(i) > 0]
 
     @staticmethod
     def parse(output):
@@ -186,6 +189,21 @@ class Preprocess:
         #TODO długo trwa
         for sample in sequence:
             f = []
+
+            #print(sample.features)
+            #print('1',FeaturePreprocessor.cases(sample.features['token']))
+            #print('2',FeaturePreprocessor.interps(sample.features['token'],sample.features))
+            #print('3',FeaturePreprocessor.qubliki(sample.features['token']))
+            #print('4',FeaturePreprocessor.shape(sample.features['token'])) #90%
+            #print('5',FeaturePreprocessor.prefix1(sample.features['token']))
+            #print('6',FeaturePreprocessor.prefix2(sample.features['token']))
+            #print('7',FeaturePreprocessor.prefix3(sample.features['token']))
+            #print('8',FeaturePreprocessor.suffix1(sample.features['token']))
+            #print('9',FeaturePreprocessor.suffix2(sample.features['token']))
+            #print('10',FeaturePreprocessor.suffix3(sample.features['token']))
+            #print('11',TagsPreprocessor.create_tags4_without_guesser(sample.features['tags'])) #3% moze cache dla wszystkich tagów
+            #print('12',TagsPreprocessor.create_tags5_without_guesser(sample.features['tags'])) #3%
+            #print('13',sample.features['space_before'])
 
             f.extend(FeaturePreprocessor.cases(sample.features['token']))
             f.extend(FeaturePreprocessor.interps(sample.features['token'],sample.features))
@@ -257,7 +275,7 @@ class Preprocess:
 
         results = Preprocess.maca(batchC)
         #self.log('MACA')
-        # print('MACA', len(results))
+        #print('MACA', len(results), file=sys.stderr)
         sequences=[]
         for res in  results:
             result = Preprocess.parse(res)
@@ -276,8 +294,9 @@ class Preprocess:
             Preprocess.create_features(sequence)
 
             if sequence:
-                sequences.append(sequence)
-        return sequences
+                yield sequence
+                #sequences.append(sequence)
+        #return sequences
 
     @staticmethod
     def process_batch_preana(batch):
@@ -324,6 +343,16 @@ class Preprocess:
 
 
 def chunk(l, batch_size):
+    batch=[]
+    for element in l:
+        batch.append(element)
+        if len(batch)==batch_size:
+            yield batch
+            batch=[]
+    if batch:
+        yield batch
+
+def chunk_old(l, batch_size):
     if not l:
         return
 
