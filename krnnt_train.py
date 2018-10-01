@@ -35,6 +35,9 @@ if __name__ == '__main__':
     parser.add_option('--patience', action='store',
                       default=10, dest='patience', type="int",
                       help='patience')
+    parser.add_option('--maca_config', action='store',
+                      default='morfeusz-nkjp-official', dest='maca_config',
+                      help='Maca config')
     parser.add_option('-g', '--debug', action='store_true', dest='debug_mode') # TODO
     parser.add_option('--hash', action='store', default=None, dest='hash')
     parser.add_option('-f', '--fold', action='store', default=None, dest='fold')
@@ -56,6 +59,7 @@ if __name__ == '__main__':
     pref['nb_epoch']=int(options.epochs)
     pref['corpus_path'] = args[0]
     pref['patience'] = options.patience
+    pref['maca_config'] = options.maca_config
     if options.hash is not None:
         pref['h'] = options.hash
     if options.fold is not None:

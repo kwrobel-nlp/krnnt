@@ -30,6 +30,7 @@ def render(text='', str_results=''):
 <input type="submit">
 </form>
 <pre>%s</pre>
+<p>The tagset is described here: <a href="http://nkjp.pl/poliqarp/help/ense2.html">http://nkjp.pl/poliqarp/help/ense2.html</a></p>
 <p>Wróbel Krzysztof, <a href="http://ltc.amu.edu.pl/book/papers/PolEval1-6.pdf">KRNNT: Polish Recurrent Neural Network Tagger</a></p>
 </body>
 </html>""" % (text, str_results)
@@ -68,11 +69,14 @@ if __name__ == '__main__':
     parser.add_option('-t', '--host', action='store',
                       default='0.0.0.0', dest='host',
                       help='server host (defaults to localhost)')
+    parser.add_option('--maca_config', action='store',
+                      default='morfeusz-nkjp-official', dest='maca_config',
+                      help='Maca config')
     (options, args) = parser.parse_args()
 
     pref = {}
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
-            'keras_model_class': BEST}
+            'keras_model_class': BEST, 'maca_config':options.maca_config}
 
     if len(args) != 1:
         print('Provide path to directory with weights, lemmatisation and dictionary.')
