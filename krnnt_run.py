@@ -29,11 +29,14 @@ if __name__ == '__main__':
     parser.add_option('--maca_config', action='store',
                       default='morfeusz-nkjp-official', dest='maca_config',
                       help='Maca config')
+    parser.add_option('--toki_config_path', action='store',
+                      default='', dest='toki_config_path',
+                      help='Toki config path (directory)')
     parser.add_option('-g', '--debug', action='store_true', dest='debug_mode')  # TODO
     (options, args) = parser.parse_args()
 
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
-            'keras_model_class': BEST, 'maca_config':options.maca_config}
+            'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':options.toki_config_path}
 
     if len(args) != 3:
         print('Provide paths to corpus and to save path.')

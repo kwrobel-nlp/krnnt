@@ -45,7 +45,7 @@ class KRNNTSingle:
         if preana:
             sequences = Preprocess.process_batch_preana([(i,s) for i,s in enumerate(sentences)])
         else:
-            sequences = Preprocess.process_batch([(i,s) for i,s in enumerate(sentences)], self.pref['maca_config'])
+            sequences = Preprocess.process_batch([(i,s) for i,s in enumerate(sentences)], self.pref['maca_config'], self.pref['toki_config_path'])
         result = []
         for batch in chunk(sequences, self.pref['keras_batch_size']):
             pad_batch=Preprocess.pad(batch, self.unique_features_dict, 'tags4e3')
@@ -153,8 +153,11 @@ class Sample:
 
 class Preprocess:
     @staticmethod
-    def maca(batch, maca_config):
-        p = Popen(['maca-analyse', '-c', maca_config, '-l'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    def maca(batch, maca_config,toki_config_path=''):
+        cmd = ['maca-analyse', '-c', maca_config, '-l']
+        if toki_config_path:
+            cmd.extend(['--toki-config-path',toki_config_path])
+        p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         stdout = p.communicate(input='\n'.join(batch).encode('utf-8'))[0]
         for i in stdout.decode('utf-8').split('\n\n'):
             if len(i) > 0:
@@ -264,7 +267,7 @@ class Preprocess:
         return (form, space_before, interpretations)
 
     @staticmethod
-    def process_batch(batch, maca_config):
+    def process_batch(batch, maca_config, toki_config_path):
         #indexes=[]
         batchC = []
         for index, line in batch:
@@ -273,7 +276,7 @@ class Preprocess:
 
 
 
-        results = Preprocess.maca(batchC, maca_config)
+        results = Preprocess.maca(batchC, maca_config, toki_config_path)
         #self.log('MACA')
         #print('MACA', len(results), file=sys.stderr)
         sequences=[]
