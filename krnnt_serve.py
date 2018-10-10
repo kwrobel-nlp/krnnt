@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     pref = {}
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
-            'keras_model_class': BEST, 'maca_config':options.maca_config}
+            'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':''}
 
     if len(args) != 1:
         print('Provide path to directory with weights, lemmatisation and dictionary.')
