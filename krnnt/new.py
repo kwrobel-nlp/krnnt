@@ -553,7 +553,88 @@ class UniqueFeaturesValues(Module):
         self.load()
         return pickle.load(open(self.output_path(),'rb'))
 
+class Lemmatisation2():
+    def __init__(self):
+        pass
+      
+    def learn(self, path, stop=-1, start=0, ids=None):
+        return
+      
+    def save(self, path):
+        return
 
+    def load(self, path):
+        self.gpp = pickle.load(open(path, 'rb'))
+        return
+    
+    def base_tag(self, tag):
+        if isinstance(tag, str):
+            tag=tag.split(':')
+        transformations = {
+            'ger':  [(['pl'],'sg'), 
+                     (['gen','dat','acc','inst','loc','voc'],'nom')], 
+            'pact': [(['pl'],'sg'), 
+                     (['gen','dat','acc','inst','loc','voc'],'nom'), 
+                     (['m2','m3','f','n'], 'm1')],
+            'ppas': [(['pl'],'sg'), 
+                     (['gen','dat','acc','inst','loc','voc'],'nom'), 
+                     (['m2','m3','f','n'], 'm1')],
+        }
+        
+        tag=list(tag)
+        
+        if tag[0] not in transformations: return None
+        
+        transforms = transformations[tag[0]]
+        for sources, target in transforms:
+            for source in sources:
+                try:
+                    index = tag.index(source)
+                    tag[index]=target
+                    break
+                except ValueError:
+                    pass
+        return tag
+      
+    def same_lemma_tag(self, tag1, tag2):
+        if isinstance(tag1, str):
+            tag1=tag1.split(':')
+            tag2=tag2.split(':')
+        groups=[['subst','ger'],['adj','ppas','pact']]
+        for group in groups:
+            if tag1[0] in group and tag2[0] in group:
+                if tag1[1:4]==tag2[1:4]:
+                    return True
+                return False
+        return False
+      
+    def disambiguate(self, form, lemmas_tags, predicted_tag):
+        disamb_lemmas_tags = [x for x in lemmas_tags if x[1]==predicted_tag]
+        
+
+        if disamb_lemmas_tags:
+            base_tag = self.base_tag(predicted_tag)
+            if base_tag is None:
+                return disamb_lemmas_tags[0][0] # oryginalny lemat
+            else:
+                try:
+                    return self.gpp[(disamb_lemmas_tags[0][0],tuple(base_tag))] # szukamy "mianownika"
+                except KeyError:
+                    pass
+        else:
+            for lemma,tag in lemmas_tags:
+                if self.same_lemma_tag(predicted_tag, tag):
+                    base_tag = self.base_tag(tag)
+                    if base_tag is None:
+                        return lemma # orygianlny lemat
+                    else:
+                        try:
+                            return self.gpp[(lemma, tuple(base_tag))] # szukamy "mianownika"
+                        except KeyError:
+                            break
+        
+        return form
+    
 class Lemmatisation():
     def __init__(self):
         self.lemmas={}

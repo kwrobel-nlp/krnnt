@@ -5,7 +5,7 @@ import sys
 from optparse import OptionParser
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain, results_to_xces, read_xces, results_to_conll
+from krnnt.new import results_to_plain, results_to_xces, read_xces, results_to_conll, Lemmatisation, Lemmatisation2
 from krnnt.pipeline import KRNNTSingle
 
 usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
@@ -32,6 +32,9 @@ if __name__ == '__main__':
     parser.add_option('--toki_config_path', action='store',
                       default='', dest='toki_config_path',
                       help='Toki config path (directory)')
+    parser.add_option('--lemmatisation', action='store',
+                      default='sgjp', dest='lemmatisation',
+                      help='lemmatization mode (sgjp, simple)')
     parser.add_option('-g', '--debug', action='store_true', dest='debug_mode')  # TODO
     (options, args) = parser.parse_args()
 
@@ -39,8 +42,13 @@ if __name__ == '__main__':
             'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':options.toki_config_path}
 
     if len(args) != 3:
-        print('Provide paths to corpus and to save path.')
+        print('Provide paths to weights, lemmatisation data and dictionary.')
         sys.exit(1)
+
+    if options.lemmatisation=='simple':
+        pref['lemmatisation_class'] = Lemmatisation2
+    else:
+        pref['lemmatisation_class'] = Lemmatisation
 
     pref['reanalyze'] = options.reanalyzed
     # pref['input_format'] = options.input_format

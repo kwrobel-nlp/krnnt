@@ -31,7 +31,7 @@ class KRNNTSingle:
         self.pref=pref
         self.unique_features_dict = pickle.load(open(pref['UniqueFeaturesValues'],'rb'))
         self.km = KerasThread.create_model(pref, testing=True)
-        self.lemmatisation = Lemmatisation()
+        self.lemmatisation = pref['lemmatisation_class']()
         self.lemmatisation.load(pref['lemmatisation_path'])
 
     def tag_sentence(self, sentence, preana=False):
