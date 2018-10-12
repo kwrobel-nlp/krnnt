@@ -44,7 +44,10 @@ lt={}
 for line in tqdm.tqdm(open(sgjp), total=7221123):
     row = line.split('\t')[:-1]
 #     print(row)
-    form, lemma, tag, other = row
+    try:
+        form, lemma, tag, other = row
+    except ValueError:
+        continue
     
     tags=[t.split('.') for t in tag.split(':')]
     for tag in itertools.product(*tags):
