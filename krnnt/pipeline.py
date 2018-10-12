@@ -539,14 +539,14 @@ class KerasThread(threading.Thread):
                 token_response['sep']=sep
                 token_response['prob']=prob
 
-                lemmas = [ x for x in sample.features['maca_lemmas'] if x[1]==predicted_tag]
+                lemmas = [ x for x in sample.features['maca_lemmas']]
                 token_response['tag']=predicted_tag
                 token_response['lemmas']=[]
 
 
-                if not lemmas:
-                    lemmas.append((sample.features['token'], predicted_tag))
-                lemma = lemmatisation.disambiguate(token_response['token'], lemmas)
+                #if not lemmas:
+                #    lemmas.append((sample.features['token'], predicted_tag))
+                lemma = lemmatisation.disambiguate(token_response['token'], lemmas, predicted_tag)
 
                 token_response['lemmas'].append(lemma)
 
@@ -595,11 +595,11 @@ class KerasThread(threading.Thread):
                 #print(sample.features['token']+'\t'+sep)
                 response.append(sample.features['token']+'\t'+sep)
 
-                lemmas = [ x for x in sample.features['maca_lemmas'] if x[1]==predicted_tag]
+                lemmas = [ x for x in sample.features['maca_lemmas']]
 
-                if not lemmas:
-                    lemmas.append((sample.features['token'], predicted_tag))
-                lemma = lemmatisation.disambiguate(sample.features['token'], lemmas)
+                #if not lemmas:
+                #    lemmas.append((sample.features['token'], predicted_tag))
+                lemma = lemmatisation.disambiguate(sample.features['token'], lemmas, predicted_tag)
 
                 response.append('\t'+lemma+'\t'+predicted_tag+'\tdisamb')
 

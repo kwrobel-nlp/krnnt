@@ -574,9 +574,15 @@ class Lemmatisation():
             best = sorted(v.items(), key=lambda x: (x[1], x[0]), reverse=True)[0] #TODO kilka z taka sama statystyka
             self.lemmas[k]=best[0]
 
-    def disambiguate(self, form, ilosc_disamb):
+    def disambiguate(self, form, ilosc_disamb, predicted_tag):
         if form is None: return
-        tag=ilosc_disamb[0][1]
+        tag=predicted_tag
+        
+        ilosc_disamb=[x for x in ilosc_disamb if x[1]==predicted_tag]
+        
+        if not ilosc_disamb:
+            ilosc_disamb=[(form, predicted_tag)]
+        
         interp_lemmas = [lemma for (lemma,tag) in ilosc_disamb]
         if (form,tag) in self.lemmas:
             pred_lemma = self.lemmas[(form,tag)]
