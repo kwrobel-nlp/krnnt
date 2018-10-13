@@ -609,6 +609,12 @@ class Lemmatisation2():
         return False
       
     def disambiguate(self, form, lemmas_tags, predicted_tag):
+        #print(form)
+        #print(lemmas_tags)
+        #print(predicted_tag)
+        #print()
+      
+        lemmas_tags = [(x.rsplit(':',1)[0],y) for x,y in lemmas_tags]
         disamb_lemmas_tags = [x for x in lemmas_tags if x[1]==predicted_tag]
         
 
