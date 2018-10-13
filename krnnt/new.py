@@ -614,7 +614,7 @@ class Lemmatisation2():
         #print(predicted_tag)
         #print()
       
-        lemmas_tags = [(x.rsplit(':',1)[0],y) for x,y in lemmas_tags]
+        lemmas_tags = [(regex.sub(r':[abcdijnopqsv][0-9]?$','', x),y) for x,y in lemmas_tags]
         disamb_lemmas_tags = [x for x in lemmas_tags if x[1]==predicted_tag]
         
 
