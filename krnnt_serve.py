@@ -64,8 +64,8 @@ def tag():
 if __name__ == '__main__':
     parser = OptionParser(usage='HTTP Tagger server')
     parser.add_option('-p', '--port', action='store',
-                      default=9200, dest='port',
-                      help='server port (defaults to 9200)')
+                      default=9003, dest='port',
+                      help='server port (defaults to 9003)')
     parser.add_option('-t', '--host', action='store',
                       default='0.0.0.0', dest='host',
                       help='server host (defaults to localhost)')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
 
     krnnt = KRNNTSingle(pref)
-    
+
     krnnt.tag_sentences( ['Ala'] )
-    
+
     app.run(host=options.host, port=options.port, debug=True)
