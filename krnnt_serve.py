@@ -93,4 +93,4 @@ if __name__ == '__main__':
     
     krnnt.tag_sentences( ['Ala'] )
     
-    app.run(host=options.host, port=options.port, debug=True)
+    app.run(host=options.host, port=options.port, debug=False)
