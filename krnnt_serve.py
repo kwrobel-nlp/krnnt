@@ -10,7 +10,7 @@ from flask import request
 from flask import g, current_app
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain_str, results_to_xces_str, read_xces
+from krnnt.new import results_to_plain_str, results_to_xces_str, read_xces, Lemmatisation, Lemmatisation2
 from krnnt.pipeline import KRNNTSingle
 
 app = Flask(__name__)
@@ -72,15 +72,26 @@ if __name__ == '__main__':
     parser.add_option('--maca_config', action='store',
                       default='morfeusz-nkjp-official', dest='maca_config',
                       help='Maca config')
+    parser.add_option('--toki_config_path', action='store',
+                      default='', dest='toki_config_path',
+                      help='Toki config path (directory)')
+    parser.add_option('--lemmatisation', action='store',
+                      default='sgjp', dest='lemmatisation',
+                      help='lemmatization mode (sgjp, simple)')
     (options, args) = parser.parse_args()
 
     pref = {}
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
-            'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':''}
+            'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':options.toki_config_path}
 
     if len(args) != 1:
         print('Provide path to directory with weights, lemmatisation and dictionary.')
         sys.exit(1)
+
+    if options.lemmatisation=='simple':
+        pref['lemmatisation_class'] = Lemmatisation2
+    else:
+        pref['lemmatisation_class'] = Lemmatisation
 
     pref['reanalyze'] = True
 

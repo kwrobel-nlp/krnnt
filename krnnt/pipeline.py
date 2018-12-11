@@ -159,6 +159,8 @@ class Preprocess:
             cmd.extend(['--toki-config-path',toki_config_path])
         p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         stdout = p.communicate(input='\n'.join(batch).encode('utf-8'))[0]
+        if p.returncode!=0:
+          raise Exception('Maca is not working properly')
         for i in stdout.decode('utf-8').split('\n\n'):
             if len(i) > 0:
                 yield i
