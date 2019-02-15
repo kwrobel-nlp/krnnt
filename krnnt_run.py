@@ -5,7 +5,7 @@ import sys
 from optparse import OptionParser
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain, results_to_xces, read_xces, results_to_conll, Lemmatisation, Lemmatisation2
+from krnnt.new import results_to_plain, results_to_xces, read_xces, read_jsonl, results_to_conll, Lemmatisation, Lemmatisation2
 from krnnt.pipeline import KRNNTSingle
 
 usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
@@ -20,9 +20,9 @@ if __name__ == '__main__':
     parser.add_option('-p', '--preanalyzed', action='store_false',
                       default=True, dest='reanalyzed',
                       help='training data have not been reanalyzed')
-    # parser.add_option('-i', '--input-format', action='store',
-    #                   default='xces', dest='input_format',
-    #                   help='input format of preanalyzed data: xces')
+    parser.add_option('-i', '--input-format', action='store',
+                      default='xces', dest='input_format',
+                      help='input format of preanalyzed data: xces, jsonl')
     parser.add_option('-o', '--output-format', action='store',
                       default='xces', dest='output_format',
                       help='output format: xces, plain, conll')
@@ -64,7 +64,14 @@ if __name__ == '__main__':
         results = krnnt.tag_sentences(sys.stdin.read().split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
     else:
         #f = io.StringIO(sys.stdin.read())
-        corpus = read_xces(sys.stdin)
+        if options.input_format=='xces':
+            corpus = read_xces(sys.stdin)
+        elif options.input_format=='jsonl':
+            corpus = read_jsonl(sys.stdin)
+        else:
+            print('Wrong input format.')
+            sys.exit(1)
+
         results = krnnt.tag_sentences(corpus, preana=True)
 
     #print(results)

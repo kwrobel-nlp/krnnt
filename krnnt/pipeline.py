@@ -43,7 +43,7 @@ class KRNNTSingle:
 
     def __tag(self, sentences, preana):
         if preana:
-            sequences = Preprocess.process_batch_preana([(i,s) for i,s in enumerate(sentences)])
+            sequences = Preprocess.process_batch_preana(enumerate(sentences))
         else:
             sequences = Preprocess.process_batch([(i,s) for i,s in enumerate(sentences)], self.pref['maca_config'], self.pref['toki_config_path'])
         result = []
@@ -321,8 +321,10 @@ class Preprocess:
                 Preprocess.create_features(sequence)
 
                 if sequence:
-                    sequences.append(sequence)
-        return sequences
+                    # print(len(sequence))
+                    yield sequence
+                    # sequences.append(sequence)
+        # return sequences
 
     @staticmethod
     def pad(batch, unique_features_dict, feature_name):

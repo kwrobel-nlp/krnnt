@@ -1589,3 +1589,29 @@ def read_xces(file_path):
             yield paragraph
             elem.clear()
 
+import jsonlines
+
+def list_to_paragraph(l):
+    paragraph = Paragraph()
+    for s in l:
+        sentence = Sentence()
+        paragraph.add_sentence(sentence)
+        for t in s:
+            form=t[0]
+            space=t[1]
+            interpretations =  t[2:]
+            token = Token()
+            token.space_before = (space == 1)
+            token.form = form
+            sentence.add_token(token)
+
+            token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
+    return paragraph
+
+
+
+def read_jsonl(file_path):
+    with jsonlines.Reader(file_path) as reader:
+        for obj in reader:
+            a = list_to_paragraph(obj)
+            yield a
