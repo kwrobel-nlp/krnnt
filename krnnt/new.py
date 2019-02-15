@@ -784,7 +784,8 @@ def k_hot(tags, unique_tags_dict, zero=0):
         try:
             result[unique_tags_dict[tag]]=1
         except KeyError:
-            print('KeyError:', tag, file=sys.stderr)
+            # print('KeyError:', tag, file=sys.stderr)
+            pass
     return result
 
 def predictions_to_classes(unique_tags_dict, predictions):
