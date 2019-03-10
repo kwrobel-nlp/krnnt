@@ -2,7 +2,7 @@
 
 KRNNT is a morphological tagger for Polish based on recurrent naural networks. It was presented at 8th Language & Technology Conference. More details are available in the paper:
 ```
-@inproceedings{salam,
+@inproceedings{wrobel2017,
   author       = "Wróbel, Krzysztof",
   editor       = "Vetulani, Zygmunt and Paroubek, Patrick",
   title        = "KRNNT: Polish Recurrent Neural Network Tagger",
