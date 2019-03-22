@@ -5,7 +5,7 @@ import sys
 from optparse import OptionParser
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain, results_to_xces, read_xces, read_jsonl, results_to_conll, Lemmatisation, Lemmatisation2
+from krnnt.new import results_to_plain, results_to_xces, read_xces, read_jsonl, results_to_conll, results_to_conllu, Lemmatisation, Lemmatisation2
 from krnnt.pipeline import KRNNTSingle
 
 usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
@@ -25,7 +25,7 @@ if __name__ == '__main__':
                       help='input format of preanalyzed data: xces, jsonl')
     parser.add_option('-o', '--output-format', action='store',
                       default='xces', dest='output_format',
-                      help='output format: xces, plain, conll')
+                      help='output format: xces, plain, conll, conllu')
     parser.add_option('--maca_config', action='store',
                       default='morfeusz-nkjp-official', dest='maca_config',
                       help='Maca config')
@@ -82,6 +82,8 @@ if __name__ == '__main__':
         conversion = results_to_plain
     elif options.output_format == 'conll':
         conversion = results_to_conll
+    elif options.output_format == 'conllu':
+        conversion = results_to_conllu
     else:
         print('Wrong output format.')
         sys.exit(1)

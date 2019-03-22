@@ -1477,11 +1477,22 @@ def results_to_plain(results):
 def results_to_conll(results):
     print(results_to_conll_str(results))
 
+def results_to_conllu(results):
+    print(results_to_conllu_str(results))
+
 def results_to_conll_str(results):
     result_str = ""
     for sentence in results:
         for token in sentence:
             result_str += ('%s\t%s\t%s\t%s' % (token['token'], token['lemmas'][0], 1 if token['sep']=='space' else 0, token['tag'])) + "\n"
+        result_str += "\n"
+    return result_str
+
+def results_to_conllu_str(results):
+    result_str = ""
+    for sentence in results:
+        for i,token in enumerate(sentence):
+            result_str += ('%s\t%s\t%s\t_\t%s\t_\t_\t_\t_\t_\n' % (i+1, token['token'], token['lemmas'][0], token['tag']))
         result_str += "\n"
     return result_str
 
