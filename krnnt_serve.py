@@ -10,7 +10,8 @@ from flask import request
 from flask import g, current_app
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain_str, results_to_xces_str, read_xces, Lemmatisation, Lemmatisation2
+from krnnt.new import results_to_plain_str, results_to_xces_str, read_xces, Lemmatisation, Lemmatisation2, \
+    results_to_conllu_str, results_to_conll_str
 from krnnt.pipeline import KRNNTSingle
 
 app = Flask(__name__)
@@ -46,20 +47,20 @@ def tag_raw():
     if 'text' in request.form:
         text=request.form['text']
         results = krnnt.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
-        return render(text, results_to_plain_str(results))
+        return render(text, conversion(results))
     else:
-        print('wtf')
         text = request.get_data()
-        print(text)
+        # print(text)
+        # print(text.decode('utf-8').split('\n\n'))
         results = krnnt.tag_sentences(text.decode('utf-8').split('\n\n'))
-        return results_to_plain_str(results)
+        return conversion(results)
 
 @app.route('/tag/', methods=['POST'])
 def tag():
     global krnnt
     text=request.form['text']
     results = krnnt.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
-    return render(text, results_to_plain_str(results))
+    return render(text, conversion(results))
 
 if __name__ == '__main__':
     parser = OptionParser(usage='HTTP Tagger server')
@@ -78,9 +79,11 @@ if __name__ == '__main__':
     parser.add_option('--lemmatisation', action='store',
                       default='sgjp', dest='lemmatisation',
                       help='lemmatization mode (sgjp, simple)')
+    parser.add_option('-o', '--output-format', action='store',
+                      default='plain', dest='output_format',
+                      help='output format: xces, plain, conll, conllu')
     (options, args) = parser.parse_args()
 
-    pref = {}
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
             'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':options.toki_config_path}
 
@@ -103,5 +106,17 @@ if __name__ == '__main__':
     krnnt = KRNNTSingle(pref)
     
     krnnt.tag_sentences( ['Ala'] )
-    
+
+    if options.output_format == 'xces':
+        conversion = results_to_xces_str
+    elif options.output_format == 'plain':
+        conversion = results_to_plain_str
+    elif options.output_format == 'conll':
+        conversion = results_to_conll_str
+    elif options.output_format == 'conllu':
+        conversion = results_to_conllu_str
+    else:
+        print('Wrong output format.')
+        sys.exit(1)
+
     app.run(host=options.host, port=options.port, debug=False)
