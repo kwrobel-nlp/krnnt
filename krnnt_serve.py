@@ -11,11 +11,13 @@ from flask import g, current_app
 
 from krnnt.keras_models import BEST
 from krnnt.new import results_to_plain_str, results_to_xces_str, read_xces, Lemmatisation, Lemmatisation2, \
-    results_to_conllu_str, results_to_conll_str
+    results_to_conllu_str, results_to_conll_str, results_to_jsonl_str
 from krnnt.pipeline import KRNNTSingle
 
-app = Flask(__name__)
+import threading
 
+app = Flask(__name__)
+application=app
 
 def render(text='', str_results=''):
     return """
@@ -42,24 +44,25 @@ def gui():
 
 @app.route('/', methods=['POST'])
 def tag_raw():
-    global krnnt
+    global krnntx
     request.get_data()
     if 'text' in request.form:
         text=request.form['text']
-        results = krnnt.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+        results = krnntx.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
         return render(text, conversion(results))
     else:
         text = request.get_data()
         # print(text)
-        # print(text.decode('utf-8').split('\n\n'))
-        results = krnnt.tag_sentences(text.decode('utf-8').split('\n\n'))
+        print(text.decode('utf-8').split('\n\n'))
+        print(threading.active_count())
+        results = krnntx.tag_sentences(text.decode('utf-8').split('\n\n'))
         return conversion(results)
 
 @app.route('/tag/', methods=['POST'])
 def tag():
-    global krnnt
+    global krnntx
     text=request.form['text']
-    results = krnnt.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+    results = krnntx.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
     return render(text, conversion(results))
 
 if __name__ == '__main__':
@@ -81,7 +84,7 @@ if __name__ == '__main__':
                       help='lemmatization mode (sgjp, simple)')
     parser.add_option('-o', '--output-format', action='store',
                       default='plain', dest='output_format',
-                      help='output format: xces, plain, conll, conllu')
+                      help='output format: xces, plain, conll, conllu, jsonl')
     (options, args) = parser.parse_args()
 
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
@@ -103,9 +106,9 @@ if __name__ == '__main__':
     pref['UniqueFeaturesValues'] = args[0] + "/dictionary.pkl"
 
 
-    krnnt = KRNNTSingle(pref)
+    krnntx = KRNNTSingle(pref)
     
-    krnnt.tag_sentences( ['Ala'] )
+    krnntx.tag_sentences( ['Ala'] )
 
     if options.output_format == 'xces':
         conversion = results_to_xces_str
@@ -115,6 +118,8 @@ if __name__ == '__main__':
         conversion = results_to_conll_str
     elif options.output_format == 'conllu':
         conversion = results_to_conllu_str
+    elif options.output_format == 'jsonl':
+        conversion = results_to_jsonl_str
     else:
         print('Wrong output format.')
         sys.exit(1)

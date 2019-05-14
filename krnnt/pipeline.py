@@ -53,6 +53,22 @@ class KRNNTSingle:
             for plain in KerasThread.return_results(batch, preds, self.km.classes, self.lemmatisation):
                 #print(plain)
                 result.append(plain)
+
+
+        text='\n\n'.join(sentences)
+        # print(sentences)
+        # print(result)
+        offset=0
+        for s in result:
+            for t in s:
+                # print('asdf', t)
+                start=text.index(t['token'], offset)
+                end=start+len(t['token'])
+                # print(start, end)
+                offset=end
+                t['start']=start
+                t['end']=end
+
         return result
 
 
@@ -159,6 +175,11 @@ class Preprocess:
             cmd.extend(['--toki-config-path',toki_config_path])
         p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         stdout = p.communicate(input='\n'.join(batch).encode('utf-8'))[0]
+        try:
+          p.stdin.close()
+        except BrokenPipeError:
+          pass
+        p.wait()
         if p.returncode!=0:
           raise Exception('Maca is not working properly')
         for i in stdout.decode('utf-8').split('\n\n'):
@@ -305,7 +326,6 @@ class Preprocess:
 
     @staticmethod
     def process_batch_preana(batch):
-        sequences=[]
         for index, paragraph in batch:
             for sentence in paragraph:
                 sequence=[]

@@ -5,7 +5,8 @@ import sys
 from optparse import OptionParser
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain, results_to_xces, read_xces, read_jsonl, results_to_conll, results_to_conllu, Lemmatisation, Lemmatisation2
+from krnnt.new import results_to_plain, results_to_xces, read_xces, read_jsonl, results_to_conll, results_to_conllu, \
+    Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized, results_to_jsonl
 from krnnt.pipeline import KRNNTSingle
 
 usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
@@ -36,6 +37,9 @@ if __name__ == '__main__':
                       default='sgjp', dest='lemmatisation',
                       help='lemmatization mode (sgjp, simple)')
     parser.add_option('-g', '--debug', action='store_true', dest='debug_mode')  # TODO
+    parser.add_option('--tokenized', action='store_true',
+                      dest='tokenized',
+                      help='input data are tokenized, but not analyzed')
     (options, args) = parser.parse_args()
 
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
@@ -60,7 +64,18 @@ if __name__ == '__main__':
 
     krnnt = KRNNTSingle(pref)
 
-    if options.reanalyzed:
+
+    if options.tokenized:
+        if options.input_format == 'jsonl':
+            corpus = read_jsonl(sys.stdin)
+        else:
+            print('Wrong input format.')
+            sys.exit(1)
+
+        morf=get_morfeusz()
+        corpus = analyze_tokenized(morf, corpus)
+        results = krnnt.tag_sentences(corpus, preana=True)
+    elif options.reanalyzed:
         results = krnnt.tag_sentences(sys.stdin.read().split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
     else:
         #f = io.StringIO(sys.stdin.read())
@@ -84,6 +99,8 @@ if __name__ == '__main__':
         conversion = results_to_conll
     elif options.output_format == 'conllu':
         conversion = results_to_conllu
+    elif options.output_format == 'jsonl':
+        conversion = results_to_jsonl
     else:
         print('Wrong output format.')
         sys.exit(1)

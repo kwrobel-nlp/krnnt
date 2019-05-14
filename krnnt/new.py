@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-
+import io
 import numbers
 import os.path
 import pickle
@@ -1468,6 +1467,9 @@ def shape(word): #TODO zredukowac czas
     word = regex.sub(u'[^A-Za-z0-9]','x', word, flags=regex.LOCALE)
     return unix_uniq(list(word))
 
+def results_to_jsonl(results):
+    print(results_to_jsonl_str(results))
+
 def results_to_xces(results):
     print(results_to_xces_str(results))
 
@@ -1484,9 +1486,28 @@ def results_to_conll_str(results):
     result_str = ""
     for sentence in results:
         for token in sentence:
-            result_str += ('%s\t%s\t%s\t%s' % (token['token'], token['lemmas'][0], 1 if token['sep']=='space' else 0, token['tag'])) + "\n"
+            try:
+                start=token['start']
+            except KeyError:
+                start=''
+
+            try:
+                end=token['end']
+            except KeyError:
+                end=''
+
+            result_str += ('%s\t%s\t%s\t%s\t%s\t%s\n' % (token['token'], token['lemmas'][0], 1 if token['sep']=='space' else 0, token['tag'], start, end))
         result_str += "\n"
     return result_str
+
+def results_to_jsonl_str(results):
+    fp = io.StringIO()
+    with jsonlines.Writer(fp) as writer:
+        for sentence in results:
+            ss=[(token['token'], token['lemmas'][0], token['tag']) for token in sentence]
+            writer.write(ss)
+    return fp.getvalue()
+
 
 def results_to_conllu_str(results):
     result_str = ""
@@ -1609,15 +1630,21 @@ def list_to_paragraph(l):
         sentence = Sentence()
         paragraph.add_sentence(sentence)
         for t in s:
-            form=t[0]
-            space=t[1]
-            interpretations =  t[2:]
             token = Token()
-            token.space_before = (space == 1)
+            form=t[0]
             token.form = form
-            sentence.add_token(token)
 
+            print(t)
+            try:
+                space=t[1]
+                token.space_before = (space == 1)
+            except IndexError:
+                token.space_before = True # ?
+
+            interpretations = t[2:]
             token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
+
+            sentence.add_token(token)
     return paragraph
 
 
@@ -1627,3 +1654,35 @@ def read_jsonl(file_path):
         for obj in reader:
             a = list_to_paragraph(obj)
             yield a
+
+def get_morfeusz():
+    import morfeusz2
+    morf = morfeusz2.Morfeusz(
+        analyse=True, #load analyze dictionary
+        generate=False, #dont load generator dictionary
+        expand_tags=True, #expand tags (return tags without dots)
+        aggl='isolated', # 'isolated' - token 'm' has aglt interpretation, token 'np' has brev interpretation
+        praet='composite', # aglt and 'by' are not divided
+    #    whitespace=morfeusz2.KEEP_WHITESPACES
+    )
+    return morf
+
+def analyze_token(morf, token):
+    segment_interpretations = morf.analyse(token)
+    #if token is tokenized then take all interpretation of segments starting from beginning of the token
+    interpretations=[]
+    for start, end, interpretation in segment_interpretations:
+        if start==0:
+            form, lemma, tag, domain, qualifier = interpretation
+            interpretations.append((lemma, tag))
+
+    return interpretations
+
+def analyze_tokenized(morf, paragraphs):
+    for p in paragraphs:
+        for s in p:
+            for token in s:
+                interpretations=analyze_token(morf, token.form)
+                print(interpretations)
+                token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
+        yield p
