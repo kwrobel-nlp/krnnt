@@ -1568,17 +1568,16 @@ def read_xces(file_path):
     # print('Paragrpahs defined:', paragraphs_defined)
 
     for event, elem in ET.iterparse(file_path, events=("start","end",)):
-        if first_chunk and event=="start" and elem.tag == 'chunk':
-            if elem.get('type') == 's':
+        if first_chunk and event=="start" and elem.tag in ('chunk','sentence'):
+            if elem.get('type') == 's' or elem.tag =='sentence':
                 paragraphs_defined = False
             first_chunk=False
-        elif event=="end" and elem.tag == 'chunk':
-
+        elif event=="end" and elem.tag in ('chunk','sentence'):
             xml_sentences=[]
             paragraph=Paragraph()
             if paragraphs_defined and elem.tag == 'chunk' and elem.get('type')!='s':
                 xml_sentences = elem.getchildren()
-            elif (not paragraphs_defined) and elem.tag == 'chunk' and elem.get('type')=='s':
+            elif (not paragraphs_defined) and ((elem.tag == 'chunk' and elem.get('type')=='s') or elem.tag == 'sentence'):
                 xml_sentences = [elem]
             else:
                 continue
@@ -1613,12 +1612,13 @@ def read_xces(file_path):
                                     token.gold_form=form
                                 else:
                                     token.interpretations.append(form)
-
+                            elif xml_node.tag=='ann':
+                                continue
                             else:
-                                print('err', xml_token)
+                                print('err1', xml_token)
                         ns=False
                     else:
-                        print('err', xml_token)
+                        print('err2', xml_token)
             yield paragraph
             elem.clear()
 

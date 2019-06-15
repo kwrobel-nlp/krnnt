@@ -110,8 +110,9 @@ if __name__=='__main__':
 
         paragraph_raw=paragraph_raw[1:]
 
-        results=Preprocess.maca([paragraph_raw])
+        results=Preprocess.maca([paragraph_raw], maca_config='morfeusz2-nkjp')
         #self.log('MACA')
+        results=list(results)
         print(j,'MACA', len(results), len(paragraph_gold.sentences))
 
         #print(results)
