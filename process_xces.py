@@ -26,8 +26,9 @@ if __name__=='__main__':
     file_path = args[0]
     output_path = args[1]
 
-    file = open(output_path, 'ab')
+    file = open(output_path, 'wb')
     sp = SerialPickler(file)
+
     if os.path.isfile(file_path):
         for paragraph in read_xces(file_path):
             sp.add(paragraph)

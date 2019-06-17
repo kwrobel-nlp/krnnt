@@ -366,7 +366,7 @@ class Preprocess:
 
         # max_sentence_length = max([len(x) for x in result_batchX])
         #self.log('KHOT')
-        return sequence.pad_sequences(result_batchX) #, sequence.pad_sequences(result_batchY, maxlen=max_sentence_length)
+        return sequence.pad_sequences(result_batchX, padding='post', truncating='post') #, sequence.pad_sequences(result_batchY, maxlen=max_sentence_length)
 
 
 def chunk(l, batch_size):
