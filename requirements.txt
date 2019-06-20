@@ -7,3 +7,4 @@ regex==2016.9.22
 requests==2.18.1
 setproctitle==1.1.10
 jsonlines
+tensorflow-gpu==1.0.1
