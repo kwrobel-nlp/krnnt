@@ -757,7 +757,7 @@ def pad_generator(generator,sequence_length=20):
         #TODO pad multi inputs
         max_sentence_length = max([len(x) for x in batch_X])
         # print('max_sentence_length',max_sentence_length)
-        yield (sequence.pad_sequences(batch_X, maxlen=max_sentence_length, padding='post', truncating='post'), sequence.pad_sequences(batch_y, maxlen=max_sentence_length, padding='post', truncating='post'), sentences,sentences_orig)
+        yield (sequence.pad_sequences(batch_X, maxlen=max_sentence_length), sequence.pad_sequences(batch_y, maxlen=max_sentence_length), sentences,sentences_orig)
 
 def pad_generatorE(generator,sequence_length=20):
     for batch_X,batch_y, sentences,sentences_orig,batch_X_e  in generator:
@@ -767,7 +767,7 @@ def pad_generatorE(generator,sequence_length=20):
         #TODO pad multi inputs
         max_sentence_length = max([len(x) for x in batch_X])
         # print('max_sentence_length',max_sentence_length)
-        yield (sequence.pad_sequences(batch_X, maxlen=max_sentence_length, padding='post', truncating='post'), sequence.pad_sequences(batch_y, maxlen=max_sentence_length, padding='post', truncating='post'), sentences,sentences_orig, sequence.pad_sequences(batch_X_e, maxlen=max_sentence_length))
+        yield (sequence.pad_sequences(batch_X, maxlen=max_sentence_length), sequence.pad_sequences(batch_y, maxlen=max_sentence_length), sentences,sentences_orig, sequence.pad_sequences(batch_X_e, maxlen=max_sentence_length))
 
 
 def Xy_generator(generator):
