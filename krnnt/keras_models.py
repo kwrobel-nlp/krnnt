@@ -420,11 +420,12 @@ class BEST(KerasModel):
         features_length = self.parameters.pref['features_length']
 
         inputs = Input(shape=(None, features_length))
+        x = inputs
 
         x=keras.layers.wrappers.Bidirectional(GRU(self.parameters.pref['internal_neurons'], return_sequences=True,
-                       consume_less='gpu', dropout_W=0.0, dropout_U=0.5), input_shape=(None, features_length))(inputs)
+                       consume_less='mem', dropout_W=0.0, dropout_U=0.5), input_shape=(None, features_length))(x)
         x=keras.layers.wrappers.Bidirectional(GRU(self.parameters.pref['internal_neurons'], return_sequences=True,
-                       consume_less='gpu', dropout_W=0.0, dropout_U=0.5), input_shape=(None, features_length))(x)
+                       consume_less='mem', dropout_W=0.0, dropout_U=0.5), input_shape=(None, features_length))(x)
         x = Dropout(0.5)(x)
         #x = BatchNormalization()(x)
         x = TimeDistributed(Dense(self.parameters.pref['output_length'], activation='softmax'))(x)
