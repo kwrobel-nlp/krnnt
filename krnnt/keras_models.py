@@ -421,11 +421,13 @@ class BEST(KerasModel):
 
         inputs = Input(shape=(None, features_length))
         x = inputs
-
-        x=keras.layers.wrappers.Bidirectional(GRU(self.parameters.pref['internal_neurons'], return_sequences=True,
-                       consume_less='mem', dropout_W=0.0, dropout_U=0.5), input_shape=(None, features_length))(x)
-        x=keras.layers.wrappers.Bidirectional(GRU(self.parameters.pref['internal_neurons'], return_sequences=True,
-                       consume_less='mem', dropout_W=0.0, dropout_U=0.5), input_shape=(None, features_length))(x)
+        x = Masking(mask_value=0., input_shape=(None, features_length))(x)
+        x = keras.layers.wrappers.Bidirectional(
+            GRU(self.parameters.pref['internal_neurons'], return_sequences=True, dropout=0.0, recurrent_dropout=0.5,
+                implementation=1), input_shape=(None, features_length))(x)
+        x = keras.layers.wrappers.Bidirectional(
+            GRU(self.parameters.pref['internal_neurons'], return_sequences=True, dropout=0.0, recurrent_dropout=0.5,
+                implementation=1), input_shape=(None, features_length))(x)
         x = Dropout(0.5)(x)
         #x = BatchNormalization()(x)
         x = TimeDistributed(Dense(self.parameters.pref['output_length'], activation='softmax'))(x)

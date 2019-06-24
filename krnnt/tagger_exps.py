@@ -283,7 +283,8 @@ class RunExperiment():
 
         callbacks = [dev_loss_history, loss_history,
                      keras.callbacks.ModelCheckpoint(pref['weight_path'], save_best_only=True, monitor='dev_val_score'),
-                     keras.callbacks.EarlyStopping(monitor='dev_val_score', patience=pref['patience'], mode='max')]  # , save_weights_only=True
+                     keras.callbacks.EarlyStopping(monitor='dev_val_score', patience=pref['patience'], mode='max'),
+                     keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1, batch_size=32, write_graph=True, write_grads=True, write_images=True)]  # , save_weights_only=True
         logging.info('Training...')
 
         # self.train_data = pad_generator(
