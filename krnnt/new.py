@@ -1582,13 +1582,13 @@ def read_xces(file_path):
             else:
                 continue
 
-            for xml_sentence in xml_sentences:
+            for sentence_index, xml_sentence in enumerate(xml_sentences):
                 sentence=Sentence()
                 paragraph.add_sentence(sentence)
-                for xml_token in xml_sentence.getchildren():
+                for token_index, xml_token in enumerate(xml_sentence.getchildren()):
                     if xml_token.tag=='ns':
-                        ns=True
-                        pass
+                        if token_index>0 or sentence_index>0: #omit first ns in paragraph
+                            ns=True
                     elif xml_token.tag=='tok':
                         token=Token()
                         token.space_before=not ns

@@ -432,8 +432,7 @@ class BEST(KerasModel):
         #x = BatchNormalization()(x)
         x = TimeDistributed(Dense(self.parameters.pref['output_length'], activation='softmax'))(x)
 
-        self.model = Model(input=inputs, output=x)
-
+        self.model = Model(inputs=inputs, outputs=x)
 
         self.loss = 'categorical_crossentropy'
         self.optimizer = keras.optimizers.Nadam()
