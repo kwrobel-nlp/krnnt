@@ -321,7 +321,7 @@ class RunExperiment():
         pref['data_size']=count_samples(self.keras_data.data_path)
         ts=int(pref['data_size']*pref['train_data_ratio'])
         pref['train_data_size']=int(ts*(1-pref['dev_data_ratio']))
-        pref['dev_data_size']=int(ts*pref['dev_data_ratio'])
+        pref['dev_data_size']=int(ts*pref['dev_data_ratio'])-5
         pref['test_data_size']=max(0, pref['data_size']-pref['train_data_size']-pref['dev_data_size'])
 
     def print_parameters(self):
