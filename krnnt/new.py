@@ -1592,7 +1592,7 @@ def read_xces(file_path):
                     elif xml_token.tag=='tok':
                         token=Token()
                         token.space_before=not ns
-                        sentence.add_token(token)
+
                         for xml_node in xml_token.getchildren():
                             if xml_node.tag=='orth':
                                 orth=xml_node.text
@@ -1616,6 +1616,8 @@ def read_xces(file_path):
                                 continue
                             else:
                                 print('err1', xml_token)
+                        if token.form:
+                            sentence.add_token(token)
                         ns=False
                     else:
                         print('err2', xml_token)
