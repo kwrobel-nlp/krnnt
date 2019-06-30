@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-from optparse import OptionParser
+import random
+from argparse import ArgumentParser
+
+from tqdm import tqdm
+
+from krnnt.classes import SerialUnpickler, SerialPickler, Paragraph
 
 usage = """%prog CORPUS SAVE_PATH
 
@@ -11,50 +15,32 @@ Shuffle training data.
 E.g. %prog train-merged.spickle train-merged.shuf.spickle
 """
 
+if __name__ == '__main__':
+    parser = ArgumentParser(usage=usage)
+    parser.add_argument('file_path', type=str, help='paths to corpus')
+    parser.add_argument('output_path', type=str, help='save path')
+    parser.add_argument('--seed', '-s', type=int, default=1337, help='seed')
+    args = parser.parse_args()
 
-import random
+    file_path1 = args.file_path
+    file_path2 = args.output_path
 
-
-from progress.bar import Bar
-
-
-from krnnt.classes import SerialUnpickler, SerialPickler
-
-
-if __name__=='__main__':
-    parser = OptionParser(usage=usage)
-    (options, args) = parser.parse_args()
-    if len(args) != 2:
-        print('Provide paths to corpus and to save path.')
-        sys.exit(1)
-
-    file_path1 = args[0]
-    file_path2 = args[1]
-
-
-
-
-    file = open(file_path1,'rb')
+    file = open(file_path1, 'rb')
     su = SerialUnpickler(file)
 
-
-
     paragraphs = []
-    bar = Bar('Loading', suffix = '%(index)d/%(max)d %(percent).1f%% - %(eta_td)s', max=18484)
-    for paragraph in su:
-        bar.next()
+    paragraph: Paragraph
+    for paragraph in tqdm(su, desc='Loading', total=18484):
         paragraphs.append(paragraph)
     file.close()
 
-    random.seed(1337)
+    random.seed(args.seed)
     random.shuffle(paragraphs)
-
 
     file2 = open(file_path2, 'wb')
     sp = SerialPickler(file2)
 
-    bar = Bar('Saving', suffix = '%(index)d/%(max)d %(percent).1f%% - %(eta_td)s', max=18484)
-    for paragraph in paragraphs:
+    for paragraph in tqdm(paragraphs, desc='Saving'):
         sp.add(paragraph)
-        bar.next()
+
     file2.close()

@@ -13,3 +13,4 @@ setup(name='krnnt',
           'tensorflow-gpu','h5py','Keras','numpy','progress','progressbar2','regex','requests','setproctitle','termcolor','jsonlines'
       ],
       zip_safe=False)
+#pytest, tqdm

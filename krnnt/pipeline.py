@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import pickle
 import sys
+from typing import Iterable
 
 from .keras_models import ExperimentParameters
-from .classes import uniq
+from .classes import uniq, Paragraph, Sentence, Token, Form
 from .new import FeaturePreprocessor, TagsPreprocessor, k_hot, UniqueFeaturesValues, Lemmatisation
 
 sys.setrecursionlimit(10000)
@@ -167,9 +168,11 @@ class Sample:
     def __init__(self):
         self.features = {}
 
+
+
 class Preprocess:
     @staticmethod
-    def maca(batch, maca_config,toki_config_path=''):
+    def maca(batch: Iterable[str], maca_config, toki_config_path=''):
         cmd = ['maca-analyse', '-c', maca_config, '-l']
         if toki_config_path:
             cmd.extend(['--toki-config-path',toki_config_path])
@@ -185,7 +188,6 @@ class Preprocess:
         for i in stdout.decode('utf-8').split('\n\n'):
             if len(i) > 0:
                 yield i
-#        return  [i for i in stdout.decode('utf-8').split('\n\n') if len(i) > 0]
 
     @staticmethod
     def parse(output):
@@ -270,7 +272,7 @@ class Preprocess:
             if token_line == '': return None
             form, separator_before = token_line.split("\t")
         except ValueError:
-            raise Exception('Probably concraft-pl not working.') #TODO what?
+            raise Exception('Probably Maca not working.') #TODO what?
 
         form = form
         space_before = separator_before

@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from numpy.random import seed
+seed(1337)
+
+import random as rn
+rn.seed(1337)
+
+import tensorflow as tf
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1,
+                              inter_op_parallelism_threads=1)
+from keras import backend as K
+tf.set_random_seed(1337)
+
+
 import sys
 from optparse import OptionParser
 

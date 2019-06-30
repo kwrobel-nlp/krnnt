@@ -5,8 +5,9 @@ import sys
 from optparse import OptionParser
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain, results_to_xces, read_xces, read_jsonl, results_to_conll, results_to_conllu, \
+from krnnt.new import results_to_plain, results_to_xces, results_to_conll, results_to_conllu, \
     Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized, results_to_jsonl
+from krnnt.readers import read_xces, read_jsonl
 from krnnt.pipeline import KRNNTSingle
 
 usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH

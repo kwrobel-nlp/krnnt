@@ -3,11 +3,9 @@
 import glob
 
 from krnnt.classes import SerialPickler
-import sys
-import os
-from optparse import OptionParser
+from argparse import ArgumentParser
 
-from krnnt.new import read_xces
+from krnnt.readers import read_xces
 
 usage = """%prog CORPUS SAVE_PATH
 
@@ -16,26 +14,16 @@ Converts XCES corpus to internal KRNNT representation and saves it to file.
 E.g. %prog train-analyzed.xml train-analyzed.spickle
 """
 
-if __name__=='__main__':
-    parser = OptionParser(usage=usage)
-    (options, args) = parser.parse_args()
-    if len(args) != 2:
-        print('Provide path to XCES corpus (or path with wildcard) and to save path.')
-        sys.exit(1)
+if __name__ == '__main__':
+    parser = ArgumentParser(usage=usage)
+    parser.add_argument('file_path', type=str, help='path to XCES corpus (or path with wildcard)')
+    parser.add_argument('output_path', type=str, help='save path')
+    args = parser.parse_args()
 
-    file_path = args[0]
-    output_path = args[1]
+    with open(args.output_path, 'wb') as file:
+        sp = SerialPickler(file)
 
-    file = open(output_path, 'wb')
-    sp = SerialPickler(file)
-
-    if os.path.isfile(file_path):
-        for paragraph in read_xces(file_path):
-            sp.add(paragraph)
-    else:
-        for path in glob.iglob(file_path):
+        for path in glob.iglob(args.file_path):
             print(path)
             for paragraph in read_xces(path):
                 sp.add(paragraph)
-
-    file.close()

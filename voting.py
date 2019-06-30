@@ -2,7 +2,8 @@ import collections
 
 import sys
 
-from krnnt.new import read_xces, results_to_xces
+from krnnt.new import results_to_xces
+from krnnt.readers import read_xces
 
 # path='/home/djstrong/projects/repos/krnnt/models/voting/'
 # path='/home/djstrong/projects/repos/krnnt/'
