@@ -147,8 +147,8 @@ class Form:
     def __str__(self):
         return 'Form(%s, %s)' % (self.lemma, self.tags)
 
-    def __eq__(x, y):
-        return x.lemma == y.lemma and x.tags == y.tags
+    def __eq__(self, y):
+        return self.lemma == y.lemma and self.tags == y.tags
 
     def __hash__(self):
         return hash((self.lemma, self.tags))

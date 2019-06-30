@@ -33,7 +33,7 @@ def base_tag(tag):
   
   
   
-import collections
+
 import itertools
 import tqdm
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pickle
 import sys
-from typing import Iterable
+from typing import Iterable, List
 
 from .keras_models import ExperimentParameters
 from .classes import uniq, Paragraph, Sentence, Token, Form
@@ -21,11 +21,6 @@ from keras.preprocessing import sequence
 import numpy as np
 
 
-from keras import backend as K
-#K.set_learning_phase(False)
-
-#from krnnt import keras_models
-
 
 class KRNNTSingle:
     def __init__(self, pref):
@@ -35,14 +30,14 @@ class KRNNTSingle:
         self.lemmatisation = pref['lemmatisation_class']()
         self.lemmatisation.load(pref['lemmatisation_path'])
 
-    def tag_sentence(self, sentence, preana=False):
+    def tag_sentence(self, sentence: str, preana=False):
         return self.__tag([sentence], preana)
 
-    def tag_sentences(self, sentences, preana=False):
+    def tag_sentences(self, sentences: List[str], preana=False):
         return self.__tag(sentences, preana)
 
 
-    def __tag(self, sentences, preana):
+    def __tag(self, sentences: List[str], preana):
         if preana:
             sequences = Preprocess.process_batch_preana(enumerate(sentences))
         else:
@@ -289,7 +284,7 @@ class Preprocess:
             # lemma.disamb=disamb
             interpretations.append(lemma)
 
-        return (form, space_before, interpretations)
+        return form, space_before, interpretations
 
     @staticmethod
     def process_batch(batch, maca_config, toki_config_path):
@@ -381,16 +376,6 @@ def chunk(l, batch_size):
     if batch:
         yield batch
 
-def chunk_old(l, batch_size):
-    if not l:
-        return
-
-    n=max(len(l)//batch_size,1)
-    # print('n', n)
-    k, m = divmod(len(l), n)
-    for i in range(n):
-        batch = l[i * k + min(i, m):(i + 1) * k + min(i + 1, m)]
-        yield batch
 
 
 class WorkerThread(multiprocessing.Process):
@@ -448,7 +433,7 @@ class WorkerThread(multiprocessing.Process):
 
             # print('MACA0')
 
-            if self.pref['reanalyze']==True:
+            if self.pref['reanalyze']:
                 sequences=Preprocess.process_batch(batch)
             else:
                 sequences=Preprocess.process_batch_preana(batch)

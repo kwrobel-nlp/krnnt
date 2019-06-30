@@ -1,6 +1,3 @@
-import glob
-
-import pytest
 from krnnt.readers import read_xces
 
 

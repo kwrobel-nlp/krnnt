@@ -9,13 +9,6 @@ def read_xces(file_path):
     paragraphs_defined = True
     ns=False #no separator
     first_chunk=True
-#    for event, elem in ET.iterparse(file_path, events=("start",)):
-#        if elem.tag == 'chunk':
-#            if elem.get('type') == 's':
-#                paragraphs_defined = False
-#            break
-
-    # print('Paragrpahs defined:', paragraphs_defined)
 
     for event, elem in ET.iterparse(file_path, events=("start","end",)):
         if first_chunk and event=="start" and elem.tag in ('chunk','sentence'):

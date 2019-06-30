@@ -9,7 +9,7 @@ from keras.layers.wrappers import Bidirectional
 from keras.models import Model
 
 
-class ExperimentParameters():
+class ExperimentParameters:
     def __init__(self, pref: Dict, testing=False):
         self.pref = pref.copy()
         if testing:
@@ -26,7 +26,7 @@ class ExperimentParameters():
         print(self.pref)
 
 
-class KerasModel():
+class KerasModel:
     model: Model
 
     def __init__(self, parameters: ExperimentParameters):

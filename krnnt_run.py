@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import io
 import sys
 from optparse import OptionParser
 
@@ -27,7 +26,7 @@ if __name__ == '__main__':
                       help='input format of preanalyzed data: xces, jsonl')
     parser.add_option('-o', '--output-format', action='store',
                       default='xces', dest='output_format',
-                      help='output format: xces, plain, conll, conllu')
+                      help='output format: xces, plain, conll, conllu, jsonl')
     parser.add_option('--maca_config', action='store',
                       default='morfeusz-nkjp-official', dest='maca_config',
                       help='Maca config')
