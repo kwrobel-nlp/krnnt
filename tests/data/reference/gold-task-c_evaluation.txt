@@ -1,0 +1,52 @@
+### FOLD  1: tests/data/small/gold-task-c.xml (tag) v. /tmp/out.xces (ref)
+PolEval 2017 competition scores
+-------------------------------
+POS accuracy (Subtask A score): 	32.5373%
+POS accuracy (known words): 	32.5373%
+POS accuracy (unknown words): 	0.0000%
+Lemmatization accuracy (Subtask B score): 	49.8507%
+Lemmatization accuracy (known words): 	49.8507%
+Lemmatization accuracy (unknown words): 	0.0000%
+Overall accuracy (Subtask C score): 	41.1940%
+----
+REF-toks	335
+KN	100.0000%
+KN_POS_SC_LOWER	55.2239%
+KN_SC_LOWER	32.5373%
+KN_SEG_CHANGE	0.8955%
+KN_SL_LOWER	49.8507%
+KN_WC_LOWER	32.8358%
+POS_SC_LOWER	55.2239%
+POS_WC_LOWER	55.2239%
+SC_LOWER	32.5373%
+SEG_CHANGE	0.8955%
+SEG_NOCHANGE	99.1045%
+SL_CASE_CAT_HEUR	49.8507%
+SL_LOWER	49.8507%
+SL_NOCASE_CAT_HEUR	52.5373%
+SL_NOCASE_LOWER	52.5373%
+UNK	0.0000%
+UNK_POS_SC_LOWER	0.0000%
+UNK_SC_LOWER	0.0000%
+UNK_SEG_CHANGE	0.0000%
+UNK_SL_LOWER	0.0000%
+UNK_WC_LOWER	0.0000%
+WC_LOWER	32.8358%
+WL_LOWER	49.8507%
+WC_UPPER	33.7313%
+AVG weak lemma lower bound	49.8507%
+AVG KN strong lemma lower bound	49.8507%
+AVG UNK strong lemma lower bound	0.0000%
+AVG strong lemma lower bound	49.8507%
+AVG strong lemma nocase lower bound	52.5373%
+AVG strong lemma case concat heur	49.8507%
+AVG strong lemma nocase concat heur	52.5373%
+AVG weak corr lower bound	32.8358%
+AVG weak corr upper bound	33.7313%
+AVG UNK weak corr lower bound	0.0000%
+AVG UNK weak corr upper bound	0.0000%
+AVG KN  weak corr lower bound	32.8358%
+AVG KN  weak corr upper bound	33.7313%
+AVG POS strong corr lower bound	55.2239%
+AVG percentage UNK	0.0000%
+AVG percentage seg change	0.8955%

@@ -3,8 +3,9 @@ import pickle
 import sys
 from typing import Iterable, List
 
+from krnnt.analyzers import MacaAnalyzer
 from .keras_models import ExperimentParameters
-from .classes import uniq, Paragraph, Sentence, Token, Form
+from .classes import uniq
 from .new import FeaturePreprocessor, TagsPreprocessor, k_hot, UniqueFeaturesValues, Lemmatisation
 
 sys.setrecursionlimit(10000)
@@ -14,7 +15,6 @@ import multiprocessing
 mpl = multiprocessing.log_to_stderr()
 mpl.setLevel(logging.DEBUG)
 from timeit import default_timer as timer
-import csv
 from subprocess import Popen, PIPE
 import setproctitle
 from keras.preprocessing import sequence
@@ -68,97 +68,6 @@ class KRNNTSingle:
         return result
 
 
-class LogTime(multiprocessing.Process):
-    def __init__(self, queue_log):
-        super(LogTime, self).__init__()
-        self.queue_log = queue_log
-        self.f=open('log2cores2workersWsort.csv','w', newline='')
-        self.csv_writer = csv.writer(self.f)
-
-    def run(self):
-        while True:
-            item = self.queue_log.get()
-            if item is None:
-                self.queue_log.task_done()
-                break
-            self.csv_writer.writerow(item)
-            self.f.flush()
-            self.queue_log.task_done()
-
-class StdInThread(threading.Thread):
-    def __init__(self, queue, queue_log=None):
-        super(StdInThread, self).__init__()
-        self.queue=queue
-        self.queue_log = queue_log
-
-    def log(self, desc):
-        if self.queue_log:
-            # print(self.name, timer(), desc, file=sys.stderr)
-            self.queue_log.put([self.name, timer(), desc])
-
-    def run(self):
-        self.log('START')
-        ss = []
-        for i,line in enumerate(sys.stdin):
-            # self.queue.put(line.strip())
-            ss.append((i,line.strip()))
-
-
-        #ss = sorted(ss, key=lambda sentence: sentence[1].count(' '))
-        for s in ss:
-            self.queue.put(s)
-
-        self.queue.put(1)
-        self.log('STOP')
-
-class BatcherThread(threading.Thread):
-    def __init__(self, input_queue, output_queue, batch_size, number_of_consumers, queue_log=None):
-        super(BatcherThread, self).__init__()
-        self.input_queue = input_queue
-        self.output_queue = output_queue
-        self.batch_size = batch_size
-        self.number_of_consumers=number_of_consumers
-        self.queue_log = queue_log
-
-    def log(self, desc):
-        if self.queue_log:
-            # print(self.name, timer(), desc)
-            self.queue_log.put([self.name, timer(), desc])
-
-    def run(self):
-        # print(self.name, 'RUN', self.input_queue.qsize())
-        self.log('START')
-        batch = []
-        while True:
-            self.log('WORKING')
-            item = self.input_queue.get()
-            self.log('WAIT')
-            if isinstance( item, int ):
-                if batch:
-                    pass
-                    self.output_queue.put(batch)
-                if item>1:
-                    self.input_queue.put(item-1)
-                else:
-                    pass
-                    self.output_queue.put(self.number_of_consumers)
-
-                self.input_queue.task_done()
-                break
-
-            batch.append(item)
-
-            if len(batch) == self.batch_size:
-                self.log('PUT0')
-                self.output_queue.put(batch)
-                self.log('PUT1')
-                batch = []
-            self.input_queue.task_done()
-
-
-        self.log('STOP')
-        # print('batcher stop')
-
 class Sample:
     def __init__(self):
         self.features = {}
@@ -166,46 +75,8 @@ class Sample:
 
 
 class Preprocess:
-    @staticmethod
-    def maca(batch: Iterable[str], maca_config, toki_config_path=''):
-        cmd = ['maca-analyse', '-c', maca_config, '-l']
-        if toki_config_path:
-            cmd.extend(['--toki-config-path',toki_config_path])
-        p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        stdout = p.communicate(input='\n'.join(batch).encode('utf-8'))[0]
-        try:
-          p.stdin.close()
-        except BrokenPipeError:
-          pass
-        p.wait()
-        if p.returncode!=0:
-          raise Exception('Maca is not working properly')
-        for i in stdout.decode('utf-8').split('\n\n'):
-            if len(i) > 0:
-                yield i
 
-    @staticmethod
-    def parse(output):
-        data = []
-        lemma_lines = []
-        token_line = None
-        for line in output.split("\n"):
-            if line.startswith("\t"):
-                lemma_lines.append(line)
-            else:
-                if token_line is not None:
-                    data.append((token_line, lemma_lines))
-                    lemma_lines = []
-                token_line = line
-        data.append((token_line, lemma_lines))
 
-        tokens = []
-        for index, (token_line, lemma_lines) in enumerate(data):
-            token = Preprocess.construct(token_line, lemma_lines) #80%
-            if token is None: continue
-            tokens.append(token)
-
-        return tokens
 
     @staticmethod
     def create_features(sequence):
@@ -261,30 +132,7 @@ class Preprocess:
             # print(TagsPreprocessor.create_tags5_without_guesser(sample.features['tags']))
             # print(sample.features['space_before'])
 
-    @staticmethod
-    def construct(token_line, lemma_lines):
-        try:
-            if token_line == '': return None
-            form, separator_before = token_line.split("\t")
-        except ValueError:
-            raise Exception('Probably Maca not working.') #TODO what?
 
-        form = form
-        space_before = separator_before
-        interpretations = []
-
-        for lemma_line in lemma_lines:
-            try:
-                lemma, tags, _ = lemma_line.strip().split("\t") #30%
-                disamb = True
-            except ValueError:
-                lemma, tags = lemma_line.strip().split("\t") #16%
-                disamb = False
-            lemma = (lemma, tags)
-            # lemma.disamb=disamb
-            interpretations.append(lemma)
-
-        return form, space_before, interpretations
 
     @staticmethod
     def process_batch(batch, maca_config, toki_config_path):
@@ -294,14 +142,14 @@ class Preprocess:
             #indexes.append(i)
             batchC.append(line)
 
+        maca_analyzer=MacaAnalyzer(maca_config, toki_config_path)
 
-
-        results = Preprocess.maca(batchC, maca_config, toki_config_path)
+        results = maca_analyzer._maca(batchC)
         #self.log('MACA')
         #print('MACA', len(results), file=sys.stderr)
         sequences=[]
         for res in  results:
-            result = Preprocess.parse(res)
+            result = maca_analyzer._parse(res)
 
             # TODO cechy
             sequence = []

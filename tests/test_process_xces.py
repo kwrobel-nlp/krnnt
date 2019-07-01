@@ -14,3 +14,6 @@ def test_different_xces_formats():
 
     for path, paragraph_lenghts in data.items():
         assert paragraph_lenghts == [len(paragraph.sentences) for paragraph in read_xces(path)]
+        for paragraph in read_xces(path):
+            print(paragraph.text())
+        print()

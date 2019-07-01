@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import io
 import numbers
 import os.path
 import pickle
@@ -9,7 +8,7 @@ import time
 import traceback
 
 import collections
-from typing import Iterable, List, Union, Dict, Optional, Any
+from typing import Iterable, List, Union
 
 import numpy as np
 import regex
@@ -18,7 +17,7 @@ from keras.preprocessing import sequence
 from progress.bar import Bar
 from tqdm import tqdm
 
-from .classes import geo_mean, SerialUnpickler, SerialPickler, uniq, flatten, mean, Form, Paragraph
+from .classes import SerialUnpickler, SerialPickler, uniq, flatten, Form, Paragraph
 
 
 class Sample:
@@ -658,17 +657,7 @@ def pad_generator(generator, sequence_length=20):
                sequence.pad_sequences(batch_y, maxlen=max_sentence_length), sentences, sentences_orig)
 
 
-def pad_generatorE(generator, sequence_length=20):
-    for batch_X, batch_y, sentences, sentences_orig, batch_X_e in generator:
-        if not batch_X or not batch_y or not batch_X_e:
-            continue
 
-        # TODO pad multi inputs
-        max_sentence_length = max([len(x) for x in batch_X])
-        # print('max_sentence_length',max_sentence_length)
-        yield (sequence.pad_sequences(batch_X, maxlen=max_sentence_length),
-               sequence.pad_sequences(batch_y, maxlen=max_sentence_length), sentences, sentences_orig,
-               sequence.pad_sequences(batch_X_e, maxlen=max_sentence_length))
 
 
 def Xy_generator(generator):
@@ -1128,110 +1117,6 @@ def shape(word: str) -> str:  # TODO zredukowac czas
     word = regex.sub(u'\p{gc=Decimal_Number}', 'd', word, flags=regex.U)
     word = regex.sub(u'[^A-Za-z0-9]', 'x', word, flags=regex.LOCALE)
     return unix_uniq(word)
-
-
-def results_to_jsonl(results):
-    print(results_to_jsonl_str(results))
-
-
-def results_to_xces(results):
-    print(results_to_xces_str(results))
-
-
-def results_to_plain(results):
-    print(results_to_plain_str(results))
-
-
-def results_to_conll(results):
-    print(results_to_conll_str(results))
-
-
-def results_to_conllu(results):
-    print(results_to_conllu_str(results))
-
-
-def results_to_conll_str(results):
-    result_str = ""
-    for sentence in results:
-        for token in sentence:
-            try:
-                start = token['start']
-            except KeyError:
-                start = ''
-
-            try:
-                end = token['end']
-            except KeyError:
-                end = ''
-
-            result_str += ('%s\t%s\t%s\t%s\t%s\t%s\n' % (
-            token['token'], token['lemmas'][0], 1 if token['sep'] == 'space' else 0, token['tag'], start, end))
-        result_str += "\n"
-    return result_str
-
-
-def results_to_jsonl_str(results):
-    fp = io.StringIO()
-    with jsonlines.Writer(fp) as writer:
-        for sentence in results:
-            ss = [(token['token'], token['lemmas'][0], token['tag']) for token in sentence]
-            writer.write(ss)
-    return fp.getvalue()
-
-
-def results_to_conllu_str(results):
-    result_str = ""
-    for sentence in results:
-        for i, token in enumerate(sentence):
-            result_str += ('%s\t%s\t%s\t_\t%s\t_\t_\t_\t_\t_\n' % (
-            i + 1, token['token'], token['lemmas'][0], token['tag']))
-        result_str += "\n"
-    return result_str
-
-
-def results_to_plain_str(results):
-    result_str = ""
-    for sentence in results:
-        for token in sentence:
-            result_str += ('%s\t%s' % (token['token'], token['sep'])) + "\n"
-            for lemma in token['lemmas']:
-                result_str += ('\t%s\t%s\tdisamb' % (lemma, token['tag'])) + "\n"
-        result_str += "\n"
-    return result_str
-
-
-def results_to_xces_str(results):
-    result_str = ""
-    result_str += ('<?xml version="1.0" encoding="UTF-8"?>\n'
-                   '<!DOCTYPE cesAna SYSTEM "xcesAnaIPI.dtd">\n'
-                   '<cesAna xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" type="lex disamb">\n'
-                   '<chunkList>') + "\n"
-
-    for sentence in results:
-        result_str += (' <chunk type="p">\n'
-                       '  <chunk type="s">') + "\n"
-        for token in sentence:
-            if token['sep'] == 'none':
-                result_str += ('   <ns/>') + "\n"
-            result_str += ('   <tok>') + "\n"
-            result_str += ('    <orth>%s</orth>' % escape_xml(token['token'])) + "\n"
-            for lemma in token['lemmas']:
-                result_str += ('    <lex disamb="1"><base>%s</base><ctag>%s</ctag></lex>' % (escape_xml(lemma),
-                                                                                             token['tag'])) + "\n"
-            result_str += ('   </tok>') + "\n"
-        result_str += ('  </chunk>\n'
-                       ' </chunk>') + "\n"
-    result_str += ('</chunkList>\n'
-                   '</cesAna>') + "\n"
-    return result_str
-
-
-def escape_xml(s):
-    return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace('\'',
-                                                                                                            '&apos;')
-
-
-import jsonlines
 
 
 def get_morfeusz():

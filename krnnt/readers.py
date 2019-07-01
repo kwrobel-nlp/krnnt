@@ -5,7 +5,7 @@ import jsonlines
 from krnnt.classes import Paragraph, Sentence, Token, Form
 
 
-def read_xces(file_path):
+def read_xces(file_path: str) -> Paragraph:
     paragraphs_defined = True
     ns=False #no separator
     first_chunk=True
@@ -68,14 +68,14 @@ def read_xces(file_path):
             elem.clear()
 
 
-def read_jsonl(file_path):
+def read_jsonl(file_path: str) -> Paragraph:
     with jsonlines.Reader(file_path) as reader:
         for obj in reader:
             a = list_to_paragraph(obj)
             yield a
 
 
-def list_to_paragraph(l):
+def list_to_paragraph(l) -> Paragraph:
     paragraph = Paragraph()
     for s in l:
         sentence = Sentence()

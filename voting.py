@@ -2,7 +2,7 @@ import collections
 
 import sys
 
-from krnnt.new import results_to_xces
+from krnnt.writers import results_to_xces, results_to_xces_str
 from krnnt.readers import read_xces
 
 # path='/home/djstrong/projects/repos/krnnt/models/voting/'
@@ -68,6 +68,6 @@ while True:
         break
 
 
-results_to_xces(result)
+print(results_to_xces_str(result))
 
 print(count_all, count_mismatch, file=sys.stderr)

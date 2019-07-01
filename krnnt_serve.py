@@ -10,8 +10,9 @@ from flask import request
 from flask import g, current_app
 
 from krnnt.keras_models import BEST
-from krnnt.new import results_to_plain_str, results_to_xces_str, Lemmatisation, Lemmatisation2, \
-    results_to_conllu_str, results_to_conll_str, results_to_jsonl_str
+from krnnt.new import Lemmatisation, Lemmatisation2
+from krnnt.writers import results_to_conll_str, results_to_jsonl_str, results_to_conllu_str, results_to_plain_str, \
+    results_to_xces_str
 from krnnt.readers import read_xces
 from krnnt.pipeline import KRNNTSingle
 
