@@ -102,7 +102,13 @@ class Paragraph:
 
     def text(self) -> str:
         raw = ''.join([sentence.text() for sentence in self.sentences])
-        return raw[1:]  # omit first separator
+        try:
+            if self.sentences[0].tokens[0].space_before:
+                return raw[1:]
+            else:
+                return raw
+        except:
+            return raw
 
 
 class Sentence:

@@ -5,6 +5,8 @@ import io
 import sys
 from optparse import OptionParser
 import time
+
+import flask
 from flask import Flask
 from flask import request
 from flask import g, current_app
@@ -19,6 +21,7 @@ from krnnt.pipeline import KRNNTSingle
 import threading
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 application=app
 
 def render(text='', str_results=''):
@@ -67,6 +70,7 @@ def tag():
     results = krnntx.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
     return render(text, conversion(results))
 
+# def main(argv=sys.argv[1:]):
 if __name__ == '__main__':
     parser = OptionParser(usage='HTTP Tagger server')
     parser.add_option('-p', '--port', action='store',
@@ -88,6 +92,8 @@ if __name__ == '__main__':
                       default='plain', dest='output_format',
                       help='output format: xces, plain, conll, conllu, jsonl')
     (options, args) = parser.parse_args()
+
+    #TODO args = parser.parse_args(argv)
 
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
             'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':options.toki_config_path}

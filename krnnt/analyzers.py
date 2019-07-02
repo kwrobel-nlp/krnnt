@@ -12,7 +12,9 @@ class MacaAnalyzer:
 
     def analyze(self, text: str) -> Paragraph:
         results = self._maca([text])
-        results = list(results)  # generator to list
+        results = list(results)  #TODO generator to list
+
+        #TODO: start end of tokens
 
         paragraph_reanalyzed = Paragraph()
         for i, res in enumerate(results):

@@ -1,0 +1,25 @@
+Lubię	none
+	lubić	fin:sg:pri:imperf	disamb
+placki	space
+	placek	subst:pl:acc:m3	disamb
+.	none
+	.	interp	disamb
+
+Ala	newline
+	Ala	subst:sg:nom:f	disamb
+ma	space
+	mieć	fin:sg:ter:imperf	disamb
+kota	space
+	kot	subst:sg:acc:m2	disamb
+.	none
+	.	interp	disamb
+
+Raz	none
+	raz	subst:sg:nom:m3	disamb
+dwa	space
+	dwa	num:pl:nom:m3:congr	disamb
+trzy	space
+	trzy	num:pl:nom:m3:congr	disamb
+.	none
+	.	interp	disamb
+

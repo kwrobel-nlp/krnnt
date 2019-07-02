@@ -112,7 +112,7 @@ def test_run_jsonl(bash):
         for command in commands:
             s.run_script_inline([command])
 
-def test_run_xces2(bash):
+def test_run_evaluation(bash):
     commands = [
         'cd ..',
         'cat tests/data/small/gold-task-c.txt | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces --reproducible > /tmp/out.xces',

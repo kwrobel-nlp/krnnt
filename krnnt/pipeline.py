@@ -51,7 +51,7 @@ class KRNNTSingle:
                 result.append(plain)
 
 
-        text='\n\n'.join(sentences)
+        text='\n\n'.join(sentences) #TODO: sentences is generator?
         # print(sentences)
         # print(result)
         offset=0
