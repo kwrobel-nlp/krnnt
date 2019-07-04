@@ -3,6 +3,7 @@
 
 import io
 import sys
+from argparse import ArgumentParser
 from optparse import OptionParser
 import time
 
@@ -22,7 +23,10 @@ import threading
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
-application=app
+application = app
+
+global krnntx, conversion
+
 
 def render(text='', str_results=''):
     return """
@@ -43,17 +47,18 @@ def render(text='', str_results=''):
 </body>
 </html>""" % (text, str_results)
 
+
 @app.route('/', methods=['GET'])
 def gui():
     return render()
 
+
 @app.route('/', methods=['POST'])
 def tag_raw():
-    global krnntx
     request.get_data()
     if 'text' in request.form:
-        text=request.form['text']
-        results = krnntx.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+        text = request.form['text']
+        results = krnntx.tag_sentences(text.split('\n\n'))  # ['Ala ma kota.', 'Ale nie ma psa.']
         return render(text, conversion(results))
     else:
         text = request.get_data()
@@ -63,73 +68,84 @@ def tag_raw():
         results = krnntx.tag_sentences(text.decode('utf-8').split('\n\n'))
         return conversion(results)
 
+
 @app.route('/tag/', methods=['POST'])
 def tag():
-    global krnntx
-    text=request.form['text']
-    results = krnntx.tag_sentences(text.split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+    text = request.form['text']
+    results = krnntx.tag_sentences(text.split('\n\n'))  # ['Ala ma kota.', 'Ale nie ma psa.']
     return render(text, conversion(results))
 
-# def main(argv=sys.argv[1:]):
-if __name__ == '__main__':
-    parser = OptionParser(usage='HTTP Tagger server')
-    parser.add_option('-p', '--port', action='store',
-                      default=9200, dest='port',
-                      help='server port (defaults to 9200)')
-    parser.add_option('-t', '--host', action='store',
-                      default='0.0.0.0', dest='host',
-                      help='server host (defaults to localhost)')
-    parser.add_option('--maca_config', action='store',
-                      default='morfeusz-nkjp-official', dest='maca_config',
-                      help='Maca config')
-    parser.add_option('--toki_config_path', action='store',
-                      default='', dest='toki_config_path',
-                      help='Toki config path (directory)')
-    parser.add_option('--lemmatisation', action='store',
-                      default='sgjp', dest='lemmatisation',
-                      help='lemmatization mode (sgjp, simple)')
-    parser.add_option('-o', '--output-format', action='store',
-                      default='plain', dest='output_format',
-                      help='output format: xces, plain, conll, conllu, jsonl')
-    (options, args) = parser.parse_args()
 
-    #TODO args = parser.parse_args(argv)
+def main(argv=sys.argv[1:]):
+    print(argv)
+    global conversion,krnntx
+
+    parser = ArgumentParser(usage='HTTP Tagger server')
+    parser.add_argument('model_path', help='path to directory woth weights, lemmatisation data and dictionary')
+    parser.add_argument('-p', '--port',
+                        default=9200,
+                        help='server port (defaults to 9200)')
+    parser.add_argument('-t', '--host',
+                        default='0.0.0.0',
+                        help='server host (defaults to localhost)')
+    parser.add_argument('--maca_config',
+                        default='morfeusz-nkjp-official',
+                        help='Maca config')
+    parser.add_argument('--toki_config_path',
+                        default='',
+                        help='Toki config path (directory)')
+    parser.add_argument('--lemmatisation',
+                        default='sgjp',
+                        help='lemmatization mode (sgjp, simple)')
+    parser.add_argument('-o', '--output-format',
+                        default='plain', dest='output_format',
+                        help='output format: xces, plain, conll, conllu, jsonl')
+    args = parser.parse_args(argv)
+
+    # TODO args = parser.parse_args(argv)
 
     pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
-            'keras_model_class': BEST, 'maca_config':options.maca_config, 'toki_config_path':options.toki_config_path}
+            'keras_model_class': BEST, 'maca_config': args.maca_config, 'toki_config_path': args.toki_config_path}
 
-    if len(args) != 1:
-        print('Provide path to directory with weights, lemmatisation and dictionary.')
-        sys.exit(1)
-
-    if options.lemmatisation=='simple':
+    if args.lemmatisation == 'simple':
         pref['lemmatisation_class'] = Lemmatisation2
     else:
         pref['lemmatisation_class'] = Lemmatisation
 
     pref['reanalyze'] = True
 
-    pref['weight_path'] = args[0] + "/weights.hdf5"
-    pref['lemmatisation_path'] = args[0] + "/lemmatisation.pkl"
-    pref['UniqueFeaturesValues'] = args[0] + "/dictionary.pkl"
-
+    pref['weight_path'] = args.model_path + "/weights.hdf5"
+    pref['lemmatisation_path'] = args.model_path + "/lemmatisation.pkl"
+    pref['UniqueFeaturesValues'] = args.model_path + "/dictionary.pkl"
 
     krnntx = KRNNTSingle(pref)
-    
-    krnntx.tag_sentences( ['Ala'] )
 
-    if options.output_format == 'xces':
+    krnntx.tag_sentences(['Ala'])
+
+    if args.output_format == 'xces':
         conversion = results_to_xces_str
-    elif options.output_format == 'plain':
+    elif args.output_format == 'plain':
         conversion = results_to_plain_str
-    elif options.output_format == 'conll':
+    elif args.output_format == 'conll':
         conversion = results_to_conll_str
-    elif options.output_format == 'conllu':
+    elif args.output_format == 'conllu':
         conversion = results_to_conllu_str
-    elif options.output_format == 'jsonl':
+    elif args.output_format == 'jsonl':
         conversion = results_to_jsonl_str
     else:
         print('Wrong output format.')
         sys.exit(1)
 
-    app.run(host=options.host, port=options.port, debug=False)
+    return app, args.host, args.port
+
+
+
+if __name__ == '__main__':
+    app,host,port = main()
+    app.run(host=host, port=port, debug=False)
+
+def start(*args, **kwargs):
+    app, host, port = main(args)
+    return app
+
+#gunicorn -b 127.0.0.1:9200 -w 4 -k gevent -t 3600 --threads 4 'krnnt_serve:start("model_data","--maca_config","morfeusz2-nkjp","--toki_config_path","/home/krnnt/")'

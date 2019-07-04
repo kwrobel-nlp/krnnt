@@ -1,0 +1,35 @@
+import concurrent.futures
+
+import requests
+
+
+def test_api():
+    url = 'http://localhost:9200'
+
+    for line in open('data/full/test-raw.txt'):
+        line=line.strip()
+        if not line: continue
+
+
+        r = requests.post(url, data=payload)
+
+        # print(r.text)
+        # break
+
+def tag(url, data):
+    payload = data.encode('utf-8')
+    r = requests.post(url, data=payload)
+    return r
+
+def test_parallel_api():
+    lines=[]
+    for line in open('data/full/test-raw.txt'):
+        line = line.strip()
+        if not line: continue
+        lines.append(line)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        future_to_url = {executor.submit(tag, 'http://localhost:9200', line): line for line in lines}
+        for future in concurrent.futures.as_completed(future_to_url):
+            r=future.result()
+            # print(r.text)
