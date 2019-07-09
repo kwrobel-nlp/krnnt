@@ -34,17 +34,18 @@ def test_maca():
 
 def test_parse():
     maca_analyzer = MacaAnalyzer('')
+    maca_analyzer.text=paragraph_raw
     result = maca_analyzer._parse(reference_maca_output)
 
     reference = [
         ('Lubię', 'newline',
-         [('lubić', 'fin:sg:pri:imperf')]),
+         [('lubić', 'fin:sg:pri:imperf')],0,5),
         ('pociągi', 'space',
          [('pociąg', 'subst:pl:nom:m3'),
           ('pociąg', 'subst:pl:acc:m3'),
-          ('pociąg', 'subst:pl:voc:m3')]),
+          ('pociąg', 'subst:pl:voc:m3')],6,13),
         ('.', 'none',
-         [('.', 'interp')])]
+         [('.', 'interp')], 13,14)]
 
     assert result == reference
 
@@ -60,15 +61,15 @@ def test_maca_analyzer():
     assert len(result.sentences[0].tokens) == 3
 
     assert result.sentences[0].tokens[0].form == 'Lubię'
-    assert result.sentences[0].tokens[0].space_before == True
+    assert result.sentences[0].tokens[0].space_before == 'newline'
     assert len(result.sentences[0].tokens[0].interpretations) == 1
 
     assert result.sentences[0].tokens[1].form == 'pociągi'
-    assert result.sentences[0].tokens[1].space_before == True
+    assert result.sentences[0].tokens[1].space_before == 'space'
     assert len(result.sentences[0].tokens[1].interpretations) == 3
 
     assert result.sentences[0].tokens[2].form == '.'
-    assert result.sentences[0].tokens[2].space_before == False
+    assert result.sentences[0].tokens[2].space_before == 'none'
     assert len(result.sentences[0].tokens[2].interpretations) == 1
 
     assert result.sentences[0].tokens[1].interpretations[0] == Form('pociąg', 'subst:pl:nom:m3')

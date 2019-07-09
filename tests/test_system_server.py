@@ -12,7 +12,7 @@ def test_download_model(bash):
 def test_post_raw(bash):
     commands = [
         'cd ..',
-        'curl -X POST "http://localhost:9200" -d @tests/data/server/in_raw.txt > /tmp/out.txt',
+        'curl -X POST "http://localhost:9200" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
         'diff /tmp/out.txt tests/data/server/out_raw.txt'
     ]
 
@@ -23,7 +23,7 @@ def test_post_raw(bash):
 def test_post_form(bash):
     commands = [
         'cd ..',
-        'curl -X POST "http://localhost:9200" -d "text=Lubię placki. Ala ma kota.\nRaz dwa trzy." > /tmp/out.txt'
+        'curl -X POST "http://localhost:9200" --data-binary "text=Lubię placki. Ala ma kota.\n\nRaz dwa trzy." > /tmp/out.txt'
     ]
 
     with bash() as s:
@@ -34,3 +34,25 @@ def test_post_form(bash):
     reference = open('data/server/out_raw.txt').read()
 
     assert reference in generated
+
+def test_post_tokenized_json(bash):
+    commands = [
+        'cd ..',
+        'curl -X POST -H "Content-Type: application/json" "http://localhost:9200" -d @tests/data/server/in_tokenized.json > /tmp/out.txt',
+        'diff /tmp/out.txt tests/data/server/out_raw.txt'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])
+
+def test_post_tokenized_compact_json(bash):
+    commands = [
+        'cd ..',
+        'curl -X POST -H "Content-Type: application/json" "http://localhost:9200" -d @tests/data/server/in_tokenized_compact.json > /tmp/out.txt',
+        'diff /tmp/out.txt tests/data/server/out_raw.txt'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])

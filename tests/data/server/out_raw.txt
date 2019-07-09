@@ -1,11 +1,11 @@
-Lubię	none
+Lubię	newline
 	lubić	fin:sg:pri:imperf	disamb
 placki	space
 	placek	subst:pl:acc:m3	disamb
 .	none
 	.	interp	disamb
 
-Ala	newline
+Ala	space
 	Ala	subst:sg:nom:f	disamb
 ma	space
 	mieć	fin:sg:ter:imperf	disamb
@@ -14,7 +14,7 @@ kota	space
 .	none
 	.	interp	disamb
 
-Raz	none
+Raz	newline
 	raz	subst:sg:nom:m3	disamb
 dwa	space
 	dwa	num:pl:nom:m3:congr	disamb

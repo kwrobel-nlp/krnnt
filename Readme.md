@@ -227,3 +227,154 @@ krnnt]$ python3 voting.py reana/ > reana/test-raw.krnnt.voting.xml
 ```
 
 KRNNT is licensed under GNU LGPL v3.0.
+
+
+# Input formats
+
+* raw text
+  * text format - documents are separated by double new line (empty line) 
+* pretokenized text
+  * JSON
+    * verbose
+    * compact
+
+## Pretokenized text
+
+The format consists of documents. Each document have sentences, and each sentence have tokens.
+
+Fields for each token:
+* `form`
+* `separator` (optional) - white characters before token: `newline`, `space` or `none`
+* `start` (optional) - staring offset of the token
+* `end` (optional) - ending offset of the token
+
+`Separator` is a feature for the classifier. 
+If `separator` is not provided and `start` and `end` positions are provided then `separator` is computed.
+If `separator`, `start` and `end` fields are not provided then `separator` is set to True.
+
+### Verbose JSON
+
+Verbose JSON uses dictionaries.
+
+```json
+{
+  "documents": [
+    {
+      "text": "Lubię placki. Ala ma kota.\nRaz dwa trzy.",
+      "sentences": [
+        {
+          "tokens": [
+            {
+              "form": "Lubię",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "placki",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": ".",
+              "separator": false,
+              "start": 0,
+              "end": 0
+            }
+          ]
+        },
+        {
+          "tokens": [
+            {
+              "form": "Ala",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "ma",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "kota",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": ".",
+              "separator": false,
+              "start": 0,
+              "end": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "text": "",
+      "sentences": [
+        {
+          "tokens": [
+            {
+              "form": "Raz",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "dwa",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "trzy",
+              "separator": true,
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": ".",
+              "separator": false,
+              "start": 0,
+              "end": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Compact JSON
+
+Compact JSON uses lists and positional fields (for speed and memory efficiency).
+
+```json
+[
+  [
+    [["Lubię",true],["placki",true],[".",false]],
+    [["Ala",true],["ma",true],["kota",true],[".",false]]
+  ],
+  [
+    [["Raz",true],["dwa",true],["trzy",true],[".",false]]
+  ]
+]
+```
+
+
+# Output formats
+
+* JSON
+* JSONL - each document in separate line
+* TSV (CONLL)
+* XCES
+* plain
+
+
+TODO: opcje jako nagłówki HTTP?

@@ -1,0 +1,92 @@
+{
+  "documents": [
+    {
+      "text": "Lubię placki. Ala ma kota.\nRaz dwa trzy.",
+      "sentences": [
+        {
+          "tokens": [
+            {
+              "form": "Lubię",
+              "separator": "newline",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "placki",
+              "separator": "space",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": ".",
+              "separator": "none",
+              "start": 0,
+              "end": 0
+            }
+          ]
+        },
+        {
+          "tokens": [
+            {
+              "form": "Ala",
+              "separator": "space",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "ma",
+              "separator": "space",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "kota",
+              "separator": "space",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": ".",
+              "separator": "none",
+              "start": 0,
+              "end": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "text": "",
+      "sentences": [
+        {
+          "tokens": [
+            {
+              "form": "Raz",
+              "separator": "newline",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "dwa",
+              "separator": "space",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": "trzy",
+              "separator": "space",
+              "start": 0,
+              "end": 0
+            },
+            {
+              "form": ".",
+              "separator": "none",
+              "start": 0,
+              "end": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

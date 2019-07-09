@@ -36,7 +36,7 @@ def test_shuffle(bash):
 def test_train(bash):
     commands = [
         'cd ..',
-        'rm /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2 /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues',
+        # 'rm /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2 /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues',
         'python3 krnnt_train.py --maca_config $MACA_CONFIG /tmp/nkjp-reanalyzed.shuf.spickle -e 2 --reproducible --hash test',
 
         'h5diff weight_test.hdf5 tests/data/reference/weight_test.hdf5',

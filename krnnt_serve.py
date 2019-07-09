@@ -12,8 +12,10 @@ from flask import Flask
 from flask import request
 from flask import g, current_app
 
+from krnnt.analyzers import MacaAnalyzer
+from krnnt.classes import Paragraph, Sentence, Token
 from krnnt.keras_models import BEST
-from krnnt.new import Lemmatisation, Lemmatisation2
+from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
 from krnnt.writers import results_to_conll_str, results_to_jsonl_str, results_to_conllu_str, results_to_plain_str, \
     results_to_xces_str
 from krnnt.readers import read_xces
@@ -25,7 +27,7 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 application = app
 
-global krnntx, conversion
+global krnntx, conversion, maca_analyzer, morfeusz
 
 
 def render(text='', str_results=''):
@@ -53,18 +55,92 @@ def gui():
     return render()
 
 
+def json_to_objects(data):
+    paragraphs = []
+    for input_paragraph in data['documents']:
+        paragraph = Paragraph()
+        paragraphs.append(paragraph)
+        for input_sentence in input_paragraph['sentences']:
+            sentence = Sentence()
+            paragraph.add_sentence(sentence)
+            for input_token in input_sentence['tokens']:
+                token = Token()
+                token.form = input_token['form']
+                if len(input_token)>=2:
+                    separator=input_token['separator']
+                    if separator is not None:
+                        token.space_before=separator
+                    elif len(input_token)>=4:
+                        token.start=input_token['start']
+                        token.end = input_token['end']
+                        #infer separator before from positions
+                        if len(sentence.tokens)==0:
+                            token.space_before='space'
+                        else:
+                            if sentence.tokens[-1].end==token.start:
+                                token.space_before = 'none'
+                            else:
+                                token.space_before = 'space'
+                else:
+                    token.space_before = 'space'  # TODO ?
+                sentence.add_token(token)
+    return paragraphs
+
+def json_compact_to_objects(data):
+    paragraphs = []
+    for input_paragraph in data:
+        paragraph = Paragraph()
+        paragraphs.append(paragraph)
+        for input_sentence in input_paragraph:
+            sentence = Sentence()
+            paragraph.add_sentence(sentence)
+            for input_token in input_sentence:
+                token = Token()
+                token.form = input_token[0]
+                if len(input_token) >= 2:
+                    separator = input_token[1]
+                    if separator is not None:
+                        token.space_before = separator
+                    elif len(input_token) >= 4:
+                        token.start = input_token[2]
+                        token.end = input_token[3]
+                        # infer separator before from positions
+                        if len(sentence.tokens) == 0:
+                            token.space_before = 'space'
+                        else:
+                            if sentence.tokens[-1].end == token.start:
+                                token.space_before = 'none'
+                            else:
+                                token.space_before = 'space'
+                else:
+                    token.space_before = 'space'  # TODO ?
+                sentence.add_token(token)
+    return paragraphs
+
+
 @app.route('/', methods=['POST'])
 def tag_raw():
     request.get_data()
-    if 'text' in request.form:
+    if request.is_json:
+        data = request.get_json()
+
+        if 'documents' in data:
+            paragraphs=json_to_objects(data)
+        else:
+            paragraphs = json_compact_to_objects(data)
+
+
+        corpus = analyze_tokenized(morfeusz, paragraphs)
+        results = krnntx.tag_sentences(corpus, preana=True)
+        return conversion(results)
+
+    elif 'text' in request.form:
         text = request.form['text']
         results = krnntx.tag_sentences(text.split('\n\n'))  # ['Ala ma kota.', 'Ale nie ma psa.']
         return render(text, conversion(results))
     else:
         text = request.get_data()
-        # print(text)
         print(text.decode('utf-8').split('\n\n'))
-        print(threading.active_count())
         results = krnntx.tag_sentences(text.decode('utf-8').split('\n\n'))
         return conversion(results)
 
@@ -75,10 +151,18 @@ def tag():
     results = krnntx.tag_sentences(text.split('\n\n'))  # ['Ala ma kota.', 'Ale nie ma psa.']
     return render(text, conversion(results))
 
+@app.route('/maca/', methods=['POST'])
+def maca():
+    text = request.get_data()
+    print(text.decode('utf-8').split('\n\n'))
+
+    results = maca_analyzer._maca(text.decode('utf-8').split('\n\n'))
+    results = list(results)
+    return str(results)
 
 def main(argv=sys.argv[1:]):
     print(argv)
-    global conversion,krnntx
+    global conversion,krnntx,maca_analyzer, morfeusz
 
     parser = ArgumentParser(usage='HTTP Tagger server')
     parser.add_argument('model_path', help='path to directory woth weights, lemmatisation data and dictionary')
@@ -100,11 +184,12 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('-o', '--output-format',
                         default='plain', dest='output_format',
                         help='output format: xces, plain, conll, conllu, jsonl')
+    parser.add_argument('-b', '--batch_size',
+                        default=32, type=int,
+                        help='batch size')
     args = parser.parse_args(argv)
 
-    # TODO args = parser.parse_args(argv)
-
-    pref = {'keras_batch_size': 32, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
+    pref = {'keras_batch_size': args.batch_size, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
             'keras_model_class': BEST, 'maca_config': args.maca_config, 'toki_config_path': args.toki_config_path}
 
     if args.lemmatisation == 'simple':
@@ -118,6 +203,8 @@ def main(argv=sys.argv[1:]):
     pref['lemmatisation_path'] = args.model_path + "/lemmatisation.pkl"
     pref['UniqueFeaturesValues'] = args.model_path + "/dictionary.pkl"
 
+    morfeusz = get_morfeusz()
+    maca_analyzer = MacaAnalyzer(args.maca_config)
     krnntx = KRNNTSingle(pref)
 
     krnntx.tag_sentences(['Ala'])
