@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pickle
 import sys
-from typing import Iterable, List
+from typing import List
 
 from krnnt.analyzers import MacaAnalyzer
 from .keras_models import ExperimentParameters
@@ -9,23 +9,15 @@ from .classes import uniq
 from .new import FeaturePreprocessor, TagsPreprocessor, k_hot, UniqueFeaturesValues, Lemmatisation
 
 sys.setrecursionlimit(10000)
-import threading
-import logging
-import multiprocessing
-mpl = multiprocessing.log_to_stderr()
-mpl.setLevel(logging.DEBUG)
-from timeit import default_timer as timer
-from subprocess import Popen, PIPE
-import setproctitle
+
 from keras.preprocessing import sequence
 import numpy as np
 
 
-
 class KRNNTSingle:
     def __init__(self, pref):
-        self.pref=pref
-        self.unique_features_dict = pickle.load(open(pref['UniqueFeaturesValues'],'rb'))
+        self.pref = pref
+        self.unique_features_dict = pickle.load(open(pref['UniqueFeaturesValues'], 'rb'))
         self.km = KerasThread.create_model(pref, testing=True)
         self.lemmatisation = pref['lemmatisation_class']()
         self.lemmatisation.load(pref['lemmatisation_path'])
@@ -36,34 +28,34 @@ class KRNNTSingle:
     def tag_sentences(self, sentences: List[str], preana=False):
         return self.__tag(sentences, preana)
 
-
     def __tag(self, sentences: List[str], preana):
         if preana:
             sequences = Preprocess.process_batch_preana(enumerate(sentences))
         else:
-            sequences = Preprocess.process_batch([(i,s) for i,s in enumerate(sentences)], self.pref['maca_config'], self.pref['toki_config_path'])
+            sequences = Preprocess.process_batch(sentences, self.pref['maca_config'], self.pref['toki_config_path'])
         result = []
         for batch in chunk(sequences, self.pref['keras_batch_size']):
-            pad_batch=Preprocess.pad(batch, self.unique_features_dict, 'tags4e3')
+            pad_batch = Preprocess.pad(batch, self.unique_features_dict, 'tags4e3')
             preds = self.km.model.predict_on_batch(pad_batch)
             for plain in KerasThread.return_results(batch, preds, self.km.classes, self.lemmatisation):
-                #print(plain)
+                # print(plain)
                 result.append(plain)
 
-
-        text='\n\n'.join(sentences) #TODO: sentences is generator?
-        # print(sentences)
-        # print(result)
-        offset=0
-        for s in result:
-            for t in s:
-                # print('asdf', t)
-                start=text.index(t['token'], offset)
-                end=start+len(t['token'])
-                # print(start, end)
-                offset=end
-                t['start']=start
-                t['end']=end
+        # text='\n\n'.join(sentences) #TODO: sentences is generator?
+        # # print('asd', sentences)
+        # # print(result)
+        #
+        # # print('ASD',text)
+        # offset=0
+        # for s in result:
+        #     for t in s:
+        #         # print('asdf', t)
+        #         start=text.index(t['token'], offset)
+        #         end=start+len(t['token'])
+        #         # print(start, end)
+        #         offset=end
+        #         t['start']=start
+        #         t['end']=end
 
         return result
 
@@ -73,44 +65,42 @@ class Sample:
         self.features = {}
 
 
-
 class Preprocess:
-
-
 
     @staticmethod
     def create_features(sequence):
-        #TODO długo trwa
+        # TODO długo trwa
         for sample in sequence:
             f = []
 
-            #print(sample.features)
-            #print('1',FeaturePreprocessor.cases(sample.features['token']))
-            #print('2',FeaturePreprocessor.interps(sample.features['token'],sample.features))
-            #print('3',FeaturePreprocessor.qubliki(sample.features['token']))
-            #print('4',FeaturePreprocessor.shape(sample.features['token'])) #90%
-            #print('5',FeaturePreprocessor.prefix1(sample.features['token']))
-            #print('6',FeaturePreprocessor.prefix2(sample.features['token']))
-            #print('7',FeaturePreprocessor.prefix3(sample.features['token']))
-            #print('8',FeaturePreprocessor.suffix1(sample.features['token']))
-            #print('9',FeaturePreprocessor.suffix2(sample.features['token']))
-            #print('10',FeaturePreprocessor.suffix3(sample.features['token']))
-            #print('11',TagsPreprocessor.create_tags4_without_guesser(sample.features['tags'])) #3% moze cache dla wszystkich tagów
-            #print('12',TagsPreprocessor.create_tags5_without_guesser(sample.features['tags'])) #3%
-            #print('13',sample.features['space_before'])
+            # print(sample.features)
+            # print('1',FeaturePreprocessor.cases(sample.features['token']))
+            # print('2',FeaturePreprocessor.interps(sample.features['token'],sample.features))
+            # print('3',FeaturePreprocessor.qubliki(sample.features['token']))
+            # print('4',FeaturePreprocessor.shape(sample.features['token'])) #90%
+            # print('5',FeaturePreprocessor.prefix1(sample.features['token']))
+            # print('6',FeaturePreprocessor.prefix2(sample.features['token']))
+            # print('7',FeaturePreprocessor.prefix3(sample.features['token']))
+            # print('8',FeaturePreprocessor.suffix1(sample.features['token']))
+            # print('9',FeaturePreprocessor.suffix2(sample.features['token']))
+            # print('10',FeaturePreprocessor.suffix3(sample.features['token']))
+            # print('11',TagsPreprocessor.create_tags4_without_guesser(sample.features['tags'])) #3% moze cache dla wszystkich tagów
+            # print('12',TagsPreprocessor.create_tags5_without_guesser(sample.features['tags'])) #3%
+            # print('13',sample.features['space_before'])
 
             f.extend(FeaturePreprocessor.cases(sample.features['token']))
-            f.extend(FeaturePreprocessor.interps(sample.features['token'],sample.features))
+            f.extend(FeaturePreprocessor.interps(sample.features['token'], sample.features))
             f.extend(FeaturePreprocessor.qubliki(sample.features['token']))
-            f.extend(FeaturePreprocessor.shape(sample.features['token'])) #90%
+            f.extend(FeaturePreprocessor.shape(sample.features['token']))  # 90%
             f.extend(FeaturePreprocessor.prefix1(sample.features['token']))
             f.extend(FeaturePreprocessor.prefix2(sample.features['token']))
             f.extend(FeaturePreprocessor.prefix3(sample.features['token']))
             f.extend(FeaturePreprocessor.suffix1(sample.features['token']))
             f.extend(FeaturePreprocessor.suffix2(sample.features['token']))
             f.extend(FeaturePreprocessor.suffix3(sample.features['token']))
-            f.extend(TagsPreprocessor.create_tags4_without_guesser(sample.features['tags'])) #3% moze cache dla wszystkich tagów
-            f.extend(TagsPreprocessor.create_tags5_without_guesser(sample.features['tags'])) #3%
+            f.extend(TagsPreprocessor.create_tags4_without_guesser(
+                sample.features['tags']))  # 3% moze cache dla wszystkich tagów
+            f.extend(TagsPreprocessor.create_tags5_without_guesser(sample.features['tags']))  # 3%
             f.extend(sample.features['space_before'])
 
             sample.features['tags4e3'] = uniq(f)
@@ -132,56 +122,61 @@ class Preprocess:
             # print(TagsPreprocessor.create_tags5_without_guesser(sample.features['tags']))
             # print(sample.features['space_before'])
 
-
-
     @staticmethod
     def process_batch(batch, maca_config, toki_config_path):
-        #indexes=[]
-        batchC = []
-        for index, line in batch:
-            #indexes.append(i)
-            batchC.append(line)
+        # indexes=[]
+        # batchC = []
+        # for line in batch:
+        # indexes.append(i)
+        # batchC.append(line)
 
-        maca_analyzer=MacaAnalyzer(maca_config, toki_config_path)
+        maca_analyzer = MacaAnalyzer(maca_config, toki_config_path)
 
-        results = maca_analyzer._maca(batchC)
-        #self.log('MACA')
-        #print('MACA', len(results), file=sys.stderr)
-        sequences=[]
-        for res in  results:
+        results = maca_analyzer._maca(batch)
+        # self.log('MACA')
+        # print('MACA', len(results), file=sys.stderr)
+        sequences = []
+        for res in results:
             result = maca_analyzer._parse(res)
 
             # TODO cechy
             sequence = []
-            for form, space_before, interpretations in result:
+            for form, space_before, interpretations, start, end in result:
                 sample = Sample()
                 sequence.append(sample)
                 sample.features['token'] = form
                 # print(interpretations)
-                sample.features['tags'] = uniq([t for l,t in  interpretations])
+                sample.features['tags'] = uniq([t for l, t in interpretations])
                 sample.features['maca_lemmas'] = interpretations
-                sample.features['space_before'] = ['space_before'] if space_before=='space' else ['no_space_before']
+                # print(space_before)
+
+                # TODO: cleanup space before
+                sample.features['space_before'] = ['space_before'] if space_before == 'space' else ['no_space_before']
+                sample.features['space_before'].append(space_before)
+                sample.features['start'] = start
+                sample.features['end'] = end
 
             Preprocess.create_features(sequence)
 
             if sequence:
                 yield sequence
-                #sequences.append(sequence)
-        #return sequences
+                # sequences.append(sequence)
+        # return sequences
 
     @staticmethod
     def process_batch_preana(batch):
         for index, paragraph in batch:
             for sentence in paragraph:
-                sequence=[]
+                sequence = []
                 for token in sentence:
                     sample = Sample()
                     sequence.append(sample)
                     sample.features['token'] = token.form
                     # print(interpretations)
-                    sample.features['tags'] = uniq([form.tags for form in  token.interpretations])
-                    sample.features['maca_lemmas'] = uniq([(form.lemma, form.tags) for form in  token.interpretations])
+                    sample.features['tags'] = uniq([form.tags for form in token.interpretations])
+                    sample.features['maca_lemmas'] = uniq([(form.lemma, form.tags) for form in token.interpretations])
                     sample.features['space_before'] = ['space_before'] if token.space_before else ['no_space_before']
+                    sample.features['space_before'].append(token.space_before)
 
                 Preprocess.create_features(sequence)
 
@@ -196,154 +191,49 @@ class Preprocess:
         if not batch:
             return []
 
-        #feature_name='tags4e3'
+        # feature_name='tags4e3'
         result_batchX = []
         # print('batch len',len(batch))
         for sentence in batch:
             X_sentence = []
             # y_sentence = []
             for sample in sentence:
-                #print(feature_name, sample.features[feature_name])
+                # print(feature_name, sample.features[feature_name])
                 X_sentence.append(np.array(k_hot(sample.features[feature_name], unique_features_dict[feature_name])))
 
             result_batchX.append(X_sentence)
 
-
         # max_sentence_length = max([len(x) for x in result_batchX])
-        #self.log('KHOT')
-        return sequence.pad_sequences(result_batchX) #, sequence.pad_sequences(result_batchY, maxlen=max_sentence_length)
+        # self.log('KHOT')
+        return sequence.pad_sequences(
+            result_batchX)  # , sequence.pad_sequences(result_batchY, maxlen=max_sentence_length)
 
 
 def chunk(l, batch_size):
-    batch=[]
+    batch = []
     for element in l:
         batch.append(element)
-        if len(batch)==batch_size:
+        if len(batch) == batch_size:
             yield batch
-            batch=[]
+            batch = []
     if batch:
         yield batch
 
 
-
-class WorkerThread(multiprocessing.Process):
-    def __init__(self, input_queue, output_queue, maca_batch_size, keras_batch_size, number_of_consumers, queue_log=None, pref=None):
-        # super(WorkerThread, self).__init__()
-        self.input_queue = input_queue
-        self.output_queue = output_queue
-        self.number_of_consumers=number_of_consumers
-        self.queue_log = queue_log
-        self.maca_batch_size=maca_batch_size
-        self.keras_batch_size=keras_batch_size
-        self.pref=pref
-        super(WorkerThread, self).__init__()
-
-    def log(self, desc):
-        if self.queue_log:
-            # print(self.name, timer(), desc)
-            self.queue_log.put([self.name, timer(), desc])
-
-
-
-
-
-    def run(self):
-        setproctitle.setproctitle(self.name)
-        # print(self.name, 'WORKER0')
-
-        if 'UniqueFeaturesValues' in self.pref:
-            self.unique_features_dict = pickle.load(open(self.pref['UniqueFeaturesValues'],'rb'))
-        else:
-            #data_path = 'nkjp_paragraphs_shuffled_concraft.spickle_FormatData_PreprocessData'
-            data_path = self.pref['data_path']
-            self.unique_features_dict = UniqueFeaturesValues(data_path).get()
-        #data_path = 'train-merged.spickle_FormatData2_PreprocessData'
-
-        # print(self.name, 'WORKER1') #TODO problem
-
-
-        # print(self.name, 'WORKER')
-        self.log('START')
-
-        while True:
-            self.log('WORKING')
-            batch = self.input_queue.get()
-            self.log('WAIT')
-
-            if isinstance( batch, int ):
-                if batch>1:
-                    self.input_queue.put(batch-1)
-                else:
-                    self.output_queue.put(self.number_of_consumers)
-
-                self.input_queue.task_done()
-                break
-
-            # print('MACA0')
-
-            if self.pref['reanalyze']:
-                sequences=Preprocess.process_batch(batch)
-            else:
-                sequences=Preprocess.process_batch_preana(batch)
-            self.log('PARSER_F')
-
-
-            # print('jgfjhg', len(indexes), len(sequences))
-
-            #TODO dziel na x czesci
-
-            for batch in chunk(sequences, self.keras_batch_size):
-            #create batches
-            # while sequences:
-            #     batch = sequences[:self.keras_batch_size]
-                self.log('CHUNK')
-                pad_batch=Preprocess.pad(batch, self.unique_features_dict, 'tags4e3')
-                self.log('PAD')
-                # print(self.name, 'put batch', len(pad_batch))
-                self.output_queue.put((pad_batch, batch))
-                self.log('PUT')
-                # sequences=sequences[self.keras_batch_size:]
-
-            self.input_queue.task_done()
-
-
-        self.log('STOP')
-
-
-
-
-class KerasThread(threading.Thread):
-    def __init__(self, input_queue, output_queue, number_of_consumers,queue_log=None, pref=None):
-        """
-
-        :param input_queue:
-        :param output_queue:
-        :return:
-        """
-        super(KerasThread, self).__init__()
-        self.input_queue = input_queue
-        self.output_queue = output_queue
-
-        self.number_of_consumers=number_of_consumers
-        self.queue_log = queue_log
-        self.name='Keras'+self.name
-        self.pref=pref
+class KerasThread():
 
     @staticmethod
     def create_model(pref, testing=False):
         keras_model_class = pref['keras_model_class']
 
-
-
         parameters = ExperimentParameters(pref, testing)
-
 
         km = keras_model_class(parameters)
 
         if 'UniqueFeaturesValues' in pref:
-            km.unique_features_dict = pickle.load(open(pref['UniqueFeaturesValues'],'rb'))
+            km.unique_features_dict = pickle.load(open(pref['UniqueFeaturesValues'], 'rb'))
         else:
-            #data_path = 'nkjp_paragraphs_shuffled_concraft.spickle_FormatData_PreprocessData'
+            # data_path = 'nkjp_paragraphs_shuffled_concraft.spickle_FormatData_PreprocessData'
             data_path = pref['data_path']
             km.unique_features_dict = UniqueFeaturesValues(data_path).get()
 
@@ -353,11 +243,10 @@ class KerasThread(threading.Thread):
         pref['features_length'] = len(km.unique_features_dict[pref['feature_name']])
         pref['output_length'] = len(km.unique_features_dict[pref['label_name']])
 
-
         km.create_model()
-        #self.km.load_weights('weight_7471898792961270266.hdf5')
-        #km.load_weights('weight_7471898792961270266.hdf5')
-        #km.load_weights('../artykul/compare/train_on_all.weights')
+        # self.km.load_weights('weight_7471898792961270266.hdf5')
+        # km.load_weights('weight_7471898792961270266.hdf5')
+        # km.load_weights('../artykul/compare/train_on_all.weights')
         km.load_weights(pref['weight_path'])
         km.compile()
 
@@ -365,45 +254,55 @@ class KerasThread(threading.Thread):
 
     @staticmethod
     def return_results(sentences, preds, classes, lemmatisation):
-        for sentence,preds2 in zip(sentences, preds): #TODO sentences
+        for sentence, preds2 in zip(sentences, preds):  # TODO sentences
             # print(preds2.shape)
             # print(preds2)
 
-            response=[]
+            response = []
 
             preds3 = preds2.argmax(axis=-1)
             preds3max = preds2.max(axis=-1)
             # print(len(sentence), len(preds3))
-            first=True
-            for sample,max_index, prob in zip(sentence,list(preds3)[-len(sentence):], list(preds3max)[-len(sentence):]):
-                # print(sample, max_index)
+            first = True
+            for sample, max_index, prob in zip(sentence, list(preds3)[-len(sentence):],
+                                               list(preds3max)[-len(sentence):]):
+                # print(sample.features, max_index)
                 # max_index, max_value = max(enumerate(d), key=lambda x: x[1])
 
                 token_response = {}
                 response.append(token_response)
-                predicted_tag=classes[max_index]
+                predicted_tag = classes[max_index]
 
-                if sample.features['space_before']==['space_before']:
-                    if first:
-                        sep='newline'
-                    else:
-                        sep = 'space'
+                # TODO
+                if sample.features['space_before'] == ['space_before']:
+                    sep = 'space'
                 else:
-                    sep='none'
+                    sep = 'none'
 
+                if 'newline' in sample.features['space_before']:
+                    sep = 'newline'
+                elif 'space' in sample.features['space_before']:
+                    sep = 'space'
+                elif 'none' in sample.features['space_before']:
+                    sep = 'none'
 
-                #print(sample.features['token']+'\t'+sep)
-                #response.append(sample.features['token']+'\t'+sep)
-                token_response['token']=sample.features['token']
-                token_response['sep']=sep
-                token_response['prob']=prob
+                # print(sample.features['token']+'\t'+sep)
+                # response.append(sample.features['token']+'\t'+sep)
+                token_response['token'] = sample.features['token']
+                token_response['sep'] = sep
+                token_response['prob'] = prob
 
-                lemmas = [ x for x in sample.features['maca_lemmas']]
-                token_response['tag']=predicted_tag
-                token_response['lemmas']=[]
+                lemmas = [x for x in sample.features['maca_lemmas']]
+                token_response['tag'] = predicted_tag
+                token_response['lemmas'] = []
+                try:
+                    token_response['start'] = sample.features['start']
+                    token_response['end'] = sample.features['end']
+                except KeyError:
+                    token_response['start'] = None
+                    token_response['end'] = None
 
-
-                #if not lemmas:
+                # if not lemmas:
                 #    lemmas.append((sample.features['token'], predicted_tag))
                 lemma = lemmatisation.disambiguate(token_response['token'], lemmas, predicted_tag)
 
@@ -419,48 +318,46 @@ class KerasThread(threading.Thread):
                 #     #response.append('\t'+sample.features['token']+'\t'+predicted_tag+'\tdisamb')
                 #     token_response['lemmas'].append(sample.features['token'])
 
-
-                first=False
-            #print()
-            #response.append('')
+                first = False
+            # print()
+            # response.append('')
 
             yield response
 
     @staticmethod
     def return_plain(sentences, preds, classes, lemmatisation):
-        for sentence,preds2 in zip(sentences, preds): #TODO sentences
+        for sentence, preds2 in zip(sentences, preds):  # TODO sentences
             # print(preds2.shape)
             # print(preds2)
 
-            response=[]
+            response = []
 
             preds3 = preds2.argmax(axis=-1)
             # print(len(sentence), len(preds3))
-            first=True
-            for sample,max_index in zip(sentence,list(preds3)[-len(sentence):]):
+            first = True
+            for sample, max_index in zip(sentence, list(preds3)[-len(sentence):]):
                 # print(sample, max_index)
                 # max_index, max_value = max(enumerate(d), key=lambda x: x[1])
-                predicted_tag=classes[max_index]
+                predicted_tag = classes[max_index]
 
-                if sample.features['space_before']==['space_before']:
+                if sample.features['space_before'] == ['space_before']:
                     if first:
-                        sep='newline'
+                        sep = 'newline'
                     else:
                         sep = 'space'
                 else:
-                    sep='none'
+                    sep = 'none'
 
+                # print(sample.features['token']+'\t'+sep)
+                response.append(sample.features['token'] + '\t' + sep)
 
-                #print(sample.features['token']+'\t'+sep)
-                response.append(sample.features['token']+'\t'+sep)
+                lemmas = [x for x in sample.features['maca_lemmas']]
 
-                lemmas = [ x for x in sample.features['maca_lemmas']]
-
-                #if not lemmas:
+                # if not lemmas:
                 #    lemmas.append((sample.features['token'], predicted_tag))
                 lemma = lemmatisation.disambiguate(sample.features['token'], lemmas, predicted_tag)
 
-                response.append('\t'+lemma+'\t'+predicted_tag+'\tdisamb')
+                response.append('\t' + lemma + '\t' + predicted_tag + '\tdisamb')
 
                 # if lemmas:
                 #     for l, t in lemmas:
@@ -470,79 +367,8 @@ class KerasThread(threading.Thread):
                 #     #print('\t'+sample.features['token']+'\t'+predicted_tag+'\tdisamb')
                 #     response.append('\t'+sample.features['token']+'\t'+predicted_tag+'\tdisamb')
 
-
-                first=False
-            #print()
+                first = False
+            # print()
             response.append('')
 
             yield '\n'.join(response)
-
-    def run(self):
-        if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'START'])
-        # if self.name=='Thread-2':
-        #     import theano.sandbox.cuda
-        #     theano.sandbox.cuda.use('gpu')
-        # self.km = KerasModel()
-
-
-        #pref = {'data_size':int(10), 'train_data_size': int(16635*0.9), 'dev_data_size':int(16635*0.1), 'test_data_size': int(1849), 'nb_epoch': 1, 'batch_size': 32,
-        #'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
-        #'evaluator': UnalignedSimpleEvaluator,
-        #'weight_path': 'weight_836cd228-603a-11e7-aaf4-a0000220fe80.hdf5', 'samples_per_epoch': 128, 'keras_model_class': keras_models.BEST,'UniqueFeaturesValues':'train-merged.spickle_FormatData2_PreprocessData_UniqueFeaturesValues'}
-
-        # pref['features_length']=123
-        # pref['output_length']=132
-
-
-        self.km = KerasThread.create_model(self.pref, testing=True)
-        lemmatisation=Lemmatisation()
-        lemmatisation.load(self.pref['lemmatisation_path'])
-
-        if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'START2'])
-        # setproctitle.setproctitle('KERAS '+self.name)
-        start_timer = timer()
-        # print('start compiling model')
-
-        # print('compiled')
-
-        while True:
-            # print('keras', self.name,  self.input_queue.qsize())
-            if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'WORKING'])
-            item = self.input_queue.get()
-            if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'WAIT'])
-            if isinstance( item, int ):
-                # print('INT', item)
-                if item>1:
-                    self.input_queue.put(item-1)
-                elif item==1:
-                    pass
-                    #self.output_queue.put(self.number_of_consumers)
-
-                # print('parser koneic')
-                self.input_queue.task_done()
-                break
-            item,sentences=item
-            # print(len(item))
-            #batch = self.km.prepare(item)
-            batch=item
-            # print('keras', self.name, 'prepared')
-            if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'GPU0'])
-            preds = self.km.model.predict_on_batch(batch)
-            if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'GPU1'])
-            # print('keras', self.name, 'predicted')
-            # self.input_queue.task_done()
-            #print(preds)
-
-            for plain in KerasThread.return_plain(sentences, preds, self.km.classes, lemmatisation):
-                print(plain)
-
-
-            # self.output_queue.put((item,preds))
-            # self.queue_log.put([self.name, timer(), 'PUT1'])
-            self.input_queue.task_done()
-
-        end_timer = timer()
-        print('KerasThread', (end_timer - start_timer), file=sys.stderr)
-        if self.queue_log is not None: self.queue_log.put([self.name, timer(), 'STOP'])
-
-

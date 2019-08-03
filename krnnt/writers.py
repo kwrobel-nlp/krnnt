@@ -2,6 +2,16 @@ import io
 
 import jsonlines
 
+def results_to_txt_str(results):
+    result_str = ""
+    for sentence in results:
+        for i,token in enumerate(sentence):
+            # print(token['sep'])
+            if i>0 and token['sep'] != 'none':
+                result_str+=' '
+            result_str+=token['token']
+        result_str += "\n"
+    return result_str
 
 def results_to_conll_str(results):
     result_str = ""
@@ -18,7 +28,7 @@ def results_to_conll_str(results):
                 end = ''
 
             result_str += ('%s\t%s\t%s\t%s\t%s\t%s\n' % (
-                token['token'], token['lemmas'][0], 1 if token['sep'] == 'space' else 0, token['tag'], start, end))
+                token['token'], token['lemmas'][0], 0 if token['sep'] == 'none' else 1, token['tag'], start, end))
         result_str += "\n"
     return result_str
 

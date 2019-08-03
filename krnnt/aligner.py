@@ -1,3 +1,5 @@
+import sys
+
 from .classes import Token, Sentence, Paragraph
 
 
@@ -19,7 +21,7 @@ def align(pred, ref, ref_text_old=''):
         # print(pred_text, ref_text)
         if len(pred_text) == len(ref_text):  # aligned
             if pred_text != ref_text:
-                print('alignment ERROR', pred_text, ref_text, ref, pred)
+                print('alignment ERROR', pred_text, ref_text, ref, pred, file=sys.stderr)
 
             yield (pred_buffer, ref_buffer, ref_text[len(pred_text):])
 

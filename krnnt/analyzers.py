@@ -4,6 +4,7 @@ from typing import Iterable
 from .classes import Form, Token, uniq, Sentence, Paragraph
 
 
+# TODO morfeusz analyzer for pretokenized?
 
 class MacaAnalyzer:
     def __init__(self, maca_config: str, toki_config_path: str = ''):
@@ -12,41 +13,43 @@ class MacaAnalyzer:
 
     def analyze(self, text: str) -> Paragraph:
         results = self._maca([text])
-        results = list(results)  #TODO generator to list
-
-        #TODO: start end of tokens
+        results = list(results)  # TODO generator to list
 
         paragraph_reanalyzed = Paragraph()
         for i, res in enumerate(results):
             result = self._parse(res)
             sentence_reanalyzed = Sentence()
             paragraph_reanalyzed.add_sentence(sentence_reanalyzed)
-            for form, space_before, interpretations in result:
+            for form, space_before, interpretations, start, end in result:
                 token_reanalyzed = Token()
                 sentence_reanalyzed.add_token(token_reanalyzed)
                 token_reanalyzed.form = form
-                token_reanalyzed.space_before = space_before != 'none'
-                token_reanalyzed.interpretations = [Form(l, t) for l, t in uniq(interpretations)]
+                token_reanalyzed.space_before = space_before #!= 'none'
+                token_reanalyzed.interpretations = [Form(l.replace('_',' '), t) for l, t in uniq(interpretations)]
+                #TODO usunąc :s... :d.. :[abcdijnopqsv]\d?
+                token_reanalyzed.start = start
+                token_reanalyzed.end = end
         return paragraph_reanalyzed
-
 
     def _maca(self, batch: Iterable[str]):
         cmd = ['maca-analyse', '-c', self.maca_config, '-l']
         if self.toki_config_path:
-            cmd.extend(['--toki-config-path',self.toki_config_path])
+            cmd.extend(['--toki-config-path', self.toki_config_path])
         p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        stdout = p.communicate(input='\n'.join(batch).encode('utf-8'))[0]
+
+        self.text = '\n'.join(batch)
+
+        stdout = p.communicate(input=self.text.encode('utf-8'))[0]
         try:
-          p.stdin.close()
+            p.stdin.close()
         except BrokenPipeError:
-          pass
+            pass
         p.wait()
-        if p.returncode!=0:
-          raise Exception('Maca is not working properly')
+        if p.returncode != 0:
+            raise Exception('Maca is not working properly')
         for i in stdout.decode('utf-8').split('\n\n'):
             if len(i) > 0:
                 yield i
-
 
     def _parse(self, output):
         data = []
@@ -63,20 +66,24 @@ class MacaAnalyzer:
         data.append((token_line, lemma_lines))
 
         tokens = []
+        last_offset = 0
         for index, (token_line, lemma_lines) in enumerate(data):
-            token = self._construct(token_line, lemma_lines) #80%
+            token = self._construct(token_line, lemma_lines)  # 80%
             if token is None: continue
-            tokens.append(token)
+            form, space_before, interpretations = token
+            start = self.text.index(form, last_offset)
+            end = start + len(form)
+            last_offset = end
+            tokens.append((form, space_before, interpretations, start, end))
 
         return tokens
-
 
     def _construct(self, token_line, lemma_lines):
         try:
             if token_line == '': return None
             form, separator_before = token_line.split("\t")
         except ValueError:
-            raise Exception('Probably Maca not working.')  # TODO what?
+            raise Exception('Probably Maca is not working.')
 
         form = form
         space_before = separator_before

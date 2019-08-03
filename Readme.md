@@ -378,3 +378,7 @@ Compact JSON uses lists and positional fields (for speed and memory efficiency).
 
 
 TODO: opcje jako nagłówki HTTP?
+
+# Scripts
+
+* `analyze_corpus_tagset_date.py` - analyze corpus tagset version

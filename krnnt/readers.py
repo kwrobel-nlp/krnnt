@@ -1,3 +1,4 @@
+import sys
 from xml.etree import ElementTree as ET
 
 import jsonlines
@@ -52,18 +53,20 @@ def read_xces(file_path: str) -> Paragraph:
 
                                 form = Form(base, ctag)
                                 if disamb:
+                                    if token.gold_form is not None:
+                                        print('More than 1 disamb', file_path, orth, file=sys.stderr)
                                     token.gold_form=form
                                 else:
                                     token.interpretations.append(form)
                             elif xml_node.tag=='ann':
                                 continue
                             else:
-                                print('Error 1', xml_token)
+                                print('Error 1', xml_token, file=sys.stderr)
                         if token.form:
                             sentence.add_token(token)
                         ns=False
                     else:
-                        print('Error 2', xml_token)
+                        print('Error 2', xml_token, file=sys.stderr)
             yield paragraph
             elem.clear()
 

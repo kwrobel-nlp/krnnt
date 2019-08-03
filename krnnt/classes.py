@@ -91,6 +91,8 @@ def flatten(l: Iterable) -> List:
 class Paragraph:
     sentences: List['Sentences']
 
+    __slots__ = ['sentences','concraft']
+
     def __init__(self):
         self.sentences = []
 
@@ -114,6 +116,7 @@ class Paragraph:
 class Sentence:
     tokens: List['Token']
 
+    __slots__ = ['tokens']
     def __init__(self):
         self.tokens = []
 
@@ -132,6 +135,7 @@ class Token:
     interpretations: List['Form']
     gold_form: 'Form'
 
+    __slots__ = ['form', 'space_before','interpretations','gold_form','start','end']
     def __init__(self):
         self.form = None
         self.space_before = None
