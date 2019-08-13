@@ -1,7 +1,15 @@
+import re
+import sys
 from subprocess import PIPE, Popen
 from typing import Iterable
 
-from .classes import Form, Token, uniq, Sentence, Paragraph
+from .classes import Form, Token, Sentence, Paragraph
+from krnnt.new import uniq
+
+try:
+    from maca_analyse import maca_analyse
+except ImportError:
+    pass
 
 
 # TODO morfeusz analyzer for pretokenized?
@@ -10,10 +18,16 @@ class MacaAnalyzer:
     def __init__(self, maca_config: str, toki_config_path: str = ''):
         self.maca_config = maca_config
         self.toki_config_path = toki_config_path
+        self.configure_maca()
+
+    def configure_maca(self):
+        if 'maca_analyse' in sys.modules:
+            self._maca = self._maca_wrapper
+        else:
+            self._maca = self._maca_process
 
     def analyze(self, text: str) -> Paragraph:
         results = self._maca([text])
-        results = list(results)  # TODO generator to list
 
         paragraph_reanalyzed = Paragraph()
         for i, res in enumerate(results):
@@ -24,20 +38,22 @@ class MacaAnalyzer:
                 token_reanalyzed = Token()
                 sentence_reanalyzed.add_token(token_reanalyzed)
                 token_reanalyzed.form = form
-                token_reanalyzed.space_before = space_before #!= 'none'
-                token_reanalyzed.interpretations = [Form(l.replace('_',' '), t) for l, t in uniq(interpretations)]
-                #TODO usunąc :s... :d.. :[abcdijnopqsv]\d?
+                token_reanalyzed.space_before = space_before  # != 'none'
+                interpretations = [(re.sub(r':[abcdijnopqsv]\d?$', '', l), t) for l, t in
+                                   interpretations]  # remove senses
+                token_reanalyzed.interpretations = [Form(l.replace('_', ' '), t) for l, t in uniq(interpretations)]
                 token_reanalyzed.start = start
                 token_reanalyzed.end = end
         return paragraph_reanalyzed
 
-    def _maca(self, batch: Iterable[str]):
+    def _maca_process(self, batch: Iterable[str]):
         cmd = ['maca-analyse', '-c', self.maca_config, '-l']
         if self.toki_config_path:
             cmd.extend(['--toki-config-path', self.toki_config_path])
         p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
         self.text = '\n'.join(batch)
+        self.last_offset = 0
 
         stdout = p.communicate(input=self.text.encode('utf-8'))[0]
         try:
@@ -48,6 +64,16 @@ class MacaAnalyzer:
         if p.returncode != 0:
             raise Exception('Maca is not working properly')
         for i in stdout.decode('utf-8').split('\n\n'):
+            if len(i) > 0:
+                yield i
+
+    def _maca_wrapper(self, batch: Iterable[str]):
+        self.text = '\n'.join(batch)
+        self.last_offset = 0
+
+        output_text = maca_analyse(self.maca_config, self.toki_config_path, self.text)
+
+        for i in output_text.split('\n\n'):
             if len(i) > 0:
                 yield i
 
@@ -66,14 +92,14 @@ class MacaAnalyzer:
         data.append((token_line, lemma_lines))
 
         tokens = []
-        last_offset = 0
+
         for index, (token_line, lemma_lines) in enumerate(data):
             token = self._construct(token_line, lemma_lines)  # 80%
             if token is None: continue
             form, space_before, interpretations = token
-            start = self.text.index(form, last_offset)
+            start = self.text.index(form, self.last_offset)
             end = start + len(form)
-            last_offset = end
+            self.last_offset = end
             tokens.append((form, space_before, interpretations, start, end))
 
         return tokens
@@ -81,23 +107,22 @@ class MacaAnalyzer:
     def _construct(self, token_line, lemma_lines):
         try:
             if token_line == '': return None
-            form, separator_before = token_line.split("\t")
+            form, space_before = token_line.split("\t")
         except ValueError:
             raise Exception('Probably Maca is not working.')
 
-        form = form
-        space_before = separator_before
         interpretations = []
 
         for lemma_line in lemma_lines:
+            row = lemma_line.strip().split("\t")
             try:
-                lemma, tags, _ = lemma_line.strip().split("\t")  # 30%
+                lemma, tags, _ = row  # 30%
                 # disamb = True
             except ValueError:
-                lemma, tags = lemma_line.strip().split("\t")  # 16%
+                lemma, tags = row  # 16%
                 # disamb = False
-            lemma = (lemma, tags)
+            interpretation = (lemma, tags)
             # lemma.disamb=disamb
-            interpretations.append(lemma)
+            interpretations.append(interpretation)
 
         return form, space_before, interpretations

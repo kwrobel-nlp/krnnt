@@ -1,6 +1,5 @@
 from krnnt.analyzers import MacaAnalyzer
 from krnnt.classes import Form
-from krnnt.pipeline import Preprocess
 
 reference_maca_output = \
 '''Lubię	newline
@@ -27,10 +26,34 @@ def test_maca():
         results = maca_analyzer._maca([paragraph_raw])
         results = list(results)
 
-    print(results[0])
     assert len(results) == 1
     assert results[0] == reference_maca_output
 
+def test_maca_process():
+    try:
+        maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
+        results = maca_analyzer._maca_process([paragraph_raw])
+        results = list(results)
+    except:
+        maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
+        results = maca_analyzer._maca_process([paragraph_raw])
+        results = list(results)
+
+    assert len(results) == 1
+    assert results[0] == reference_maca_output
+
+def test_maca_wrapper():
+    try:
+        maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
+        results = maca_analyzer._maca_wrapper([paragraph_raw])
+        results = list(results)
+    except:
+        maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
+        results = maca_analyzer._maca_wrapper([paragraph_raw])
+        results = list(results)
+
+    assert len(results) == 1
+    assert results[0] == reference_maca_output
 
 def test_parse():
     maca_analyzer = MacaAnalyzer('')
@@ -75,3 +98,18 @@ def test_maca_analyzer():
     assert result.sentences[0].tokens[1].interpretations[0] == Form('pociąg', 'subst:pl:nom:m3')
     assert result.sentences[0].tokens[1].interpretations[1] == Form('pociąg', 'subst:pl:acc:m3')
     assert result.sentences[0].tokens[1].interpretations[2] == Form('pociąg', 'subst:pl:voc:m3')
+
+
+def test_maca_analyzer_lemmas():
+    paragraph_raw='Ala ma kota.'
+    try:
+        maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
+        result = maca_analyzer.analyze(paragraph_raw)
+    except:
+        maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
+        result = maca_analyzer.analyze(paragraph_raw)
+
+    lemmas =[form.lemma for form in result.sentences[0].tokens[2].interpretations]
+    assert 'kot' in lemmas
+    assert 'kot:s1' not in lemmas
+    assert 'kot:s2' not in lemmas
