@@ -3,7 +3,7 @@ from xml.etree import ElementTree as ET
 
 import jsonlines
 
-from krnnt.classes import Paragraph, Sentence, Token, Form
+from krnnt.structure import Paragraph, Sentence, Token, Form
 
 
 def read_xces(file_path: str) -> Paragraph:
@@ -74,11 +74,11 @@ def read_xces(file_path: str) -> Paragraph:
 def read_jsonl(file_path: str) -> Paragraph:
     with jsonlines.Reader(file_path) as reader:
         for obj in reader:
-            a = list_to_paragraph(obj)
+            a = _list_to_paragraph(obj)
             yield a
 
 
-def list_to_paragraph(l) -> Paragraph:
+def _list_to_paragraph(l) -> Paragraph:
     paragraph = Paragraph()
     for s in l:
         sentence = Sentence()

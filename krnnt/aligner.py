@@ -1,6 +1,6 @@
 import sys
 
-from .classes import Token, Sentence, Paragraph
+from krnnt.structure import Token, Sentence, Paragraph
 
 
 def text(buffer):

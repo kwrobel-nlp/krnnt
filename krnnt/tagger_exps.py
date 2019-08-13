@@ -7,10 +7,9 @@ import sys
 import collections
 
 from krnnt.keras_models import KerasModel
-from .new import FormatData2, FormatDataPreAnalyzed, FeaturePreprocessor, TagsPreprocessor, \
-    JoinProcessingRule, PreprocessData, UniqueFeaturesValues, batch_generator, generate_arrays_from_file, Xy_generator, \
+from .new import FormatData2, FormatDataPreAnalyzed, PreprocessData, UniqueFeaturesValues, batch_generator, generate_arrays_from_file, Xy_generator, \
     pad_generator, to_plain, LossHistory, DataList, DataGenerator, Lemmatisation
-from .classes import count_samples
+from krnnt.serial_pickle import count_samples
 
 sys.setrecursionlimit(10000)
 import logging
@@ -35,22 +34,21 @@ class KerasData:
         else:
             data_path = FormatDataPreAnalyzed(self.corpus_path).load()
 
-        from krnnt.new import ProcessingRule
         operations = [
-            ProcessingRule(FeaturePreprocessor.nic, 'token', 'nic'),
-            ProcessingRule(FeaturePreprocessor.cases, 'token', 'cases'),
-            ProcessingRule(FeaturePreprocessor.interps, 'token', 'interps'),
-            ProcessingRule(FeaturePreprocessor.qubliki, 'token', 'qubs'),
-            ProcessingRule(FeaturePreprocessor.shape, 'token', 'shape'),
-            ProcessingRule(FeaturePreprocessor.prefix1, 'token', 'prefix1'),
-            ProcessingRule(FeaturePreprocessor.prefix2, 'token', 'prefix2'),
-            ProcessingRule(FeaturePreprocessor.prefix3, 'token', 'prefix3'),
-            ProcessingRule(FeaturePreprocessor.suffix1, 'token', 'suffix1'),
-            ProcessingRule(FeaturePreprocessor.suffix2, 'token', 'suffix2'),
-            ProcessingRule(FeaturePreprocessor.suffix3, 'token', 'suffix3'),
+            # ProcessingRule(FeaturePreprocessor.nic, 'token', 'nic'),
+            # ProcessingRule(FeaturePreprocessor.cases, 'token', 'cases'),
+            # ProcessingRule(FeaturePreprocessor.interps, 'token', 'interps'),
+            # ProcessingRule(FeaturePreprocessor.qubliki, 'token', 'qubs'),
+            # ProcessingRule(FeaturePreprocessor.shape, 'token', 'shape'),
+            # ProcessingRule(FeaturePreprocessor.prefix1, 'token', 'prefix1'),
+            # ProcessingRule(FeaturePreprocessor.prefix2, 'token', 'prefix2'),
+            # ProcessingRule(FeaturePreprocessor.prefix3, 'token', 'prefix3'),
+            # ProcessingRule(FeaturePreprocessor.suffix1, 'token', 'suffix1'),
+            # ProcessingRule(FeaturePreprocessor.suffix2, 'token', 'suffix2'),
+            # ProcessingRule(FeaturePreprocessor.suffix3, 'token', 'suffix3'),
             # ProcessingRule(TagsPreprocessor().create_tags2, 'tags', 'tags2'),
-            ProcessingRule(TagsPreprocessor.create_tags4_without_guesser, 'tags', 'tags4'),
-            ProcessingRule(TagsPreprocessor.create_tags5_without_guesser, 'tags', 'tags5'),
+            # ProcessingRule(TagsPreprocessorCython.create_tags4_without_guesser, 'tags', 'tags4'),
+            # ProcessingRule(TagsPreprocessorCython.create_tags5_without_guesser, 'tags', 'tags5'),
             # ProcessingRule(TagsPreprocessor().create_tag4, 'label', 'y4'),
             # ProcessingRule(TagsPreprocessor().create_tag2, 'label', 'y'),
             # HistoryRule('tags2', 'tags2h+1', 1, '-1-'),
@@ -74,9 +72,9 @@ class KerasData:
             # JoinProcessingRule(['tags4', 'presuffix','interps'], 'tags4presuffixinterps'),
             # JoinProcessingRule(['tags4', 'presuffix','qubs'], 'tags4presuffixqubs'),
             # JoinProcessingRule(['tags4', 'tags'], 'tags4tags'),
-            JoinProcessingRule(
-                ['tags4', 'tags5', 'cases', 'space_before', 'interps', 'qubs', 'shape', 'prefix1', 'prefix2',
-                 'prefix3', 'suffix1', 'suffix2', 'suffix3'], 'tags4e3')
+            # JoinProcessingRule(
+            #     ['tags4', 'tags5', 'cases', 'space_before', 'interps', 'qubs', 'shape', 'prefix1', 'prefix2',
+            #      'prefix3', 'suffix1', 'suffix2', 'suffix3'], 'tags4e3')
         ]
         self.operations = operations
 
@@ -448,7 +446,7 @@ class RunFolds2:
 
     def run(self):
         import numpy as np
-        from sklearn.cross_validation import KFold
+        from sklearn.model_selection import KFold
 
         pref = self.preferences
         kd = KerasData(pref['corpus_path'], pref['reanalyze'])
@@ -457,6 +455,7 @@ class RunFolds2:
         folds_scores2 = collections.defaultdict(list)
 
         pref['data_size'] = count_samples(pref['corpus_path'])
+
 
         kf = KFold(self.preferences['data_size'], n_folds=10)
 

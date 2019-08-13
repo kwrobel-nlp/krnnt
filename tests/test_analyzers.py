@@ -1,5 +1,5 @@
 from krnnt.analyzers import MacaAnalyzer
-from krnnt.classes import Form
+from krnnt.structure import Form
 
 reference_maca_output = \
 '''Lubię	newline

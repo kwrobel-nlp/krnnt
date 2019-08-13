@@ -8,7 +8,7 @@ import time
 import traceback
 
 import collections
-from typing import Iterable, List, Union
+from typing import List, Union, Iterable
 
 import numpy as np
 import regex
@@ -17,7 +17,8 @@ from keras.preprocessing import sequence
 from progress.bar import Bar
 from tqdm import tqdm
 
-from .classes import SerialUnpickler, SerialPickler, uniq, flatten, Form, Paragraph
+from krnnt.serial_pickle import SerialPickler, SerialUnpickler
+from krnnt.structure import Paragraph, Form
 
 
 class Sample:
@@ -57,7 +58,7 @@ class FormatDataPreAnalyzed(Module):
         file2 = open(self.output_path(), 'wb')
         sp = SerialPickler(file2)
 
-        for paragraph in tqdm(su, total=18484,desc='Processing'):
+        for paragraph in tqdm(su, total=18484, desc='Processing'):
             paragraph_sequence = []
             for sentence in paragraph:
                 sequence = []
@@ -87,7 +88,7 @@ class FormatData2(Module):
         sp = SerialPickler(file2)
 
         paragraph: Paragraph
-        for paragraph in tqdm(su, total=18484,desc='Processing'):
+        for paragraph in tqdm(su, total=18484, desc='Processing'):
             paragraph_sequence = []
             for sentence, sentence_gold in zip(paragraph, paragraph.concraft):
                 sequence = []
@@ -131,248 +132,8 @@ class FormatData2(Module):
         file2.close()
 
 
-class FeaturePreprocessor:
-    qubs = {'a', 'abo', 'aby', 'akurat', 'albo', 'ale', 'amen', 'ani', 'aż', 'aza', 'bądź', 'blisko', 'bo', 'bogać',
-            'by', 'byle', 'byleby', 'choć', 'choćby', 'chociaż', 'chociażby', 'chyba', 'ci', 'co', 'coś', 'czy',
-            'czyli', 'czyż', 'dalibóg', 'dobra', 'dokładnie', 'doprawdy', 'dość', 'dosyć', 'dziwna', 'dziwniejsza',
-            'gdyby', 'gdzie', 'gdzieś', 'hale', 'i', 'ino', 'istotnie', 'jakby', 'jakoby', 'jednak', 'jedno', 'jeno',
-            'koło', 'kontra', 'lada', 'ledwie', 'ledwo', 'li', 'maksimum', 'minimum', 'może', 'najdziwniejsza',
-            'najmniej', 'najwidoczniej', 'najwyżej', 'naturalnie', 'nawzajem', 'ni', 'niby', 'nie', 'niechaj',
-            'niejako', 'niejakoś', 'no', 'nuż', 'oczywiście', 'oczywista', 'okay', 'okej', 'około', 'oto', 'pewnie',
-            'pewno', 'podobno', 'ponad', 'ponoś', 'prawda', 'prawie', 'przecie', 'przeszło', 'raczej', 'skąd',
-            'skądinąd', 'skądże', 'szlus', 'ta', 'taj', 'tak', 'tam', 'też', 'to', 'toż', 'tuż', 'tylko', 'tylo',
-            'widocznie', 'właśnie', 'wprost', 'wręcz', 'wszakże', 'wszelako', 'za', 'zaledwie', 'zaledwo', 'żali',
-            'zaliż', 'zaraz', 'że', 'żeby', 'zwłaszcza'}
-    safe_chars = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', u'?', u'-', u'a', u'ą', u'c', u'ć', u'b', u'e',
-                  u'ę', u'd', u'g', u'f', u'i', u'h', u'k', u'j', u'm', u'l', u'ł', u'o', u'ó', u'n', u'ń', u'q', u'p',
-                  u's', u'ś', u'r', u'u', u't', u'w', u'y', u'x', u'z', u'ź', u'ż'}
-
-    @staticmethod
-    def nic(form, features=None):
-        return ['NIC']
-
-    @staticmethod
-    def cases(form, features=None):
-        if form.islower():
-            return ['islower']
-        elif form.isupper():
-            return ['isupper']
-        elif form.istitle():
-            return ['istitle']
-        elif form.isdigit():
-            return ['isdigit']
-        else:
-            return ['ismixed']
-
-    @staticmethod
-    def interps(form, features):
-        if 'interp' in features['tags'] and len(features['token']) == 1:
-            return [features['token']]
-        else:
-            return []
-
-    @staticmethod
-    def qubliki(form, features=None):
-        if form.lower() in FeaturePreprocessor.qubs:
-            return [form]
-        else:
-            return []
-
-    @staticmethod
-    def shape(form, features=None):
-        # print(form, shape(form))
-        return [shape(form)]
-
-    @staticmethod
-    def prefix(n, form, features=None):
-        try:
-            char = form[n].lower()
-            if char not in FeaturePreprocessor.safe_chars:
-                char = '??'
-        except IndexError:
-            char = 'xx'
-
-        return ['P' + str(n) + char]
-
-    @staticmethod
-    def prefix1(form, features=None):
-        return FeaturePreprocessor.prefix(0, form, features)
-
-    @staticmethod
-    def prefix2(form, features=None):
-        return FeaturePreprocessor.prefix(1, form, features)
-
-    @staticmethod
-    def prefix3(form, features=None):
-        return FeaturePreprocessor.prefix(2, form, features)
-
-    @staticmethod
-    def suffix(n, form, features=None):
-        try:
-            char = form[-n].lower()
-            if char not in FeaturePreprocessor.safe_chars:
-                char = '??'
-        except IndexError:
-            char = 'xx'
-
-        return ['S' + str(n) + char]
-
-    @staticmethod
-    def suffix1(form, features=None):
-        return FeaturePreprocessor.suffix(1, form, features)
-
-    @staticmethod
-    def suffix2(form, features=None):
-        return FeaturePreprocessor.suffix(2, form, features)
-
-    @staticmethod
-    def suffix3(form, features=None):
-        return FeaturePreprocessor.suffix(3, form, features)
-
-
-class TagsPreprocessor:
-    cas = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']
-
-    per = ['pri', 'sec', 'ter']
-    nmb = ['sg', 'pl']
-    gnd = ['m1', 'm2', 'm3', 'f', 'n']
-
-    def create_tags2(self, tags, features=None):
-        return uniq(flatten(map(lambda tag: self.create_tag2(tag), tags)))
-
-    def create_tag2(self, tag, features=None):
-        tags = flatten(map(lambda x: x.split('.'), tag.split(':')))
-        pos = tags[0]
-        tags = tags[1:]
-        tags2 = []
-
-        if not tags:
-            tags2.append(pos)
-        for tag in tags:
-            tags2.append(pos + '-' + tag)
-
-        return uniq(tags2)
-
-    def create_tag3(self, tag, features=None):
-        tags = flatten(map(lambda x: x.split('.'), tag.split(':')))
-        pos = tags[0]
-        tags = tags[1:]
-        tags2 = []
-
-        if not tags:
-            tags2.append(pos)
-        for tag in tags:
-            tags2.append(pos + '-' + tag)
-            tags2.append(tag)
-            tags2.append(pos)
-
-        return uniq(tags2)
-
-    def create_tags3(self, tags, features=None):
-        return uniq(flatten(map(lambda tag: self.create_tag3(tag), tags)))
-
-    @staticmethod
-    def create_tags4(tags, features=None, keep_guesser=True):  # concraft
-        if not keep_guesser and 'ign' in tags:
-            return ['ign']
-            # return ['1ign','2ign','1subst:nom','2subst:sg:f','1adj:nom','1subst:gen','2subst:sg:n','2subst:sg:m1','2adj:sg:m3:pos','2subst:sg:m3','1num:acc','2num:pl:m3:rec','1brev','2adj:sg:n:pos','2num:pl:m3:congr','1num:nom','1adj:gen','1adj:loc']
-        return uniq(flatten(map(lambda tag: TagsPreprocessor.create_tag4(tag), tags)))
-
-    @staticmethod
-    def create_tags4_without_guesser(tags, features=None):
-        return TagsPreprocessor.create_tags4(tags, features=features, keep_guesser=False)
-
-    @staticmethod
-    def create_tag4(otag, features=None):
-        tags = flatten(map(lambda x: x.split('.'), otag.split(':')))
-        pos = tags[0]
-        tags = tags[1:]
-        tags2 = []
-
-        first = None
-        for tag in tags:
-            if tag in TagsPreprocessor.cas or tag in TagsPreprocessor.per:
-                first = tag
-                break
-
-        if first:
-            tags.remove(first)
-            tags2.append('1' + pos + ':' + first)
-        else:
-            tags2.append('1' + pos)  # TODO sprawdzic
-
-        tags2.append('2' + (':'.join([pos] + tags)))
-
-        # print otag, tags2
-        return uniq(tags2)
-
-    @staticmethod
-    def create_tags5(tags, features=None, keep_guesser=True):  # concraft
-        if not keep_guesser and 'ign' in tags:
-            return ['ign']
-            # return ['ign','sg:loc:m3','sg:nom:n','pl:nom:m3','pl:acc:m3','loc','sg:gen:m3','pl:gen:m3','sg:nom:m1','sg:nom:m3','gen','nom','acc','sg:nom:f']
-
-        return uniq(flatten(map(lambda tag: TagsPreprocessor.create_tag5(tag), tags)))
-
-    @staticmethod
-    def create_tags5_without_guesser(tags, features=None):
-        return TagsPreprocessor.create_tags5(tags, features=features, keep_guesser=False)
-
-    @staticmethod
-    def create_tag5(otag, features=None):
-
-        tags = flatten(map(lambda x: x.split('.'), otag.split(':')))
-
-        tags_out = []
-        tags2 = []
-        tags3 = []
-        for tag in tags:
-            if tag in TagsPreprocessor.nmb:
-                tags2.append(tag)
-            elif tag in TagsPreprocessor.cas:
-                tags2.append(tag)
-                tags3.append(tag)
-            elif tag in TagsPreprocessor.gnd:
-                tags2.append(tag)
-
-        for tagsX in [tags2, tags3]:
-            if tagsX:
-                tags_out.append(':'.join(tagsX))
-
-        return uniq(tags_out)
-
-
-class ProcessingRule:
-    def __init__(self, method, inpupt_name:str, output_name:str):
-        self.method = method
-        self.input_name = inpupt_name
-        self.output_name = output_name
-
-    def apply(self, sample: Sample, sentence):
-        sample.features[self.output_name] = self.method(sample.features[self.input_name], features=sample.features)
-
-    def __repr__(self):
-        return str([self.method.__name__, self.input_name, self.output_name])
-
-
-
-
-
-class JoinProcessingRule:
-    def __init__(self, input_names: Iterable, output_name: str):
-        self.input_names = input_names
-        self.output_name = output_name
-
-    def apply(self, sample: Sample, sentence):
-        sample.features[self.output_name] = uniq(
-            flatten(map(lambda input_name: sample.features[input_name], self.input_names)))
-
-    def __repr__(self):
-        return str(self.input_names)
-
-
 class PreprocessData(Module):
-    def __init__(self, input_path: str, operations: List[Union[ProcessingRule, JoinProcessingRule]] =None):
+    def __init__(self, input_path: str, operations: List = None):
         super(PreprocessData, self).__init__(input_path)
         if operations is None:
             operations = []
@@ -407,7 +168,7 @@ class UniqueFeaturesValues(Module):
 
         unique_dict = collections.defaultdict(dict)
         index = collections.defaultdict(int)
-        for paragraph in tqdm(su,total=85663, desc='Processing %s' % str(self.__class__.__name__)):
+        for paragraph in tqdm(su, total=85663, desc='Processing %s' % str(self.__class__.__name__)):
             for sentence, sentence_orig in paragraph:
                 for sample in sentence:
                     for name, values in sample.features.items():
@@ -428,7 +189,6 @@ class UniqueFeaturesValues(Module):
                             if value not in unique_dict[name]:
                                 unique_dict[name][value] = index[name]
                                 index[name] += 1
-
 
         file.close()
 
@@ -558,11 +318,10 @@ class Lemmatisation():
         if not ilosc_disamb:
             ilosc_disamb = [(form, predicted_tag)]
 
-        interp_lemmas = [lemma for (lemma, tag) in ilosc_disamb]
         if (form, tag) in self.lemmas:
             pred_lemma = self.lemmas[(form, tag)]
         else:
-            # print('XXX', form, tag, interp_lemmas)
+            interp_lemmas = [lemma for (lemma, tag) in ilosc_disamb]
             pred_lemma = random.choice(interp_lemmas)
         return pred_lemma
         # print('\t%s\t%s\tdisamb' % (pred_lemma, tag))
@@ -657,9 +416,6 @@ def pad_generator(generator, sequence_length=20):
                sequence.pad_sequences(batch_y, maxlen=max_sentence_length), sentences, sentences_orig)
 
 
-
-
-
 def Xy_generator(generator):
     for batch_X, batch_y, sequences, sentences_orig in generator:
         # print len(x), len(x[0])
@@ -734,6 +490,7 @@ class Evaluator:
         self.test_data = test_data
         self.unique_tags_dict = unique_tags_dict
 
+
 class Accuracy(object):
     def __init__(self):
         self.tp = 0
@@ -747,7 +504,6 @@ class Accuracy(object):
 
     def __repr__(self):
         return str([self.tp, self.tn])
-
 
 
 def to_plain(batch, preds, file_test, file_pred, unique_tags_dict):
@@ -1088,8 +844,6 @@ def align_verbose(pred, ref):
         yield (pred_buffer + pred, rest)
 
 
-
-
 def count_sentences(path, ids=None):
     if ids is None:
         ids = []
@@ -1101,21 +855,11 @@ def count_sentences(path, ids=None):
     return count
 
 
-
-def unix_uniq(l: str) -> str:
-    packed = []
-
-    for el in l:
-        if not packed or packed[-1] != el:
-            packed.append(el)
-    return ''.join(packed)
-
-
 def shape(word: str) -> str:  # TODO zredukowac czas
-    word = regex.sub(u'(?V1)\p{Lowercase}', 'l', word, flags=regex.U)  # 80%
-    word = regex.sub(u'(?V1)\p{Uppercase}', 'u', word, flags=regex.U)
-    word = regex.sub(u'\p{gc=Decimal_Number}', 'd', word, flags=regex.U)
-    word = regex.sub(u'[^A-Za-z0-9]', 'x', word, flags=regex.LOCALE)
+    word = regex.sub(r'(?V1)\p{Lowercase}', 'l', word, flags=regex.U)  # 80%
+    word = regex.sub(r'(?V1)\p{Uppercase}', 'u', word, flags=regex.U)
+    word = regex.sub(r'\p{gc=Decimal_Number}', 'd', word, flags=regex.U)
+    word = regex.sub(r'[^A-Za-z0-9]', 'x', word, flags=regex.LOCALE)
     return unix_uniq(word)
 
 
@@ -1152,3 +896,21 @@ def analyze_tokenized(morf, paragraphs):
                 print(interpretations)
                 token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
         yield p
+
+
+def unix_uniq(l: str) -> str:
+    packed = []
+
+    for el in l:
+        if not packed or packed[-1] != el:
+            packed.append(el)
+    return ''.join(packed)
+
+
+def uniq(seq: Iterable) -> List:
+    seen = set()
+    return [x for x in seq if not (x in seen or seen.add(x))]
+
+
+def flatten(l: Iterable) -> List:
+    return [item for sublist in l for item in sublist]

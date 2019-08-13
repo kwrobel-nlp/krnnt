@@ -5,13 +5,15 @@ from typing import List
 
 from krnnt.analyzers import MacaAnalyzer
 from .keras_models import ExperimentParameters
-from .classes import uniq
-from .new import FeaturePreprocessor, TagsPreprocessor, k_hot, UniqueFeaturesValues, Lemmatisation
+from krnnt.new import uniq
+from .new import k_hot, UniqueFeaturesValues
+from krnnt.features import FeaturePreprocessor, TagsPreprocessorCython
 
 sys.setrecursionlimit(10000)
 
 from keras.preprocessing import sequence
 import numpy as np
+import krnnt_utils
 
 
 class KRNNTSingle:
@@ -22,11 +24,19 @@ class KRNNTSingle:
         self.lemmatisation = pref['lemmatisation_class']()
         self.lemmatisation.load(pref['lemmatisation_path'])
 
+        self.configure()
+
     def tag_sentence(self, sentence: str, preana=False):
         return self.__tag([sentence], preana)
 
     def tag_sentences(self, sentences: List[str], preana=False):
         return self.__tag(sentences, preana)
+
+    def configure(self):
+        if 'krnnt_utils' in sys.modules:
+            self.pad = krnnt_utils.pad
+        else:
+            self.pad = Preprocess.pad
 
     def __tag(self, sentences: List[str], preana):
         if preana:
@@ -35,7 +45,7 @@ class KRNNTSingle:
             sequences = Preprocess.process_batch(sentences, self.pref['maca_config'], self.pref['toki_config_path'])
         result = []
         for batch in chunk(sequences, self.pref['keras_batch_size']):
-            pad_batch = Preprocess.pad(batch, self.unique_features_dict, 'tags4e3')
+            pad_batch = self.pad(batch, self.unique_features_dict, 'tags4e3')
             preds = self.km.model.predict_on_batch(pad_batch)
             for plain in KerasThread.return_results(batch, preds, self.km.classes, self.lemmatisation):
                 # print(plain)
@@ -98,12 +108,12 @@ class Preprocess:
             f.extend(FeaturePreprocessor.suffix1(sample.features['token']))
             f.extend(FeaturePreprocessor.suffix2(sample.features['token']))
             f.extend(FeaturePreprocessor.suffix3(sample.features['token']))
-            f.extend(TagsPreprocessor.create_tags4_without_guesser(
+            f.extend(TagsPreprocessorCython.create_tags4_without_guesser(
                 sample.features['tags']))  # 3% moze cache dla wszystkich tagów
-            f.extend(TagsPreprocessor.create_tags5_without_guesser(sample.features['tags']))  # 3%
+            f.extend(TagsPreprocessorCython.create_tags5_without_guesser(sample.features['tags']))  # 3%
             f.extend(sample.features['space_before'])
 
-            sample.features['tags4e3'] = uniq(f)
+            sample.features['tags4e3'] = uniq(f)  # TODO czy uniq potrzebne
 
             # print()
             # print(sample.features['token'])
@@ -191,22 +201,15 @@ class Preprocess:
         if not batch:
             return []
 
-        # feature_name='tags4e3'
         result_batchX = []
-        # print('batch len',len(batch))
         for sentence in batch:
             X_sentence = []
-            # y_sentence = []
             for sample in sentence:
-                # print(feature_name, sample.features[feature_name])
                 X_sentence.append(np.array(k_hot(sample.features[feature_name], unique_features_dict[feature_name])))
 
             result_batchX.append(X_sentence)
 
-        # max_sentence_length = max([len(x) for x in result_batchX])
-        # self.log('KHOT')
-        return sequence.pad_sequences(
-            result_batchX)  # , sequence.pad_sequences(result_batchY, maxlen=max_sentence_length)
+        return sequence.pad_sequences(result_batchX)
 
 
 def chunk(l, batch_size):
@@ -323,52 +326,3 @@ class KerasThread():
             # response.append('')
 
             yield response
-
-    @staticmethod
-    def return_plain(sentences, preds, classes, lemmatisation):
-        for sentence, preds2 in zip(sentences, preds):  # TODO sentences
-            # print(preds2.shape)
-            # print(preds2)
-
-            response = []
-
-            preds3 = preds2.argmax(axis=-1)
-            # print(len(sentence), len(preds3))
-            first = True
-            for sample, max_index in zip(sentence, list(preds3)[-len(sentence):]):
-                # print(sample, max_index)
-                # max_index, max_value = max(enumerate(d), key=lambda x: x[1])
-                predicted_tag = classes[max_index]
-
-                if sample.features['space_before'] == ['space_before']:
-                    if first:
-                        sep = 'newline'
-                    else:
-                        sep = 'space'
-                else:
-                    sep = 'none'
-
-                # print(sample.features['token']+'\t'+sep)
-                response.append(sample.features['token'] + '\t' + sep)
-
-                lemmas = [x for x in sample.features['maca_lemmas']]
-
-                # if not lemmas:
-                #    lemmas.append((sample.features['token'], predicted_tag))
-                lemma = lemmatisation.disambiguate(sample.features['token'], lemmas, predicted_tag)
-
-                response.append('\t' + lemma + '\t' + predicted_tag + '\tdisamb')
-
-                # if lemmas:
-                #     for l, t in lemmas:
-                #         #print('\t'+l+'\t'+t+'\tdisamb')
-                #         response.append('\t'+l+'\t'+t+'\tdisamb')
-                # else:
-                #     #print('\t'+sample.features['token']+'\t'+predicted_tag+'\tdisamb')
-                #     response.append('\t'+sample.features['token']+'\t'+predicted_tag+'\tdisamb')
-
-                first = False
-            # print()
-            response.append('')
-
-            yield '\n'.join(response)

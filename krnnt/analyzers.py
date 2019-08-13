@@ -3,7 +3,7 @@ import sys
 from subprocess import PIPE, Popen
 from typing import Iterable
 
-from .classes import Form, Token, Sentence, Paragraph
+from krnnt.structure import Form, Token, Sentence, Paragraph
 from krnnt.new import uniq
 
 try:

@@ -6,7 +6,8 @@ from tqdm import tqdm
 
 from krnnt.aligner import align_paragraphs
 from krnnt.analyzers import MacaAnalyzer
-from krnnt.classes import Paragraph, SerialPickler, SerialUnpickler
+from krnnt.structure import Paragraph
+from krnnt.serial_pickle import SerialPickler, SerialUnpickler
 
 usage = """%prog CORPUS_GOLD CORPUS_SAVE
 

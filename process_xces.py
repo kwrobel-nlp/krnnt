@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import glob
 
-from krnnt.classes import SerialPickler
+from krnnt.serial_pickle import SerialPickler
 from argparse import ArgumentParser
 
 from krnnt.readers import read_xces

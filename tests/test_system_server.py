@@ -56,3 +56,13 @@ def test_post_tokenized_compact_json(bash):
     with bash() as s:
         for command in commands:
             s.run_script_inline([command])
+
+def test_post_raw_poleval(bash):
+    commands = [
+        'cd ..',
+        'curl -X POST "http://localhost:9200" --data-binary @tests/data/full/test-raw.txt  > /tmp/out.txt'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])

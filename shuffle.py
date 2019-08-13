@@ -6,7 +6,8 @@ from argparse import ArgumentParser
 
 from tqdm import tqdm
 
-from krnnt.classes import SerialUnpickler, SerialPickler, Paragraph
+from krnnt.structure import Paragraph
+from krnnt.serial_pickle import SerialPickler, SerialUnpickler
 
 usage = """%prog CORPUS SAVE_PATH
 

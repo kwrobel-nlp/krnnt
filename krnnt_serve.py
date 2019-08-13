@@ -140,7 +140,7 @@ def tag_raw():
         return render(text, conversion(results))
     else:
         text = request.get_data()
-        print(text.decode('utf-8').split('\n\n'))
+        # print(text.decode('utf-8').split('\n\n'))
         results = krnntx.tag_sentences(text.decode('utf-8').split('\n\n'))
         return conversion(results)
 
@@ -154,7 +154,7 @@ def tag():
 @app.route('/maca/', methods=['POST'])
 def maca():
     text = request.get_data()
-    print(text.decode('utf-8').split('\n\n'))
+    # print(text.decode('utf-8').split('\n\n'))
 
     results = maca_analyzer._maca(text.decode('utf-8').split('\n\n'))
     results = list(results)

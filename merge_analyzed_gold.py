@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from krnnt.classes import Paragraph, Sentence, Token, Form, SerialPickler, SerialUnpickler
+from krnnt.structure import Paragraph, Sentence, Token, Form
+from krnnt.serial_pickle import SerialPickler, SerialUnpickler
 import sys
 from optparse import OptionParser
 
