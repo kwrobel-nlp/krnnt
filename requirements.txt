@@ -16,3 +16,4 @@ pytest
 gunicorn
 gevent
 -e git+https://github.com/djstrong/pytest-shell.git#egg=pytest-shell
+git+https://github.com/Zhylkaaa/krnnt_text_utils.git@cython

@@ -1,12 +1,13 @@
 import concurrent.futures
+import os
 
 import requests
 
 
-def test_api():
+def test_api(rootdir):
     url = 'http://localhost:9200'
 
-    for line in open('data/full/test-raw.txt'):
+    for line in open(os.path.join(rootdir, 'data/full/test-raw.txt')):
         line=line.strip()
         if not line: continue
 
@@ -17,9 +18,9 @@ def tag(url, data):
     r = requests.post(url, data=payload)
     return r
 
-def test_parallel_api():
+def test_parallel_api(rootdir):
     lines=[]
-    for line in open('data/full/test-raw.txt'):
+    for line in open(os.path.join(rootdir, 'data/full/test-raw.txt')):
         line = line.strip()
         if not line: continue
         lines.append(line)
@@ -30,9 +31,9 @@ def test_parallel_api():
             r=future.result()
             # print(r.text)
 
-def test_parallel_api_maca():
+def test_parallel_api_maca(rootdir):
     lines=[]
-    for line in open('data/full/test-raw.txt'):
+    for line in open(os.path.join(rootdir, 'data/full/test-raw.txt')):
         line = line.strip()
         if not line: continue
         lines.append(line)

@@ -57,7 +57,8 @@ def test_maca_wrapper():
 
 def test_parse():
     maca_analyzer = MacaAnalyzer('')
-    maca_analyzer.text=paragraph_raw
+    maca_analyzer.text = paragraph_raw
+    maca_analyzer.last_offset = 0
     result = maca_analyzer._parse(reference_maca_output)
 
     reference = [

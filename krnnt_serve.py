@@ -13,7 +13,7 @@ from flask import request
 from flask import g, current_app
 
 from krnnt.analyzers import MacaAnalyzer
-from krnnt.classes import Paragraph, Sentence, Token
+from krnnt.structure import Paragraph, Sentence, Token
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
 from krnnt.writers import results_to_conll_str, results_to_jsonl_str, results_to_conllu_str, results_to_plain_str, \

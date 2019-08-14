@@ -456,12 +456,11 @@ class RunFolds2:
 
         pref['data_size'] = count_samples(pref['corpus_path'])
 
-
-        kf = KFold(self.preferences['data_size'], n_folds=10)
+        kf = KFold(n_splits=10)
 
         fmain = open('mainlog' + str(uuid.uuid1()), 'wt')
 
-        for i, (train, test) in enumerate(kf):
+        for i, (train, test) in enumerate(kf.split(range(self.preferences['data_size']))):
             print(i)
             if 'fold' in pref and i != pref['fold']: continue
             logging.info('Fold %s' % i)

@@ -22,4 +22,3 @@ trzy	space
 	trzy	num:pl:nom:m3:congr	disamb
 .	none
 	.	interp	disamb
-
