@@ -1,3 +1,6 @@
+import os
+
+
 def test_download_model(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
@@ -34,7 +37,7 @@ def test_post_form(bash, rootdir):
             s.run_script_inline([command])
 
     generated = open('/tmp/out.txt').read()
-    reference = open('data/server/out_raw.txt').read()
+    reference = open(os.path.join(rootdir,'data/server/out_raw.txt')).read()
 
     assert reference in generated
 

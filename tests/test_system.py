@@ -31,7 +31,7 @@ def test_shuffle(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'python3 shuffle.py /tmp/nkjp-reanalyzed.spickle /tmp/nkjp-reanalyzed.shuf.spickle',
+        'python3 shuffle.py tests/data/reference/nkjp1m-1.2-reanalyzed.spickle /tmp/nkjp-reanalyzed.shuf.spickle',
         'diff /tmp/nkjp-reanalyzed.shuf.spickle tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle'
     ]
 

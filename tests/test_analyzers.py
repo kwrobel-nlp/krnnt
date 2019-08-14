@@ -114,3 +114,4 @@ def test_maca_analyzer_lemmas():
     assert 'kot' in lemmas
     assert 'kot:s1' not in lemmas
     assert 'kot:s2' not in lemmas
+
