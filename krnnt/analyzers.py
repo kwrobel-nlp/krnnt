@@ -4,7 +4,7 @@ from subprocess import PIPE, Popen
 from typing import Iterable
 
 from krnnt.structure import Form, Token, Sentence, Paragraph
-from krnnt.new import uniq
+from krnnt.utils import uniq
 
 try:
     from maca_analyse import maca_analyse

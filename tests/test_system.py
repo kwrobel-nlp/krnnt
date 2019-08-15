@@ -11,9 +11,8 @@ def test_process_xces(bash, rootdir):
     for command in commands:
         bash.run_script_inline([command])
 
-
+@pytest.mark.xfail(reason="version of morfeusz dictionary may influence results")
 def test_reanalyze(bash, rootdir):
-    # version of morfeusz dictionary may influence results
     commands = [
         'cd %s' % rootdir,
         'cd ..',
@@ -44,7 +43,7 @@ def test_train(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        # 'rm /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2 /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues',
+        'rm /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2 /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues',
         'python3 krnnt_train.py --maca_config $MACA_CONFIG /tmp/nkjp-reanalyzed.shuf.spickle -e 2 --reproducible --hash test',
 
         'h5diff weight_test.hdf5 tests/data/reference/weight_test.hdf5',
@@ -59,7 +58,6 @@ def test_train(bash, rootdir):
         for command in commands:
             s.run_script_inline([command])
 
-
 def test_run_xces(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
@@ -72,6 +70,17 @@ def test_run_xces(bash, rootdir):
         for command in commands:
             s.run_script_inline([command])
 
+def test_run_xces_from_training(bash, rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        'cd ..',
+        'echo "Lubię placki." | python3 krnnt_run.py weight_test.hdf5.final lemmatisation_test.pkl /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces > /tmp/out.xces',
+        'diff /tmp/out.xces tests/data/reference/out.xces'
+    ]
+
+    with bash(envvars={'MACA_CONFIG': 'morfeusz2-nkjp', 'CUDA_VISIBLE_DEVICES':''}) as s:
+        for command in commands:
+            s.run_script_inline([command])
 
 def test_run_plain(bash, rootdir):
     commands = [
@@ -130,6 +139,20 @@ def test_run_evaluation(bash, rootdir):
         'cd %s' % rootdir,
         'cd ..',
         'cat tests/data/small/gold-task-c.txt | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces --reproducible > /tmp/out.xces',
+        'python2 tagger-eval.py  tests/data/small/gold-task-c.xml /tmp/out.xces > /tmp/out_evaluation.txt',
+        'diff /tmp/out_evaluation.txt tests/data/reference/gold-task-c_evaluation.txt '
+    ]
+
+    with bash(envvars={'MACA_CONFIG': 'morfeusz2-nkjp', 'CUDA_VISIBLE_DEVICES':'','PYTHONHASHSEED':'0'}) as s:
+        for command in commands:
+            s.run_script_inline([command])
+
+@pytest.mark.xfail(reason="non-deterministic lemmatisation?")
+def test_run_evaluation_from_training(bash, rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        'cd ..',
+        'cat tests/data/small/gold-task-c.txt | python3 krnnt_run.py weight_test.hdf5.final lemmatisation_test.pkl /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces --reproducible > /tmp/out.xces',
         'python2 tagger-eval.py  tests/data/small/gold-task-c.xml /tmp/out.xces > /tmp/out_evaluation.txt',
         'diff /tmp/out_evaluation.txt tests/data/reference/gold-task-c_evaluation.txt '
     ]

@@ -1,6 +1,6 @@
 import pytest
 
-from krnnt.features import FeaturePreprocessor, TagsPreprocessorCython, TagsPreprocessor
+from krnnt.features import FeaturePreprocessor, TagsPreprocessorCython, TagsPreprocessor, create_token_features
 
 
 @pytest.fixture
@@ -10,6 +10,7 @@ def token():
 
 def test_nic(token):
     assert ["NIC"] == FeaturePreprocessor.nic(token)
+
 
 @pytest.mark.xfail
 @pytest.mark.parametrize('token, expected', [('kot', 'islower'),
@@ -60,6 +61,7 @@ def test_suffix2():
 def test_suffix3():
     assert ["S3k"] == FeaturePreprocessor.suffix3('kot')
 
+
 @pytest.mark.xfail
 def test_qubliki():
     assert [] == FeaturePreprocessor.qubliki('kot')
@@ -78,9 +80,10 @@ def test_shape(token, expected):
     assert features[0] == expected
     assert len(features) == 1
 
+
 @pytest.mark.parametrize('tags, expected', [
     (['fin:sg:ter:imperf', 'subst:sg:nom:f'], ['1fin:ter', '2fin:sg:imperf', '1subst:nom',
-           '2subst:sg:f']),
+                                               '2subst:sg:f']),
     (['interp'], ['1interp', '2interp']),
     ([''], ['1', '2']),
     ([], [])])
@@ -97,3 +100,16 @@ def test_tags4(tags, expected):
 def test_tags5(tags, expected):
     assert TagsPreprocessor.create_tags5_without_guesser(tags) == expected
     assert TagsPreprocessorCython.create_tags5_without_guesser(tags) == expected
+
+
+def test_create_token_features(benchmark):
+    token = 'obejmie'
+    tags = ['subst:sg:loc:m3', 'subst:sg:voc:m3', 'subst:sg:dat:f', 'subst:sg:loc:f',
+            'fin:sg:ter:perf']
+    space_before = ['space_before']
+    features=['islower', 'l', 'P0o', 'P1b', 'P2e', 'S1e', 'S2i', 'S3m', '1subst:loc', '2subst:sg:m3',
+                          '1subst:voc', '1subst:dat', '2subst:sg:f', '1fin:ter', '2fin:sg:perf', 'sg:loc:m3', 'loc',
+                          'sg:voc:m3', 'voc', 'sg:dat:f', 'dat', 'sg:loc:f', 'sg', 'space_before']
+
+    result_features = create_token_features(token, tags, space_before)
+    assert result_features == features

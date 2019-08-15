@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from krnnt.new import shape, uniq, flatten
+from krnnt.utils import uniq, flatten, shape
 
 try:
     import krnnt_utils
@@ -192,3 +192,23 @@ class TagsPreprocessor:
                 tags_out.append(':'.join(tagsX))
 
         return uniq(tags_out)
+
+def create_token_features(token, tags, space_before): #TODO
+    f = []
+    f+=FeaturePreprocessor.cases(token)
+    f+=FeaturePreprocessor.interps(token, {'tags':tags})
+    f+=FeaturePreprocessor.qubliki(token)
+    f+=FeaturePreprocessor.shape(token)  # 90%
+    f+=FeaturePreprocessor.prefix1(token)
+    f+=FeaturePreprocessor.prefix2(token)
+    f+=FeaturePreprocessor.prefix3(token)
+    f+=FeaturePreprocessor.suffix1(token)
+    f+=FeaturePreprocessor.suffix2(token)
+    f+=FeaturePreprocessor.suffix3(token)
+    f+=TagsPreprocessorCython.create_tags4_without_guesser(
+        tags)  # 3% moze cache dla wszystkich tagów
+    f+=TagsPreprocessorCython.create_tags5_without_guesser(tags)  # 3%
+    f+=space_before
+
+
+    return f   # TODO czy uniq potrzebne - niekoenicznie: ign się powtarza

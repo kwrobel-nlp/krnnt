@@ -5,9 +5,9 @@ from typing import List
 
 from krnnt.analyzers import MacaAnalyzer
 from .keras_models import ExperimentParameters
-from krnnt.new import uniq
+from krnnt.utils import uniq
 from .new import k_hot, UniqueFeaturesValues
-from krnnt.features import FeaturePreprocessor, TagsPreprocessorCython
+from krnnt.features import create_token_features
 
 sys.setrecursionlimit(10000)
 
@@ -77,60 +77,30 @@ class Sample:
 
 class Preprocess:
 
+    # @staticmethod
+    # def create_token_features(token, tags, space_before): #TODO
+    #     f = []
+    #     f+=FeaturePreprocessor.cases(token)
+    #     f+=FeaturePreprocessor.interps(token, {'tags':tags})
+    #     f+=FeaturePreprocessor.qubliki(token)
+    #     f+=FeaturePreprocessor.shape(token)  # 90%
+    #     f+=FeaturePreprocessor.prefix1(token)
+    #     f+=FeaturePreprocessor.prefix2(token)
+    #     f+=FeaturePreprocessor.prefix3(token)
+    #     f+=FeaturePreprocessor.suffix1(token)
+    #     f+=FeaturePreprocessor.suffix2(token)
+    #     f+=FeaturePreprocessor.suffix3(token)
+    #     f+=TagsPreprocessorCython.create_tags4_without_guesser(
+    #         tags)  # 3% moze cache dla wszystkich tagów
+    #     f+=TagsPreprocessorCython.create_tags5_without_guesser(tags)  # 3%
+    #     f+=(space_before,)
+    #     return uniq(f)   # TODO czy uniq potrzebne
+
     @staticmethod
     def create_features(sequence):
-        # TODO długo trwa
         for sample in sequence:
-            f = []
+            sample.features['tags4e3'] = create_token_features(sample.features['token'],sample.features['tags'],sample.features['space_before'])
 
-            # print(sample.features)
-            # print('1',FeaturePreprocessor.cases(sample.features['token']))
-            # print('2',FeaturePreprocessor.interps(sample.features['token'],sample.features))
-            # print('3',FeaturePreprocessor.qubliki(sample.features['token']))
-            # print('4',FeaturePreprocessor.shape(sample.features['token'])) #90%
-            # print('5',FeaturePreprocessor.prefix1(sample.features['token']))
-            # print('6',FeaturePreprocessor.prefix2(sample.features['token']))
-            # print('7',FeaturePreprocessor.prefix3(sample.features['token']))
-            # print('8',FeaturePreprocessor.suffix1(sample.features['token']))
-            # print('9',FeaturePreprocessor.suffix2(sample.features['token']))
-            # print('10',FeaturePreprocessor.suffix3(sample.features['token']))
-            # print('11',TagsPreprocessor.create_tags4_without_guesser(sample.features['tags'])) #3% moze cache dla wszystkich tagów
-            # print('12',TagsPreprocessor.create_tags5_without_guesser(sample.features['tags'])) #3%
-            # print('13',sample.features['space_before'])
-
-            f.extend(FeaturePreprocessor.cases(sample.features['token']))
-            f.extend(FeaturePreprocessor.interps(sample.features['token'], sample.features))
-            f.extend(FeaturePreprocessor.qubliki(sample.features['token']))
-            f.extend(FeaturePreprocessor.shape(sample.features['token']))  # 90%
-            f.extend(FeaturePreprocessor.prefix1(sample.features['token']))
-            f.extend(FeaturePreprocessor.prefix2(sample.features['token']))
-            f.extend(FeaturePreprocessor.prefix3(sample.features['token']))
-            f.extend(FeaturePreprocessor.suffix1(sample.features['token']))
-            f.extend(FeaturePreprocessor.suffix2(sample.features['token']))
-            f.extend(FeaturePreprocessor.suffix3(sample.features['token']))
-            f.extend(TagsPreprocessorCython.create_tags4_without_guesser(
-                sample.features['tags']))  # 3% moze cache dla wszystkich tagów
-            f.extend(TagsPreprocessorCython.create_tags5_without_guesser(sample.features['tags']))  # 3%
-            f.extend(sample.features['space_before'])
-
-            sample.features['tags4e3'] = uniq(f)  # TODO czy uniq potrzebne
-
-            # print()
-            # print(sample.features['token'])
-            # print(sample.features['tags'])
-            # print(FeaturePreprocessor.cases(sample.features['token']))
-            # print(FeaturePreprocessor.interps(sample.features['token'],sample.features))
-            # print(FeaturePreprocessor.qubliki(sample.features['token']))
-            # print(FeaturePreprocessor.shape(sample.features['token']))
-            # print(FeaturePreprocessor.prefix1(sample.features['token']))
-            # print(FeaturePreprocessor.prefix2(sample.features['token']))
-            # print(FeaturePreprocessor.prefix3(sample.features['token']))
-            # print(FeaturePreprocessor.suffix1(sample.features['token']))
-            # print(FeaturePreprocessor.suffix2(sample.features['token']))
-            # print(FeaturePreprocessor.suffix3(sample.features['token']))
-            # print(TagsPreprocessor.create_tags4_without_guesser(sample.features['tags']))
-            # print(TagsPreprocessor.create_tags5_without_guesser(sample.features['tags']))
-            # print(sample.features['space_before'])
 
     @staticmethod
     def process_batch(batch, maca_config, toki_config_path):

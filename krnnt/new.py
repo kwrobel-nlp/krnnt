@@ -8,15 +8,17 @@ import time
 import traceback
 
 import collections
-from typing import List, Union, Iterable
+from typing import List
 
 import numpy as np
 import regex
 from keras.callbacks import Callback
 from keras.preprocessing import sequence
+from krnnt.features import create_token_features
 from progress.bar import Bar
 from tqdm import tqdm
 
+from krnnt.utils import uniq
 from krnnt.serial_pickle import SerialPickler, SerialUnpickler
 from krnnt.structure import Paragraph, Form
 
@@ -150,9 +152,15 @@ class PreprocessData(Module):
             paragraph_sequence = []
             for sentence, sentence_orig in paragraph:
                 sequence = list(sentence)
-                for operation in self.operations:
-                    for sample in sentence:
-                        operation.apply(sample, sentence)
+                for sample in sentence:
+                    sample.features['tags4e3'] = create_token_features(sample.features['token'],
+                                                                       sample.features['tags'],
+                                                                       sample.features['space_before'])
+                    print(sample.features)
+
+                    # for operation in self.operations:
+                #     for sample in sentence:
+                #         operation.apply(sample, sentence)
 
                 paragraph_sequence.append((sequence, sentence_orig))
             sp.add(paragraph_sequence)
@@ -855,14 +863,6 @@ def count_sentences(path, ids=None):
     return count
 
 
-def shape(word: str) -> str:  # TODO zredukowac czas
-    word = regex.sub(r'(?V1)\p{Lowercase}', 'l', word, flags=regex.U)  # 80%
-    word = regex.sub(r'(?V1)\p{Uppercase}', 'u', word, flags=regex.U)
-    word = regex.sub(r'\p{gc=Decimal_Number}', 'd', word, flags=regex.U)
-    word = regex.sub(r'[^A-Za-z0-9]', 'x', word, flags=regex.LOCALE)
-    return unix_uniq(word)
-
-
 def get_morfeusz():
     import morfeusz2
     morf = morfeusz2.Morfeusz(
@@ -896,21 +896,3 @@ def analyze_tokenized(morf, paragraphs):
                 print(interpretations)
                 token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
         yield p
-
-
-def unix_uniq(l: str) -> str:
-    packed = []
-
-    for el in l:
-        if not packed or packed[-1] != el:
-            packed.append(el)
-    return ''.join(packed)
-
-
-def uniq(seq: Iterable) -> List:
-    seen = set()
-    return [x for x in seq if not (x in seen or seen.add(x))]
-
-
-def flatten(l: Iterable) -> List:
-    return [item for sublist in l for item in sublist]

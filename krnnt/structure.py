@@ -28,6 +28,9 @@ class Paragraph:
         except:
             return raw
 
+    def __str__(self):
+        return 'Paragraph([%s])' % ','.join([str(x) for x in self.sentences])
+
 
 class Sentence:
     tokens: List['Token']
@@ -46,6 +49,8 @@ class Sentence:
     def __iter__(self):
         return self.tokens.__iter__()
 
+    def __str__(self):
+        return 'Sentence([%s])' % ','.join([str(x) for x in self.tokens])
 
 class Token:
     form: str
@@ -64,7 +69,7 @@ class Token:
         self.interpretations.append(interpretation)
 
     def __str__(self):
-        return 'Token(%s, %s)' % (self.form, self.interpretations)
+        return 'Token(%s, %s, %s, %s)' % (self.form, ','.join([str(x) for x in self.interpretations]), self.space_before, str(self.gold_form))
 
 
 class Form:

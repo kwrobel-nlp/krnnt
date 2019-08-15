@@ -4,7 +4,7 @@ from krnnt.structure import Token, Sentence, Paragraph
 
 
 def text(buffer):
-    return ''.join([' '+token.form if token.space_before else token.form for token in buffer])
+    return ''.join([' '+token.form if (token.space_before is True or (token.space_before is not False and token.space_before!='none')) else token.form for token in buffer])
 
 def align(pred, ref, ref_text_old=''):
     pred_buffer = [pred.pop(0)]
@@ -18,7 +18,8 @@ def align(pred, ref, ref_text_old=''):
     while pred_buffer or ref_buffer:
         pred_text = text(pred_buffer)
         ref_text = text(ref_buffer)
-        # print(pred_text, ref_text)
+        # print("BUFFERS: [%s] [%s]" % ([str(x) for x in pred_buffer], [str(x) for x in ref_buffer]))
+        # print("BUFFERS: [%s] [%s]" % (pred_text, ref_text))
         if len(pred_text) == len(ref_text):  # aligned
             if pred_text != ref_text:
                 print('alignment ERROR', pred_text, ref_text, ref, pred, file=sys.stderr)
@@ -40,7 +41,7 @@ def align(pred, ref, ref_text_old=''):
                 pred_buffer.append(pred.pop(0))
             else:
 
-                print('break2', pred_text, ref_text, ref_text[len(pred_text):])
+                print('break2', pred_text, ref_text, ref_text[len(pred_text):], file=sys.stderr)
                 #skroc ref_buffer
                 asd=[]
                 for x in ref_buffer:
@@ -50,10 +51,10 @@ def align(pred, ref, ref_text_old=''):
                         break
                 ref_buffer=asd
                 if len(pred_text) < len(text(asd)):
-                    print('RRRR', asd[-1].form)
+                    print('RRRR', asd[-1].form, file=sys.stderr)
                     asd[-1].form = asd[-1].form[:len(pred_text)-1]
-                    print('RRRR', asd[-1].form)
-                print(text(ref_buffer), 'XXX', text(ref))
+                    print('RRRR', asd[-1].form, file=sys.stderr)
+                print(text(ref_buffer), 'XXX', text(ref), file=sys.stderr)
 
 
                 break
@@ -61,7 +62,7 @@ def align(pred, ref, ref_text_old=''):
             if ref:
                 ref_buffer.append(ref.pop(0))
             else:
-                print('break3')
+                print('break3', file=sys.stderr)
                 break
 
     rest = ref_buffer # + ref
@@ -89,7 +90,7 @@ def align_paragraphs(paragraph_reanalyzed: Paragraph, paragraph_gold: Paragraph)
                 for r1 in r:
                     sentence_reanalyzed_gold.add_token(r1)
                 if text(p) != text(r):
-                    print('ERR', [t.form for t in p], [t.form for t in r])
+                    print('ERR', [t.form for t in p], [t.form for t in r], file=sys.stderr)
                 # if len(p)!=len(r):
                 # print(text(p),'_____', text(r))
                 # print(len(tokens_gold))

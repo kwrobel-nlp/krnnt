@@ -1,6 +1,6 @@
 import pytest
 
-from krnnt.new import shape
+from krnnt.utils import shape
 import krnnt_utils
 
 @pytest.fixture

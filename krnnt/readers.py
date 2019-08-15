@@ -44,7 +44,6 @@ def read_xces(file_path: str) -> Paragraph:
                             elif xml_node.tag=='lex':
                                 if xml_node.get('disamb')=='1':
                                     disamb=True
-
                                 else:
                                     disamb=False
 
