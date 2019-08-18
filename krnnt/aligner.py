@@ -1,4 +1,5 @@
 import sys
+import logging
 
 from krnnt.structure import Token, Sentence, Paragraph
 
@@ -23,7 +24,7 @@ def align(pred, ref, ref_text_old=''):
         if len(pred_text) == len(ref_text):  # aligned
             if pred_text != ref_text:
                 print('alignment ERROR', pred_text, ref_text, ref, pred, file=sys.stderr)
-
+                logging.error("alignment ERROR")
             yield (pred_buffer, ref_buffer, ref_text[len(pred_text):])
 
             pred_buffer=[]

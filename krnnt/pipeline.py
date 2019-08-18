@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import math
 import pickle
 import sys
 from typing import List
@@ -43,6 +44,9 @@ class KRNNTSingle:
             sequences = Preprocess.process_batch_preana(enumerate(sentences))
         else:
             sequences = Preprocess.process_batch(sentences, self.pref['maca_config'], self.pref['toki_config_path'])
+
+        # batch_size=math.ceil(len_sequences/max(math.floor(len_sequences/self.pref['keras_batch_size']), 1)) # dynamic batch
+
         result = []
         for batch in chunk(sequences, self.pref['keras_batch_size']):
             pad_batch = self.pad(batch, self.unique_features_dict, 'tags4e3')

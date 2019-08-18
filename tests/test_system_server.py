@@ -25,6 +25,54 @@ def test_post_raw(bash,rootdir):
         for command in commands:
             s.run_script_inline([command])
 
+def test_post_raw_jsonl(bash,rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        'cd ..',
+        'curl -X POST "http://localhost:9200/?output_format=jsonl" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'diff /tmp/out.txt tests/data/server/out_raw.jsonl'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])
+
+def test_post_raw_conll(bash,rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        'cd ..',
+        'curl -X POST "http://localhost:9200/?output_format=conll" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'diff /tmp/out.txt tests/data/server/out_raw.conll'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])
+
+def test_post_raw_conllu(bash,rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        'cd ..',
+        'curl -X POST "http://localhost:9200/?output_format=conllu" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'diff /tmp/out.txt tests/data/server/out_raw.conllu'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])
+
+def test_post_raw_xces(bash,rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        'cd ..',
+        'curl -X POST "http://localhost:9200/?output_format=xces" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'diff /tmp/out.txt tests/data/server/out_raw.xces'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])
+
 def test_post_form(bash, rootdir):
     commands = [
         'cd %s' % rootdir,

@@ -2,16 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import io
+import logging
 import sys
 from argparse import ArgumentParser
 from optparse import OptionParser
 import time
 
 import flask
+import tensorflow
 from flask import Flask
 from flask import request
 from flask import g, current_app
-
+from keras import backend as K
 from krnnt.analyzers import MacaAnalyzer
 from krnnt.structure import Paragraph, Sentence, Token
 from krnnt.keras_models import BEST
@@ -121,6 +123,11 @@ def json_compact_to_objects(data):
 @app.route('/', methods=['POST'])
 def tag_raw():
     request.get_data()
+
+    output_format = request.args.get('output_format', default='plain', type=str)
+    # filter = request.args.get('filter', default='*', type=str)
+    conversion = get_output_converter(output_format)
+
     if request.is_json:
         data = request.get_json()
 
@@ -159,6 +166,24 @@ def maca():
     results = maca_analyzer._maca(text.decode('utf-8').split('\n\n'))
     results = list(results)
     return str(results)
+
+def get_output_converter(output_format):
+    output_format=output_format.lower()
+    if output_format == 'xces':
+        conversion = results_to_xces_str
+    elif output_format == 'plain':
+        conversion = results_to_plain_str
+    elif output_format in ('conll','tsv'):
+        conversion = results_to_conll_str
+    elif output_format == 'conllu':
+        conversion = results_to_conllu_str
+    elif output_format == 'jsonl':
+        conversion = results_to_jsonl_str
+    else:
+        logging.error('Wrong output format.')
+        sys.exit(1)
+
+    return conversion
 
 def main(argv=sys.argv[1:]):
     print(argv)
@@ -209,19 +234,7 @@ def main(argv=sys.argv[1:]):
 
     krnntx.tag_sentences(['Ala'])
 
-    if args.output_format == 'xces':
-        conversion = results_to_xces_str
-    elif args.output_format == 'plain':
-        conversion = results_to_plain_str
-    elif args.output_format == 'conll':
-        conversion = results_to_conll_str
-    elif args.output_format == 'conllu':
-        conversion = results_to_conllu_str
-    elif args.output_format == 'jsonl':
-        conversion = results_to_jsonl_str
-    else:
-        print('Wrong output format.')
-        sys.exit(1)
+    conversion=get_output_converter(args.output_format)
 
     return app, args.host, args.port
 
@@ -229,7 +242,13 @@ def main(argv=sys.argv[1:]):
 
 if __name__ == '__main__':
     app,host,port = main()
-    app.run(host=host, port=port, debug=False)
+    # from werkzeug.middleware.profiler import ProfilerMiddleware
+    # app.config['PROFILE'] = True
+    # app = ProfilerMiddleware(app)
+    # app.wsgi_app = ProfilerMiddleware(
+    #     app.wsgi_app, profile_dir="."
+    # )
+    app.run(host=host, port=port, debug=False) # threaded=False on GPU
 
 def start(*args, **kwargs):
     app, host, port = main(args)

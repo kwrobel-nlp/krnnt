@@ -1,3 +1,4 @@
+import logging
 import re
 import sys
 from subprocess import PIPE, Popen
@@ -109,6 +110,7 @@ class MacaAnalyzer:
             if token_line == '': return None
             form, space_before = token_line.split("\t")
         except ValueError:
+            logging.exception("Probably Maca is not working.")
             raise Exception('Probably Maca is not working.')
 
         interpretations = []

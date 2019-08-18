@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cesAna SYSTEM "xcesAnaIPI.dtd">
+<cesAna xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" type="lex disamb">
+<chunkList>
+ <chunk type="p">
+  <chunk type="s">
+   <tok>
+    <orth>Lubię</orth>
+    <lex disamb="1"><base>lubić</base><ctag>fin:sg:pri:imperf</ctag></lex>
+   </tok>
+   <tok>
+    <orth>placki</orth>
+    <lex disamb="1"><base>placek</base><ctag>subst:pl:acc:m3</ctag></lex>
+   </tok>
+   <ns/>
+   <tok>
+    <orth>.</orth>
+    <lex disamb="1"><base>.</base><ctag>interp</ctag></lex>
+   </tok>
+  </chunk>
+  <chunk type="s">
+   <tok>
+    <orth>Ala</orth>
+    <lex disamb="1"><base>Ala</base><ctag>subst:sg:nom:f</ctag></lex>
+   </tok>
+   <tok>
+    <orth>ma</orth>
+    <lex disamb="1"><base>mieć</base><ctag>fin:sg:ter:imperf</ctag></lex>
+   </tok>
+   <tok>
+    <orth>kota</orth>
+    <lex disamb="1"><base>kot</base><ctag>subst:sg:acc:m2</ctag></lex>
+   </tok>
+   <ns/>
+   <tok>
+    <orth>.</orth>
+    <lex disamb="1"><base>.</base><ctag>interp</ctag></lex>
+   </tok>
+  </chunk>
+ </chunk>
+ <chunk type="p">
+  <chunk type="s">
+   <tok>
+    <orth>Raz</orth>
+    <lex disamb="1"><base>raz</base><ctag>subst:sg:nom:m3</ctag></lex>
+   </tok>
+   <tok>
+    <orth>dwa</orth>
+    <lex disamb="1"><base>dwa</base><ctag>num:pl:nom:m3:congr</ctag></lex>
+   </tok>
+   <tok>
+    <orth>trzy</orth>
+    <lex disamb="1"><base>trzy</base><ctag>num:pl:nom:m3:congr</ctag></lex>
+   </tok>
+   <ns/>
+   <tok>
+    <orth>.</orth>
+    <lex disamb="1"><base>.</base><ctag>interp</ctag></lex>
+   </tok>
+  </chunk>
+ </chunk>
+</chunkList>
+</cesAna>

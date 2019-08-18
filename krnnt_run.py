@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
 import sys
+
 from argparse import ArgumentParser
+
 
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
-from krnnt.pipeline import KRNNTSingle
+from krnnt.pipeline import KRNNTSingle, chunk
 from krnnt.readers import read_xces, read_jsonl
 from krnnt.writers import results_to_jsonl_str, results_to_conll_str, results_to_conllu_str, \
     results_to_xces_str, results_to_plain_str
@@ -16,6 +19,10 @@ usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
 
 E.g. %prog
 """
+
+
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+
 
 if __name__ == '__main__':
     parser = ArgumentParser(usage=usage)
@@ -43,6 +50,9 @@ if __name__ == '__main__':
     parser.add_argument('--tokenized', action='store_true',
                       help='input data are tokenized, but not analyzed')
     parser.add_argument('--reproducible', action='store_true', default=False, help='set seeds')
+    parser.add_argument('--chunk_size',
+                        default=100000, type=int,
+                        help='chunk size')
     args = parser.parse_args()
 
     if args.reproducible:
@@ -75,7 +85,7 @@ if __name__ == '__main__':
     pref['UniqueFeaturesValues'] = args.dictionary
 
     krnnt = KRNNTSingle(pref)
-
+#time python3 -m cProfile -o gpu_run_train2.profil  krnnt_run.py ../krnnt/data/weights.hdf5 ../krnnt/data/lemmatisation.pkl ../krnnt/data/dictionary.pkl -o xces  > /tmp/out.xces < ../krnnt-refactor/tests/data/full/train-raw.txt
 
     if args.tokenized:
         if args.input_format == 'jsonl':
@@ -88,7 +98,9 @@ if __name__ == '__main__':
         corpus = analyze_tokenized(morf, corpus)
         results = krnnt.tag_sentences(corpus, preana=True)
     elif args.reanalyzed:
-        results = krnnt.tag_sentences(sys.stdin.read().split('\n\n')) # ['Ala ma kota.', 'Ale nie ma psa.']
+        data=sys.stdin.read().split('\n\n')
+        for batch in chunk(data, args.chunk_size):
+            results = krnnt.tag_sentences(batch) # ['Ala ma kota.', 'Ale nie ma psa.']
     else:
         #f = io.StringIO(sys.stdin.read())
         if args.input_format== 'xces':

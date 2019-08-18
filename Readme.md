@@ -36,7 +36,7 @@ docker run -it -p 9200:9200 djstrong/krnnt:0.1 python3 /home/krnnt/krnnt/krnnt_s
 ```
 2. Tag a text usig POST request or open http://localhost:9200 in a browser.
 ```bash
-curl -XPOST localhost:9200 -d "Ala ma kota."
+$ curl -XPOST localhost:9200 -d "Ala ma kota."
 Ala    none
     Ala    subst:sg:nom:f    disamb
 ma    space
@@ -374,10 +374,21 @@ Compact JSON uses lists and positional fields (for speed and memory efficiency).
 * JSONL - each document in separate line
 * TSV (CONLL)
 * XCES
-* plain
+* plain - sentences divided by one empty line, documents by two empty lines
 
 
-TODO: opcje jako nagłówki HTTP?
+# HTTP options
+
+Default output format is `plain`. It can be changed by request parameter `output_format`, 
+e.g.:
+
+```bash
+$ curl -X POST "localhost:9200/?output_format=conll" -d "Ala ma kota."
+Ala	Ala	1	subst:sg:nom:f	0	3
+ma	mieć	1	fin:sg:ter:imperf	4	6
+kota	kot	1	subst:sg:acc:m2	7	11
+.	.	0	interp	11	12
+```
 
 # Scripts
 

@@ -95,10 +95,10 @@ class RunExperiment:
 
     def learn_lemma(self):
         l = Lemmatisation()
-        print('Training lemmatisation...')
+        logging.info('Training lemmatisation...')
         l.learn(self.keras_data.data_path)
         l.save(self.keras_model.parameters.pref['lemmatisation_path'])
-        print('Training lemmatisation - done')
+        logging.info('Training lemmatisation - done')
 
     def save_plain_data(self):
         logging.info('Saving training, dev, test data')
@@ -138,7 +138,7 @@ class RunExperiment:
         test_data = []
         test_data2 = []
         if pref['test_data_size'] > 0:
-            print('test_data2')
+            logging.info('test_data2')
             for x in pad_generator(batch_generator(
                     generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
                                               pref['feature_name'], pref['label_name'],
@@ -151,7 +151,7 @@ class RunExperiment:
 
             test_data2 = [x for x in Xy_generator([test_data])][0]
 
-            print('test_data')
+            logging.info('test_data')
             test_data = []
             for x in pad_generator(batch_generator(
                     generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
@@ -169,7 +169,7 @@ class RunExperiment:
 
         dev_data = []
         if pref['dev_data_size'] > 0:
-            print('dev_data')
+            logging.info('dev_data')
             for x in pad_generator(batch_generator(
                     generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
                                               pref['feature_name'], pref['label_name'],
@@ -183,7 +183,7 @@ class RunExperiment:
         # self.test_data2=test_data2
         # self.dev_data=dev_data
 
-        print('train_data')
+        logging.info('train_data')
         train_data = DataGenerator(self.keras_data.data_path, self.keras_data.unique_features_dict, pref,
                                    range(pref['train_data_size']))
         self.train_data = train_data
@@ -258,21 +258,21 @@ class RunExperiment:
         print(self.keras_model.yaml_model())
 
     def run(self):
-        print('keras_data.load_data')
+        logging.info('keras_data.load_data')
         self.keras_data.load_data()
-        print('propagate_data_info')
+        logging.info('propagate_data_info')
         self.propagate_data_info()
-        print('learn_lemma')
+        logging.info('learn_lemma')
         self.learn_lemma()
-        print('keras_model.create_model')
+        logging.info('keras_model.create_model')
         self.keras_model.create_model()
-        print('keras_model.compile')
+        logging.info('keras_model.compile')
         self.keras_model.compile()
-        print('create_data')
+        logging.info('create_data')
         self.create_data()
-        print('print_parameters')
+        logging.info('print_parameters')
         self.print_parameters()
-        print('train')
+        logging.info('train')
         self.train()
 
         self.keras_model.model.save_weights(self.keras_model.parameters.pref['weight_path'] + '.final')
@@ -311,7 +311,7 @@ class RunExperimentFold2(RunExperiment):
         logging.info('Data creating')
         pref = self.keras_model.parameters.pref
 
-        print('test_data2')
+        logging.info('test_data2')
         test_data = []
         for x in pad_generator(batch_generator(
                 generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
@@ -324,7 +324,7 @@ class RunExperimentFold2(RunExperiment):
         test_data2 = [x for x in Xy_generator([test_data])][0]
         logging.info('Test data 2 created: %s' % len(test_data2[0]))
 
-        print('test_data')
+        logging.info('test_data')
         test_data = []
         for x in pad_generator(batch_generator(
                 generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
@@ -335,10 +335,10 @@ class RunExperimentFold2(RunExperiment):
         logging.info('Test data created: %s' % len(test_data))
 
         dev_data = []
-        print('dev_data')
+        logging.info('dev_data')
         print(pref)
         if pref['dev_data_ratio'] > 0.0:
-            print('dev_data go')
+            logging.info('dev_data go')
             for x in pad_generator(batch_generator(
                     generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
                                               pref['feature_name'], pref['label_name'],
@@ -348,7 +348,7 @@ class RunExperimentFold2(RunExperiment):
                     batch_size=len(self.train_ids[int(len(self.train_ids) * (1 - pref['dev_data_ratio'])):]))):
                 dev_data.append(x)
 
-        print('train_data')
+        logging.info('train_data')
         train_data = DataGenerator(self.keras_data.data_path, self.keras_data.unique_features_dict, pref,
                                    self.train_ids[:int(len(self.train_ids) * (1 - pref['dev_data_ratio']))])
         self.train_data = train_data
@@ -461,9 +461,9 @@ class RunFolds2:
         fmain = open('mainlog' + str(uuid.uuid1()), 'wt')
 
         for i, (train, test) in enumerate(kf.split(range(self.preferences['data_size']))):
-            print(i)
-            if 'fold' in pref and i != pref['fold']: continue
             logging.info('Fold %s' % i)
+            if 'fold' in pref and i != pref['fold']: continue
+            logging.info('Fold %s running' % i)
             parameters = keras_models.ExperimentParameters(self.preferences)
             fmain.write(parameters.h)
             fmain.write('\n')

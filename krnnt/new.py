@@ -156,7 +156,7 @@ class PreprocessData(Module):
                     sample.features['tags4e3'] = create_token_features(sample.features['token'],
                                                                        sample.features['tags'],
                                                                        sample.features['space_before'])
-                    print(sample.features)
+                    # print(sample.features)
 
                     # for operation in self.operations:
                 #     for sample in sentence:
