@@ -2,3 +2,15 @@
 2	placki	placki	_	subst:pl:nom:m1	_	_	_	_	_
 3	.	.	_	interp	_	_	_	_	_
 
+1	Ala	Ala	_	subst:sg:nom:f	_	_	_	_	_
+2	ma	ma	_	subst:sg:nom:f	_	_	_	_	_
+3	kota	kota	_	subst:sg:nom:f	_	_	_	_	_
+4	.	.	_	interp	_	_	_	_	_
+
+
+1	Raz	Raz	_	subst:sg:nom:f	_	_	_	_	_
+2	dwa	dwa	_	adj:pl:acc:f:pos	_	_	_	_	_
+3	trzy	trzy	_	subst:pl:acc:f	_	_	_	_	_
+4	.	.	_	interp	_	_	_	_	_
+
+

@@ -9,7 +9,7 @@ import time
 import traceback
 
 import collections
-from typing import List
+from typing import List, Iterable
 
 import morfeusz2
 import numpy as np
@@ -894,7 +894,7 @@ def analyze_token(morf: morfeusz2.Morfeusz, token: str):
     return interpretations
 
 
-def analyze_tokenized(morf: morfeusz2.Morfeusz, paragraphs: List[Paragraph]):
+def analyze_tokenized(morf: morfeusz2.Morfeusz, paragraphs: Iterable[Paragraph]):
     for p in paragraphs:
         for s in p:
             for token in s:

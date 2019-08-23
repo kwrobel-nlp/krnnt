@@ -5,3 +5,23 @@ placki	space
 .	none
 	.	interp	disamb
 
+Ala	space
+	Ala	subst:sg:nom:f	disamb
+ma	space
+	ma	subst:sg:nom:f	disamb
+kota	space
+	kota	subst:sg:nom:f	disamb
+.	none
+	.	interp	disamb
+
+
+Raz	newline
+	Raz	subst:sg:nom:f	disamb
+dwa	space
+	dwa	adj:pl:acc:f:pos	disamb
+trzy	space
+	trzy	subst:pl:acc:f	disamb
+.	none
+	.	interp	disamb
+
+

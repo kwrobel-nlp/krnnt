@@ -1,7 +1,7 @@
 {
   "documents": [
     {
-      "text": "Lubię placki. Ala ma kota.\nRaz dwa trzy.",
+      "text": "Lubię placki. Ala ma kota.",
       "sentences": [
         {
           "tokens": [
@@ -56,7 +56,7 @@
       ]
     },
     {
-      "text": "",
+      "text": "Raz dwa trzy.",
       "sentences": [
         {
           "tokens": [

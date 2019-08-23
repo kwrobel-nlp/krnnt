@@ -99,8 +99,9 @@ if __name__ == '__main__':
         results = krnnt.tag_paragraphs(corpus, preana=True)
     elif args.reanalyzed:
         data=sys.stdin.read().split('\n\n')
+        results=[]
         for batch in chunk(data, args.chunk_size):
-            results = krnnt.tag_paragraphs(batch) # ['Ala ma kota.', 'Ale nie ma psa.']
+            results += krnnt.tag_paragraphs(batch) # ['Ala ma kota.', 'Ale nie ma psa.']
     else:
         #f = io.StringIO(sys.stdin.read())
         if args.input_format== 'xces':

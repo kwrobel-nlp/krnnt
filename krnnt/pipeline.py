@@ -38,10 +38,10 @@ class KRNNTSingle:
     def tag_sentences_preana(self, sentences: List[Paragraph]):
         return self.__tag(sentences, preana=True)
 
-    def tag_paragraphs(self, paragraphs: List[str], preana=False):
+    def tag_paragraphs(self, paragraphs: Iterable[str], preana=False):
         return self.__tag_paragraphs(paragraphs, preana)
 
-    def __tag_paragraphs(self, paragraphs: List[str], preana):
+    def __tag_paragraphs(self, paragraphs: Iterable[str], preana):
 
 
         if preana:
@@ -136,7 +136,6 @@ class Preprocess:
                     sample.features['start'] = start
                     sample.features['end'] = end
                     sample.features['document_id'] = document_id
-                    print('OMG', sample.features)
                 Preprocess.create_features(sequence)
 
                 if sequence:
@@ -156,7 +155,6 @@ class Preprocess:
                     sample.features['space_before'] = ['space_before'] if token.space_before else ['no_space_before']
                     sample.features['space_before'].append(token.space_before)
                     sample.features['document_id'] = document_id
-                    print('OMG', sample.features)
                 Preprocess.create_features(sequence)
 
                 if sequence:

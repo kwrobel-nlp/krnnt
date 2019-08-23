@@ -2,3 +2,15 @@ Lubię	Lubię	1	adj:pl:nom:m1:pos	0	5
 placki	placki	1	subst:pl:nom:m1	6	12
 .	.	0	interp	12	13
 
+Ala	Ala	1	subst:sg:nom:f	14	17
+ma	ma	1	subst:sg:nom:f	18	20
+kota	kota	1	subst:sg:nom:f	21	25
+.	.	0	interp	25	26
+
+
+Raz	Raz	1	subst:sg:nom:f	0	3
+dwa	dwa	1	adj:pl:acc:f:pos	4	7
+trzy	trzy	1	subst:pl:acc:f	8	12
+.	.	0	interp	12	13
+
+

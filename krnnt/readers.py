@@ -1,5 +1,6 @@
 import logging
 import sys
+from typing import Generator
 from xml.etree import ElementTree as ET
 
 import jsonlines
@@ -71,7 +72,7 @@ def read_xces(file_path: str) -> Paragraph:
             elem.clear()
 
 
-def read_jsonl(file_path: str) -> Paragraph:
+def read_jsonl(file_path: str) -> Generator[Paragraph,None,None]:
     with jsonlines.Reader(file_path) as reader:
         for obj in reader:
             a = _list_to_paragraph(obj)
