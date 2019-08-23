@@ -96,11 +96,11 @@ if __name__ == '__main__':
 
         morf=get_morfeusz()
         corpus = analyze_tokenized(morf, corpus)
-        results = krnnt.tag_sentences(corpus, preana=True)
+        results = krnnt.tag_paragraphs(corpus, preana=True)
     elif args.reanalyzed:
         data=sys.stdin.read().split('\n\n')
         for batch in chunk(data, args.chunk_size):
-            results = krnnt.tag_sentences(batch) # ['Ala ma kota.', 'Ale nie ma psa.']
+            results = krnnt.tag_paragraphs(batch) # ['Ala ma kota.', 'Ale nie ma psa.']
     else:
         #f = io.StringIO(sys.stdin.read())
         if args.input_format== 'xces':
@@ -111,9 +111,9 @@ if __name__ == '__main__':
             print('Wrong input format.')
             sys.exit(1)
 
-        results = krnnt.tag_sentences(corpus, preana=True)
+        results = krnnt.tag_paragraphs(corpus, preana=True)
 
-    #print(results)
+    # print(results)
 
     if args.output_format == 'xces':
         conversion = results_to_xces_str

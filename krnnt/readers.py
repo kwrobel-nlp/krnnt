@@ -100,3 +100,68 @@ def _list_to_paragraph(l) -> Paragraph:
 
             sentence.add_token(token)
     return paragraph
+
+
+def json_to_objects(data):
+    paragraphs = []
+    for input_paragraph in data['documents']:
+        paragraph = Paragraph()
+        paragraphs.append(paragraph)
+        for input_sentence in input_paragraph['sentences']:
+            sentence = Sentence()
+            paragraph.add_sentence(sentence)
+            for input_token in input_sentence['tokens']:
+                token = Token()
+                token.form = input_token['form']
+                if len(input_token)>=2:
+                    separator=input_token['separator']
+                    if separator is not None:
+                        token.space_before=separator
+                    elif len(input_token)>=4:
+                        token.start=input_token['start']
+                        token.end = input_token['end']
+                        #infer separator before from positions
+                        if len(sentence.tokens)==0:
+                            token.space_before='space'
+                        else:
+                            if sentence.tokens[-1].end==token.start:
+                                token.space_before = 'none'
+                            else:
+                                token.space_before = 'space'
+                else:
+                    token.space_before = 'space'  # TODO ?
+                sentence.add_token(token)
+    return paragraphs
+
+
+def json_compact_to_objects(data):
+    paragraphs = []
+    for input_paragraph in data:
+        paragraph = Paragraph()
+        paragraphs.append(paragraph)
+        for input_sentence in input_paragraph:
+            sentence = Sentence()
+            paragraph.add_sentence(sentence)
+            for input_token in input_sentence:
+                token = Token()
+                token.form = input_token[0]
+                if len(input_token) >= 2:
+                    separator = input_token[1]
+                    if separator is not None:
+                        token.space_before = separator
+                    elif len(input_token) >= 4:
+                        token.start = input_token[2]
+                        token.end = input_token[3]
+                        # infer separator before from positions
+                        if len(sentence.tokens) == 0:
+                            token.space_before = 'space'
+                        else:
+                            if sentence.tokens[-1].end == token.start:
+                                token.space_before = 'none'
+                            else:
+                                token.space_before = 'space'
+                else:
+                    token.space_before = 'space'  # TODO ?
+                sentence.add_token(token)
+    return paragraphs
+

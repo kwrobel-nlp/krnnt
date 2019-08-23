@@ -231,12 +231,23 @@ KRNNT is licensed under GNU LGPL v3.0.
 
 # Input formats
 
-* raw text
-  * text format - documents are separated by double new line (empty line) 
+* text
+  * raw format (default) - one document (e.g. Wikipedia article, need of token offsets)
+  * `lines` format - documents are separated by empty line 
 * pretokenized text
   * JSON
     * verbose
     * compact
+
+Input format is determined automatically, except `lines` format.
+
+## Text
+
+### Raw format
+
+### Lines format
+
+?input_format=lines
 
 ## Pretokenized text
 

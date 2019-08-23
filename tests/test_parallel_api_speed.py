@@ -29,6 +29,7 @@ def chunk(l, batch_size):
     if batch:
         yield batch
 
+@pytest.mark.slow
 @pytest.mark.parametrize('chunk_size', [100000, 10000, 1000, 100, 10, 4, 2,1])
 def test_parallel_api(rootdir, chunk_size):
     print(rootdir, chunk_size)
@@ -48,14 +49,18 @@ def test_parallel_api(rootdir, chunk_size):
             r=future.result()
             # print(r.text)
 
-def test_parallel_api_maca(rootdir):
+@pytest.mark.slow
+@pytest.mark.parametrize('chunk_size', [100000,10,1])
+def test_parallel_api_maca(rootdir, chunk_size):
     lines=[]
-    for line in open(os.path.join(rootdir, 'data/full/test-raw.txt')):
+    for line in open(os.path.join(rootdir, 'data/full/train-raw.txt')):
         line = line.strip()
         if not line: continue
         lines.append(line)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_url = {executor.submit(tag, 'http://localhost:9200/maca/', line): line for line in lines}
+    batches = list(chunk(lines, chunk_size))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future_to_url = {executor.submit(tag, 'http://localhost:9200/maca/', "\n\n".join(batch)): "\n\n".join(batch) for batch in batches}
         for future in concurrent.futures.as_completed(future_to_url):
             r=future.result()

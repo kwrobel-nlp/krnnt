@@ -18,7 +18,7 @@ def test_post_raw(bash,rootdir):
         'cd %s' % rootdir,
         'cd ..',
         'curl -X POST "http://localhost:9200" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
-        'diff /tmp/out.txt tests/data/server/out_raw.txt'
+        'diff /tmp/out.txt tests/data/server/out_raw.plain'
     ]
 
     with bash() as s:
@@ -29,7 +29,7 @@ def test_post_raw_jsonl(bash,rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'curl -X POST "http://localhost:9200/?output_format=jsonl" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'curl -X POST "http://localhost:9200/?output_format=jsonl&input_format=lines" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
         'diff /tmp/out.txt tests/data/server/out_raw.jsonl'
     ]
 
@@ -41,7 +41,7 @@ def test_post_raw_conll(bash,rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'curl -X POST "http://localhost:9200/?output_format=conll" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'curl -X POST "http://localhost:9200/?output_format=conll&input_format=lines" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
         'diff /tmp/out.txt tests/data/server/out_raw.conll'
     ]
 
@@ -53,7 +53,7 @@ def test_post_raw_conllu(bash,rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'curl -X POST "http://localhost:9200/?output_format=conllu" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'curl -X POST "http://localhost:9200/?output_format=conllu&input_format=lines" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
         'diff /tmp/out.txt tests/data/server/out_raw.conllu'
     ]
 
@@ -65,7 +65,7 @@ def test_post_raw_xces(bash,rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'curl -X POST "http://localhost:9200/?output_format=xces" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
+        'curl -X POST "http://localhost:9200/?output_format=xces&input_format=lines" --data-binary @tests/data/server/in_raw.txt  > /tmp/out.txt',
         'diff /tmp/out.txt tests/data/server/out_raw.xces'
     ]
 
@@ -85,7 +85,7 @@ def test_post_form(bash, rootdir):
             s.run_script_inline([command])
 
     generated = open('/tmp/out.txt').read()
-    reference = open(os.path.join(rootdir,'data/server/out_raw.txt')).read()
+    reference = open(os.path.join(rootdir,'data/server/out_raw.plain')).read()
 
     assert reference in generated
 
@@ -94,7 +94,7 @@ def test_post_tokenized_json(bash, rootdir):
         'cd %s' % rootdir,
         'cd ..',
         'curl -X POST -H "Content-Type: application/json" "http://localhost:9200" -d @tests/data/server/in_tokenized.json > /tmp/out.txt',
-        'diff /tmp/out.txt tests/data/server/out_raw.txt'
+        'diff /tmp/out.txt tests/data/server/out_raw.plain'
     ]
 
     with bash() as s:
@@ -106,7 +106,7 @@ def test_post_tokenized_compact_json(bash, rootdir):
         'cd %s' % rootdir,
         'cd ..',
         'curl -X POST -H "Content-Type: application/json" "http://localhost:9200" -d @tests/data/server/in_tokenized_compact.json > /tmp/out.txt',
-        'diff /tmp/out.txt tests/data/server/out_raw.txt'
+        'diff /tmp/out.txt tests/data/server/out_raw.plain'
     ]
 
     with bash() as s:

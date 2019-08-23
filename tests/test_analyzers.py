@@ -19,11 +19,11 @@ MACA_CONFIG2='morfeusz2-nkjp'
 def test_maca():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        results = maca_analyzer._maca([paragraph_raw])
+        results = maca_analyzer._maca(paragraph_raw)
         results = list(results)
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        results = maca_analyzer._maca([paragraph_raw])
+        results = maca_analyzer._maca(paragraph_raw)
         results = list(results)
 
     assert len(results) == 1
@@ -32,11 +32,11 @@ def test_maca():
 def test_maca_process():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        results = maca_analyzer._maca_process([paragraph_raw])
+        results = maca_analyzer._maca_process(paragraph_raw)
         results = list(results)
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        results = maca_analyzer._maca_process([paragraph_raw])
+        results = maca_analyzer._maca_process(paragraph_raw)
         results = list(results)
 
     assert len(results) == 1
@@ -45,11 +45,11 @@ def test_maca_process():
 def test_maca_wrapper():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        results = maca_analyzer._maca_wrapper([paragraph_raw])
+        results = maca_analyzer._maca_wrapper(paragraph_raw)
         results = list(results)
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        results = maca_analyzer._maca_wrapper([paragraph_raw])
+        results = maca_analyzer._maca_wrapper(paragraph_raw)
         results = list(results)
 
     assert len(results) == 1

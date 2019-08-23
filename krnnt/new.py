@@ -4,12 +4,14 @@ import numbers
 import os.path
 import pickle
 import random
+import re
 import time
 import traceback
 
 import collections
 from typing import List
 
+import morfeusz2
 import numpy as np
 import regex
 from keras.callbacks import Callback
@@ -876,19 +878,23 @@ def get_morfeusz():
     return morf
 
 
-def analyze_token(morf, token):
+def analyze_token(morf: morfeusz2.Morfeusz, token: str):
     segment_interpretations = morf.analyse(token)
     # if token is tokenized then take all interpretation of segments starting from beginning of the token
     interpretations = []
     for start, end, interpretation in segment_interpretations:
         if start == 0:
             form, lemma, tag, domain, qualifier = interpretation
+            #TODO konwersja tagsetu
+            tag=convert_morfeusz2_to_nkjp(tag)
+            lemma = re.sub(r':[abcdijnopqsv]\d?$', '', lemma).replace('_', ' ') # remove senses
+
             interpretations.append((lemma, tag))
 
     return interpretations
 
 
-def analyze_tokenized(morf, paragraphs):
+def analyze_tokenized(morf: morfeusz2.Morfeusz, paragraphs: List[Paragraph]):
     for p in paragraphs:
         for s in p:
             for token in s:
@@ -896,3 +902,51 @@ def analyze_tokenized(morf, paragraphs):
                 print(interpretations)
                 token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
         yield p
+
+
+def convert_morfeusz2_to_nkjp(tag):
+    c={
+        # 'adv':'adv:pos',
+        'dig': 'num',
+        'romandig': 'num',
+        'emoticon': 'xxx',
+        'prefa': 'ign',
+        'prefppas': 'ign',
+        'prefs': 'ign',
+        'prefv': 'ign',
+        'nie': 'conj',
+        'naj': 'ign',
+        'cond': 'ign',
+        'substa': 'ign',
+        'part':'qub',
+        'frag':'burk',
+       }
+    if tag in c:
+        return c[tag]
+
+    splitted=tag.split(':')
+    try:
+        gender = splitted[3]
+        gender_map={
+            'n1':'n',
+            'n2':'n',
+            'p1':'m1',
+            'p2':'n',
+            'p3':'n,'
+        }
+        if gender in gender_map:
+            splitted[3]=gender_map[gender]
+
+    except IndexError:
+        pass
+
+    if splitted[-1] in ('col','ncol','pt'):
+        del splitted[-1]
+
+    try:
+        if splitted[3] in ('ter','pri','sec'):
+            del splitted[3]
+    except IndexError:
+        pass
+
+    return ':'.join(splitted)

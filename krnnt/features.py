@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, List
 
 from krnnt.utils import uniq, flatten, shape
 
@@ -25,11 +25,11 @@ class FeaturePreprocessor:
                   u's', u'ś', u'r', u'u', u't', u'w', u'y', u'x', u'z', u'ź', u'ż'}
 
     @staticmethod
-    def nic(form, features=None):
+    def nic(form: str, features: dict=None) -> List[str]:
         return ['NIC']
 
     @staticmethod
-    def cases(form, features=None): #TODO: wyrzucić? shape to realizuje
+    def cases(form, features=None) -> List[str]: #TODO: wyrzucić? shape to realizuje
         if form.islower():
             return ['islower']
         elif form.isupper():
@@ -42,26 +42,26 @@ class FeaturePreprocessor:
             return ['ismixed']
 
     @staticmethod
-    def interps(form, features):
+    def interps(form, features) -> List[str]:
         if 'interp' in features['tags'] and len(form) == 1:
             return [form]
         else:
             return []
 
     @staticmethod
-    def qubliki(form, features=None):
+    def qubliki(form, features=None) -> List[str]:
         if form.lower() in FeaturePreprocessor.qubs:
             return [form] #TODO: form.lower()
         else:
             return []
 
     @staticmethod
-    def shape(form, features=None):
+    def shape(form, features=None) -> List[str]:
         # print(form, shape(form))
         return [shape(form)]
 
     @staticmethod
-    def prefix(n, form, features=None):
+    def prefix(n, form, features=None) -> List[str]:
         try:
             char = form[n].lower()
             if char not in FeaturePreprocessor.safe_chars:
@@ -72,19 +72,19 @@ class FeaturePreprocessor:
         return ['P' + str(n) + char]
 
     @staticmethod
-    def prefix1(form, features=None):
+    def prefix1(form, features=None) -> List[str]:
         return FeaturePreprocessor.prefix(0, form, features)
 
     @staticmethod
-    def prefix2(form, features=None):
+    def prefix2(form, features=None) -> List[str]:
         return FeaturePreprocessor.prefix(1, form, features)
 
     @staticmethod
-    def prefix3(form, features=None):
+    def prefix3(form, features=None) -> List[str]:
         return FeaturePreprocessor.prefix(2, form, features)
 
     @staticmethod
-    def suffix(n, form, features=None):
+    def suffix(n, form, features=None) -> List[str]:
         try:
             char = form[-n].lower()
             if char not in FeaturePreprocessor.safe_chars:
@@ -95,25 +95,25 @@ class FeaturePreprocessor:
         return ['S' + str(n) + char]
 
     @staticmethod
-    def suffix1(form, features=None):
+    def suffix1(form, features=None) -> List[str]:
         return FeaturePreprocessor.suffix(1, form, features)
 
     @staticmethod
-    def suffix2(form, features=None):
+    def suffix2(form, features=None) -> List[str]:
         return FeaturePreprocessor.suffix(2, form, features)
 
     @staticmethod
-    def suffix3(form, features=None):
+    def suffix3(form, features=None) -> List[str]:
         return FeaturePreprocessor.suffix(3, form, features)
 
 
 class TagsPreprocessorCython:
     @staticmethod
-    def create_tags4_without_guesser(tags, features=None):
+    def create_tags4_without_guesser(tags, features=None) -> List[str]:
         return krnnt_utils.create_tags4_without_guesser(tags)
 
     @staticmethod
-    def create_tags5_without_guesser(tags, features=None):
+    def create_tags5_without_guesser(tags, features=None) -> List[str]:
         return krnnt_utils.create_tags5_without_guesser(tags)
 
 
@@ -124,18 +124,18 @@ class TagsPreprocessor:
     gnd = ['m1', 'm2', 'm3', 'f', 'n']
 
     @staticmethod
-    def create_tags4(tags, features=None, keep_guesser=True):  # concraft
+    def create_tags4(tags, features=None, keep_guesser=True) -> List[str]:  # concraft
         if not keep_guesser and 'ign' in tags:
             return ['ign']
             # return ['1ign','2ign','1subst:nom','2subst:sg:f','1adj:nom','1subst:gen','2subst:sg:n','2subst:sg:m1','2adj:sg:m3:pos','2subst:sg:m3','1num:acc','2num:pl:m3:rec','1brev','2adj:sg:n:pos','2num:pl:m3:congr','1num:nom','1adj:gen','1adj:loc']
         return uniq(flatten(map(lambda tag: TagsPreprocessor.create_tag4(tag), tags)))
 
     @staticmethod
-    def create_tags4_without_guesser(tags, features=None):
+    def create_tags4_without_guesser(tags, features=None) -> List[str]:
         return TagsPreprocessor.create_tags4(tags, features=features, keep_guesser=False)
 
     @staticmethod
-    def create_tag4(otag, features=None):
+    def create_tag4(otag, features=None) -> List[str]:
         tags = flatten(map(lambda x: x.split('.'), otag.split(':')))
         pos = tags[0]
         tags = tags[1:]
@@ -159,7 +159,7 @@ class TagsPreprocessor:
         return uniq(tags2)
 
     @staticmethod
-    def create_tags5(tags, features=None, keep_guesser=True):  # concraft
+    def create_tags5(tags, features=None, keep_guesser=True) -> List[str]:  # concraft
         if not keep_guesser and 'ign' in tags:
             return ['ign']
             # return ['ign','sg:loc:m3','sg:nom:n','pl:nom:m3','pl:acc:m3','loc','sg:gen:m3','pl:gen:m3','sg:nom:m1','sg:nom:m3','gen','nom','acc','sg:nom:f']
@@ -167,11 +167,11 @@ class TagsPreprocessor:
         return uniq(flatten(map(lambda tag: TagsPreprocessor.create_tag5(tag), tags)))
 
     @staticmethod
-    def create_tags5_without_guesser(tags, features=None):
+    def create_tags5_without_guesser(tags, features=None) -> List[str]:
         return TagsPreprocessor.create_tags5(tags, features=features, keep_guesser=False)
 
     @staticmethod
-    def create_tag5(otag, features=None):
+    def create_tag5(otag, features=None) -> List[str]:
 
         tags = flatten(map(lambda x: x.split('.'), otag.split(':')))
 
@@ -193,7 +193,7 @@ class TagsPreprocessor:
 
         return uniq(tags_out)
 
-def create_token_features(token, tags, space_before): #TODO
+def create_token_features(token, tags, space_before) -> List[str]: #TODO
     f = []
     f+=FeaturePreprocessor.cases(token)
     f+=FeaturePreprocessor.interps(token, {'tags':tags})

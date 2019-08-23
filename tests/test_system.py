@@ -1,5 +1,14 @@
 import pytest
 
+def test_download_model(bash, rootdir):
+    commands = [
+        'cd %s' % rootdir,
+        './download_model.sh'
+    ]
+
+    with bash() as s:
+        for command in commands:
+            s.run_script_inline([command])
 
 def test_process_xces(bash, rootdir):
     commands = [
@@ -62,7 +71,7 @@ def test_run_xces(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'echo "Lubię placki." | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces > /tmp/out.xces',
+        'python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces > /tmp/out.xces < tests/data/reference/in_raw.txt',
         'diff /tmp/out.xces tests/data/reference/out.xces'
     ]
 
@@ -74,7 +83,7 @@ def test_run_xces_from_training(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'echo "Lubię placki." | python3 krnnt_run.py weight_test.hdf5.final lemmatisation_test.pkl /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces > /tmp/out.xces',
+        'python3 krnnt_run.py weight_test.hdf5.final lemmatisation_test.pkl /tmp/nkjp-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o xces > /tmp/out.xces < tests/data/reference/in_raw.txt',
         'diff /tmp/out.xces tests/data/reference/out.xces'
     ]
 
@@ -86,7 +95,7 @@ def test_run_plain(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'echo "Lubię placki." | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o plain > /tmp/out.plain',
+        'python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o plain > /tmp/out.plain < tests/data/reference/in_raw.txt',
         'diff /tmp/out.plain tests/data/reference/out.plain'
     ]
 
@@ -99,7 +108,7 @@ def test_run_conll(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'echo "Lubię placki." | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o conll > /tmp/out.conll',
+        'python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o conll > /tmp/out.conll < tests/data/reference/in_raw.txt',
         'diff /tmp/out.conll tests/data/reference/out.conll'
     ]
 
@@ -112,7 +121,7 @@ def test_run_conllu(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'echo "Lubię placki." | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o conllu > /tmp/out.conllu',
+        'python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o conllu > /tmp/out.conllu < tests/data/reference/in_raw.txt',
         'diff /tmp/out.conllu tests/data/reference/out.conllu'
     ]
 
@@ -126,7 +135,7 @@ def test_run_jsonl(bash, rootdir):
         'cd %s' % rootdir,
         'cd ..',
 
-        'echo "Lubię placki." | python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o jsonl > /tmp/out.jsonl',
+        'python3 krnnt_run.py tests/data/reference/weight_test.hdf5.final tests/data/reference/lemmatisation_test.pkl tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues --maca_config $MACA_CONFIG -o jsonl > /tmp/out.jsonl < tests/data/reference/in_raw.txt',
         'diff /tmp/out.jsonl tests/data/reference/out.jsonl'
     ]
 

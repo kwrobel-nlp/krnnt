@@ -2,7 +2,7 @@ import logging
 import re
 import sys
 from subprocess import PIPE, Popen
-from typing import Iterable
+from typing import Iterable, Generator, List, Tuple
 
 from krnnt.structure import Form, Token, Sentence, Paragraph
 from krnnt.utils import uniq
@@ -19,16 +19,22 @@ class MacaAnalyzer:
     def __init__(self, maca_config: str, toki_config_path: str = ''):
         self.maca_config = maca_config
         self.toki_config_path = toki_config_path
-        self.configure_maca()
+        self.configure()
 
-    def configure_maca(self):
+    def _maca(self, text: str) -> Generator[str, None, None]:
+        """
+        Yields output of Maca by sentences,
+        """
+        raise NotImplementedError()
+
+    def configure(self):
         if 'maca_analyse' in sys.modules:
             self._maca = self._maca_wrapper
         else:
             self._maca = self._maca_process
 
     def analyze(self, text: str) -> Paragraph:
-        results = self._maca([text])
+        results = self._maca(text)
 
         paragraph_reanalyzed = Paragraph()
         for i, res in enumerate(results):
@@ -47,13 +53,14 @@ class MacaAnalyzer:
                 token_reanalyzed.end = end
         return paragraph_reanalyzed
 
-    def _maca_process(self, batch: Iterable[str]):
+    def _maca_process(self, text: str) -> Generator[str, None, None]:
         cmd = ['maca-analyse', '-c', self.maca_config, '-l']
         if self.toki_config_path:
             cmd.extend(['--toki-config-path', self.toki_config_path])
         p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
-        self.text = '\n'.join(batch)
+        self.text = text
+        # self.text = '\n'.join(batch)
         self.last_offset = 0
 
         stdout = p.communicate(input=self.text.encode('utf-8'))[0]
@@ -68,8 +75,9 @@ class MacaAnalyzer:
             if len(i) > 0:
                 yield i
 
-    def _maca_wrapper(self, batch: Iterable[str]):
-        self.text = '\n'.join(batch)
+    def _maca_wrapper(self, text: str) -> Generator[str, None, None]:
+        # self.text = '\n'.join(batch)
+        self.text = text
         self.last_offset = 0
 
         output_text = maca_analyse(self.maca_config, self.toki_config_path, self.text)
@@ -78,7 +86,10 @@ class MacaAnalyzer:
             if len(i) > 0:
                 yield i
 
-    def _parse(self, output):
+    def _parse(self, output: str) -> List[Tuple[str, str, List[Tuple[str, str]], int, int]]:
+        """
+        Parses one sentence output of Maca.
+        """
         data = []
         lemma_lines = []
         token_line = None
@@ -105,7 +116,7 @@ class MacaAnalyzer:
 
         return tokens
 
-    def _construct(self, token_line, lemma_lines):
+    def _construct(self, token_line: str, lemma_lines: Iterable[str]) -> Tuple[str, str, List[Tuple[str, str]]]:
         try:
             if token_line == '': return None
             form, space_before = token_line.split("\t")

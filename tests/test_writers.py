@@ -1,7 +1,7 @@
 from krnnt.writers import results_to_conll_str, results_to_conllu_str, results_to_txt_str, results_to_plain_str, \
     results_to_xces_str
 
-results = [[{'token': 'Lubię', 'sep': 'newline', 'prob': 0.37375012, 'tag': 'adj:pl:nom:m1:pos', 'lemmas': ['Lubię'],
+results = [[[{'token': 'Lubię', 'sep': 'newline', 'prob': 0.37375012, 'tag': 'adj:pl:nom:m1:pos', 'lemmas': ['Lubię'],
              'start': 0, 'end': 5},
             {'token': 'placki', 'sep': 'space', 'prob': 0.38550463, 'tag': 'subst:pl:nom:m1', 'lemmas': ['placki'],
              'start': 6, 'end': 12},
@@ -14,7 +14,7 @@ results = [[{'token': 'Lubię', 'sep': 'newline', 'prob': 0.37375012, 'tag': 'ad
                {'token': 'kota', 'sep': 'space', 'prob': 0.93132496, 'tag': 'subst:sg:nom:f', 'lemmas': ['kota'],
                 'start': 21, 'end': 25},
                {'token': '.', 'sep': 'none', 'prob': 0.9999993, 'tag': 'interp', 'lemmas': ['.'], 'start': 25,
-                'end': 26}], [
+                'end': 26}]], [[
                {'token': 'Raz', 'sep': 'space', 'prob': 0.23650545, 'tag': 'subst:sg:nom:f', 'lemmas': ['Raz'],
                 'start': 27, 'end': 30},
                {'token': 'dwa', 'sep': 'space', 'prob': 0.581044, 'tag': 'adj:pl:acc:f:pos', 'lemmas': ['dwa'],
@@ -22,7 +22,7 @@ results = [[{'token': 'Lubię', 'sep': 'newline', 'prob': 0.37375012, 'tag': 'ad
                {'token': 'trzy', 'sep': 'space', 'prob': 0.71970826, 'tag': 'subst:pl:acc:f', 'lemmas': ['trzy'],
                 'start': 35, 'end': 39},
                {'token': '.', 'sep': 'none', 'prob': 0.99999905, 'tag': 'interp', 'lemmas': ['.'], 'start': 39,
-                'end': 40}]]
+                'end': 40}]]]
 
 
 def test_conll():
@@ -36,10 +36,12 @@ ma	ma	1	subst:sg:nom:f	18	20
 kota	kota	1	subst:sg:nom:f	21	25
 .	.	0	interp	25	26
 
+
 Raz	Raz	1	subst:sg:nom:f	27	30
 dwa	dwa	1	adj:pl:acc:f:pos	31	34
 trzy	trzy	1	subst:pl:acc:f	35	39
 .	.	0	interp	39	40
+
 """
     output = results_to_conll_str(results)
     assert output == reference
@@ -55,10 +57,12 @@ def test_conllu():
 3	kota	kota	_	subst:sg:nom:f	_	_	_	_	_
 4	.	.	_	interp	_	_	_	_	_
 
+
 1	Raz	Raz	_	subst:sg:nom:f	_	_	_	_	_
 2	dwa	dwa	_	adj:pl:acc:f:pos	_	_	_	_	_
 3	trzy	trzy	_	subst:pl:acc:f	_	_	_	_	_
 4	.	.	_	interp	_	_	_	_	_
+
 """
     output = results_to_conllu_str(results)
     assert output == reference
@@ -67,7 +71,9 @@ def test_txt():
     reference=\
 """Lubię placki.
 Ala ma kota.
+
 Raz dwa trzy.
+
 """
     output = results_to_txt_str(results)
 
@@ -91,6 +97,7 @@ kota	space
 .	none
 	.	interp	disamb
 
+
 Raz	space
 	Raz	subst:sg:nom:f	disamb
 dwa	space
@@ -99,6 +106,7 @@ trzy	space
 	trzy	subst:pl:acc:f	disamb
 .	none
 	.	interp	disamb
+
 """
     output = results_to_plain_str(results)
     assert output == reference
@@ -125,8 +133,6 @@ def test_xces():
     <lex disamb="1"><base>.</base><ctag>interp</ctag></lex>
    </tok>
   </chunk>
- </chunk>
- <chunk type="p">
   <chunk type="s">
    <tok>
     <orth>Ala</orth>

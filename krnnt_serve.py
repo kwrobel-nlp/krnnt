@@ -1,29 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import io
 import logging
 import sys
 from argparse import ArgumentParser
-from optparse import OptionParser
-import time
 
-import flask
-import tensorflow
 from flask import Flask
 from flask import request
-from flask import g, current_app
-from keras import backend as K
+from krnnt.additional_format import additional_format
 from krnnt.analyzers import MacaAnalyzer
-from krnnt.structure import Paragraph, Sentence, Token
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
 from krnnt.writers import results_to_conll_str, results_to_jsonl_str, results_to_conllu_str, results_to_plain_str, \
     results_to_xces_str
-from krnnt.readers import read_xces
+from krnnt.readers import json_to_objects, json_compact_to_objects
 from krnnt.pipeline import KRNNTSingle
-
-import threading
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -57,98 +48,45 @@ def gui():
     return render()
 
 
-def json_to_objects(data):
-    paragraphs = []
-    for input_paragraph in data['documents']:
-        paragraph = Paragraph()
-        paragraphs.append(paragraph)
-        for input_sentence in input_paragraph['sentences']:
-            sentence = Sentence()
-            paragraph.add_sentence(sentence)
-            for input_token in input_sentence['tokens']:
-                token = Token()
-                token.form = input_token['form']
-                if len(input_token)>=2:
-                    separator=input_token['separator']
-                    if separator is not None:
-                        token.space_before=separator
-                    elif len(input_token)>=4:
-                        token.start=input_token['start']
-                        token.end = input_token['end']
-                        #infer separator before from positions
-                        if len(sentence.tokens)==0:
-                            token.space_before='space'
-                        else:
-                            if sentence.tokens[-1].end==token.start:
-                                token.space_before = 'none'
-                            else:
-                                token.space_before = 'space'
-                else:
-                    token.space_before = 'space'  # TODO ?
-                sentence.add_token(token)
-    return paragraphs
-
-def json_compact_to_objects(data):
-    paragraphs = []
-    for input_paragraph in data:
-        paragraph = Paragraph()
-        paragraphs.append(paragraph)
-        for input_sentence in input_paragraph:
-            sentence = Sentence()
-            paragraph.add_sentence(sentence)
-            for input_token in input_sentence:
-                token = Token()
-                token.form = input_token[0]
-                if len(input_token) >= 2:
-                    separator = input_token[1]
-                    if separator is not None:
-                        token.space_before = separator
-                    elif len(input_token) >= 4:
-                        token.start = input_token[2]
-                        token.end = input_token[3]
-                        # infer separator before from positions
-                        if len(sentence.tokens) == 0:
-                            token.space_before = 'space'
-                        else:
-                            if sentence.tokens[-1].end == token.start:
-                                token.space_before = 'none'
-                            else:
-                                token.space_before = 'space'
-                else:
-                    token.space_before = 'space'  # TODO ?
-                sentence.add_token(token)
-    return paragraphs
-
-
 @app.route('/', methods=['POST'])
 def tag_raw():
     request.get_data()
 
+    input_format = request.args.get('input_format', default=None, type=str)
     output_format = request.args.get('output_format', default='plain', type=str)
-    # filter = request.args.get('filter', default='*', type=str)
+
     conversion = get_output_converter(output_format)
 
     if request.is_json:
         data = request.get_json()
 
-        if 'documents' in data:
-            paragraphs=json_to_objects(data)
+        if 'docs' in data:
+            return additional_format(data, krnntx, morfeusz)
         else:
-            paragraphs = json_compact_to_objects(data)
+            if 'documents' in data:
+                paragraphs = json_to_objects(data)
+            else:
+                paragraphs = json_compact_to_objects(data)
 
-
-        corpus = analyze_tokenized(morfeusz, paragraphs)
-        results = krnntx.tag_sentences(corpus, preana=True)
-        return conversion(results)
-
+            corpus = analyze_tokenized(morfeusz, paragraphs)
+            results = krnntx.tag_paragraphs(corpus, preana=True)
+            return conversion(results)
     elif 'text' in request.form:
         text = request.form['text']
-        results = krnntx.tag_sentences(text.split('\n\n'))  # ['Ala ma kota.', 'Ale nie ma psa.']
+
+
+
+        results = krnntx.tag_paragraphs([text])  # ['Ala ma kota.', 'Ale nie ma psa.']
         return render(text, conversion(results))
     else:
         text = request.get_data()
-        # print(text.decode('utf-8').split('\n\n'))
-        results = krnntx.tag_sentences(text.decode('utf-8').split('\n\n'))
+
+        if input_format == 'lines':
+            data = text.decode('utf-8').split('\n\n') #TODO
+        else:
+            data = [text.decode('utf-8')]
+        print(data)
+        results = krnntx.tag_paragraphs(data)
         return conversion(results)
 
 

@@ -200,8 +200,8 @@ if __name__ == '__main__':
         TAGS: {
             POSITIVE: [lambda tag: tag == 'adjp:dat',
                        lambda tag: tag == 'adjp:gen',
-                       lambda tag: tag == 'adjp:frag',
-                       lambda tag: tag == 'adjp:part'],
+                       lambda tag: tag == 'frag',
+                       lambda tag: tag == 'part'],
             NEGATIVE: [lambda tag: tag == 'adjp',
                        lambda tag: tag == 'burk',
                        lambda tag: tag == 'qub']
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         }
     }
 
-    checks['emo'] = {
+    checks['ign'] = {
         TAGS: {
             POSITIVE: [],
             NEGATIVE: [lambda tag: tag == 'ign']
@@ -309,6 +309,56 @@ if __name__ == '__main__':
             NEGATIVE: []
         }
     }
+
+
+    test_data = [
+        ('IV', '', 'num:::'),
+        ('IV', '', 'romandig'),
+        ('1', '', 'dig'),
+        ('prostu', 'adjp', 'adjp:gen'),
+        (':)', '', 'emo'),
+        ('godzien', 'adjc', ''),
+        ('oślep', 'burk', 'frag'),
+        ('obojga', 'numcol:pl:gen:m1:rec', ''),
+        ('dwoje', 'numcol:pl:acc:m1:rec', ''),
+        ('czworo', 'numcol:pl:nom:m1:rec', ''),
+        ('hej', 'interj', ''),
+        ('jeszcze', 'qub', 'part'),
+        ('czterem', 'num:pl:dat:m1:congr', ''),
+        ('czym', 'conj', 'comp'),
+        ('niedaleko', 'prep:gen', ''),
+        ('doprawdy', 'qub', 'adv'),
+        ('jak', 'qub', 'adv'),
+        ('pół', '', 'numcomp'),
+        ('pół', '', 'num:comp'),
+        ('pół', 'num:pl:acc:n:rec', ''),
+        ('słowa', 'subst:pl:acc:n', 'subst:sg:gen:n:ncol'),
+        ('rozklepywało', '', 'praet:sg:n1:ter:imperf'),
+        ('bardzo', 'adv:pos', 'adv'),
+        ('bardziej', 'adv:com', ''),
+        ('znacząco', 'adv:pos', 'pacta'),
+        ('my', '', 'ppron12:pl:nom:_:pri'),
+        ('sobie', 'siebie:dat', ''),
+        ('zł', 'brev:npun', 'brev'),
+    ]
+
+    for formX, exist, not_exist in test_data:
+        ch={
+            TAGS: {
+                POSITIVE: [],
+                NEGATIVE: []
+            },
+            FORMS: {
+                POSITIVE: [],
+                NEGATIVE: []
+            }
+        }
+        if exist:
+            ch[FORMS][POSITIVE]=[lambda form, tag: form == formX and tag == exist]
+        if not_exist:
+            ch[FORMS][NEGATIVE]=[lambda form, tag: form == formX and tag == not_exist]
+
+        checks[f"{formX}, {exist}, {not_exist}"]=ch
 
     for date, functions in checks.items():
         print('Checking: %s' % date)
