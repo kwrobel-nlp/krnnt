@@ -899,7 +899,7 @@ def analyze_tokenized(morf: morfeusz2.Morfeusz, paragraphs: Iterable[Paragraph])
         for s in p:
             for token in s:
                 interpretations = analyze_token(morf, token.form)
-                print(interpretations)
+                # print(interpretations)
                 token.interpretations.extend([Form(base, ctag) for (base, ctag) in interpretations])
         yield p
 

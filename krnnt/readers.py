@@ -89,7 +89,7 @@ def _list_to_paragraph(l) -> Paragraph:
             form=t[0]
             token.form = form
 
-            print(t)
+            # print(t)
             try:
                 space=t[1]
                 token.space_before = (space == 1)

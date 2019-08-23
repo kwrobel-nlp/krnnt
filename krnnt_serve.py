@@ -85,7 +85,7 @@ def tag_raw():
             data = text.decode('utf-8').split('\n\n') #TODO
         else:
             data = [text.decode('utf-8')]
-        print(data)
+
         results = krnntx.tag_paragraphs(data)
         return conversion(results)
 
