@@ -11,10 +11,10 @@ MACA_CONFIG2 = 'morfeusz2-nkjp'
 def get_maca_wrapper():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        list(maca_analyzer._maca_wrapper([paragraph_raw]))
+        list(maca_analyzer._maca_wrapper(paragraph_raw))
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        list(maca_analyzer._maca_wrapper([paragraph_raw]))
+        list(maca_analyzer._maca_wrapper(paragraph_raw))
 
     return maca_analyzer
 
@@ -23,10 +23,10 @@ def get_maca_wrapper():
 def get_maca_process():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        list(maca_analyzer._maca_process([paragraph_raw]))
+        list(maca_analyzer._maca_process(paragraph_raw))
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        list(maca_analyzer._maca_process([paragraph_raw]))
+        list(maca_analyzer._maca_process(paragraph_raw))
 
     return maca_analyzer
 
@@ -44,10 +44,10 @@ def analyze_wrapper(maca_analyzer, data):
 @pytest.mark.slow
 def test_maca_process_speed(benchmark, get_maca_process):
     maca_analyzer = get_maca_process
-    benchmark(analyze_process, maca_analyzer, [paragraph_raw])
+    benchmark(analyze_process, maca_analyzer, paragraph_raw)
 
 
 @pytest.mark.slow
 def test_maca_wrapper_speed(benchmark, get_maca_wrapper):
     maca_analyzer = get_maca_wrapper
-    benchmark(analyze_wrapper, maca_analyzer, [paragraph_raw])
+    benchmark(analyze_wrapper, maca_analyzer, paragraph_raw)

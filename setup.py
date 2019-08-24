@@ -1,19 +1,23 @@
 from setuptools import setup
 
 setup(name='krnnt',
-      version='0.2.0',
+      version='1.0.0',
       description='Part of speech tagger for Polish',
-      url='http://github.com/djstrong/krnnt',
+      url='https://github.com/kwrobel-nlp/krnnt',
       author='Krzysztof Wróbel',
       author_email='Wrobel.Krzysztof@gmail.com',
       packages=['krnnt'],
       license='LGPL',
       python_requires='>=3, <4',
       install_requires=[
-          'tensorflow-gpu','h5py','Keras','numpy','progress','progressbar2','regex','requests','setproctitle','termcolor','jsonlines',
-            'pytest','tqdm','flask','scikit-learn','gunicorn','gevent',
-            'pytest-shell @ https://api.github.com/repos/djstrong/pytest-shell/tarball/'
+          'Cython', 'h5py', 'Keras', 'numpy', 'regex', 'requests', 'jsonlines', 'tqdm', 'flask', 'gunicorn',
+          'krnnt_utils @ git+https://github.com/Zhylkaaa/krnnt_text_utils@cython'
       ],
+      extras_require={
+          'train': ['scikit-learn'],
+          'pytest': ['pytest', 'pytest-benchmark',
+                     'pytest-shell @ https://api.github.com/repos/djstrong/pytest-shell/tarball/'],
+          'tfcpu': ['tensorflow'],
+          'tfgpu': ['tensorflow-gpu']
+      },
       zip_safe=False)
-#pytest, tqdm, flask, sklearn, git+https://github.com/djstrong/pytest-shell.git
-#gunicorn gevent

@@ -17,7 +17,6 @@ import regex
 from keras.callbacks import Callback
 from keras.preprocessing import sequence
 from krnnt.features import create_token_features
-from progress.bar import Bar
 from tqdm import tqdm
 
 from krnnt.utils import uniq
@@ -616,10 +615,7 @@ class UnalignedSimpleEvaluator(Evaluator):
         i = 0
         zero = 0
         errors = []
-        bar = Bar('Processing %s' % str(self.__class__.__name__),
-                  suffix='%(index)d/%(max)d %(percent).1f%% - %(eta_td)s - %(elapsed_td)s', max=len(predictions))
-        for a, b, e, sentence, sentence_orig in zip(y_train, predictions, X_train, sentences, sentences_orig):
-            bar.next()
+        for a, b, e, sentence, sentence_orig in tqdm(zip(y_train, predictions, X_train, sentences, sentences_orig), total=len(predictions), desc='Processing %s' % str(self.__class__.__name__)):
             # print tested_sentences[i]
             length = min(len(a), len(sentence))
             # print length
@@ -655,7 +651,7 @@ class UnalignedSimpleEvaluator(Evaluator):
 
             i += 1
 
-        bar.finish()
+        # bar.finish()
 
         return acc_lower.tp, acc_lower.tn, acc_lower.accuracy(), acc_pos_em.tp, acc_pos_em.tn, acc_pos_em.accuracy(), acc_k_lower.tp, acc_k_lower.tn, acc_k_lower.accuracy(), acc_u_lower.tp, acc_u_lower.tn, acc_u_lower.accuracy(), acc_upper.tp, acc_upper.tn, acc_upper.accuracy(), test_time
 

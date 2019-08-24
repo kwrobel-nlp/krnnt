@@ -11,11 +11,11 @@ MACA_CONFIG2 = 'morfeusz2-nkjp'
 def get_maca_wrapper():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        list(maca_analyzer._maca_wrapper([paragraph_raw]))
+        list(maca_analyzer._maca_wrapper(paragraph_raw))
         maca_analyzer._maca = maca_analyzer._maca_wrapper
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        list(maca_analyzer._maca_wrapper([paragraph_raw]))
+        list(maca_analyzer._maca_wrapper(paragraph_raw))
         maca_analyzer._maca = maca_analyzer._maca_wrapper
 
     return maca_analyzer
@@ -25,11 +25,11 @@ def get_maca_wrapper():
 def get_maca_process():
     try:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG1)
-        list(maca_analyzer._maca_process([paragraph_raw]))
+        list(maca_analyzer._maca_process(paragraph_raw))
         maca_analyzer._maca = maca_analyzer._maca_process
     except:
         maca_analyzer = MacaAnalyzer(MACA_CONFIG2)
-        list(maca_analyzer._maca_process([paragraph_raw]))
+        list(maca_analyzer._maca_process(paragraph_raw))
         maca_analyzer._maca = maca_analyzer._maca_process
 
     return maca_analyzer
