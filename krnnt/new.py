@@ -11,7 +11,6 @@ import traceback
 import collections
 from typing import List, Iterable
 
-import morfeusz2
 import numpy as np
 import regex
 from keras.callbacks import Callback
@@ -72,7 +71,7 @@ class FormatDataPreAnalyzed(Module):
                     sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
                     sample.features['label'] = token.gold_form.tags
                     sample.features['lemma'] = token.gold_form.lemma
-                    sample.features['space_before'] = ['space_before'] if token.space_before else ['no_space_before']
+                    sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else ['no_space_before']
 
                 paragraph_sequence.append((sequence, sequence))
             sp.add(paragraph_sequence)
@@ -104,7 +103,7 @@ class FormatData2(Module):
                         sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
                         sample.features['label'] = token.gold_form.tags
                         sample.features['lemma'] = token.gold_form.lemma
-                        sample.features['space_before'] = ['space_before'] if token.space_before else [
+                        sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else [
                             'no_space_before']
                 else:
                     for token in sentence.tokens:
@@ -112,7 +111,7 @@ class FormatData2(Module):
                         sequence.append(sample)
                         sample.features['token'] = token.form
                         sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
-                        sample.features['space_before'] = ['space_before'] if token.space_before else [
+                        sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else [
                             'no_space_before']
 
                 sequence2 = []
@@ -125,7 +124,7 @@ class FormatData2(Module):
                     else:
                         sample.features['label'] = token_gold.gold_form.tags
                         sample.features['lemma'] = token_gold.gold_form.lemma
-                    sample.features['space_before'] = ['space_before'] if token_gold.space_before else [
+                    sample.features['space_before'] = ['space_before'] if is_separator_before(token_gold.space_before) else [
                         'no_space_before']
 
                 paragraph_sequence.append((sequence, sequence2))
@@ -134,6 +133,8 @@ class FormatData2(Module):
         file.close()
         file2.close()
 
+def is_separator_before(separator) -> bool:
+    return separator is True or (separator is not False and separator!='none')
 
 class PreprocessData(Module):
     def __init__(self, input_path: str, operations: List = None):
@@ -658,12 +659,12 @@ class UnalignedSimpleEvaluator(Evaluator):
 
 def text(buffer):
     return ''.join(
-        [' ' + x[0].replace('\xa0', '') if x[2] is True or x[2] == 'space' else x[0].replace('\xa0', '') for x in
+        [' ' + x[0].replace('\xa0', '') if is_separator_before(x[2]) else x[0].replace('\xa0', '') for x in
          buffer])
 
 
 def text_verbose(buffer):
-    return ''.join([' ' + x[0].features['token'].replace('\xa0', '') if x[2] is True or x[2] == 'space' else
+    return ''.join([' ' + x[0].features['token'].replace('\xa0', '') if is_separator_before(x[2]) else
                     x[0].features['token'].replace('\xa0', '') for x in buffer])
 
 
@@ -874,7 +875,7 @@ def get_morfeusz():
     return morf
 
 
-def analyze_token(morf: morfeusz2.Morfeusz, token: str):
+def analyze_token(morf, token: str):
     segment_interpretations = morf.analyse(token)
     # if token is tokenized then take all interpretation of segments starting from beginning of the token
     interpretations = []
@@ -890,7 +891,7 @@ def analyze_token(morf: morfeusz2.Morfeusz, token: str):
     return interpretations
 
 
-def analyze_tokenized(morf: morfeusz2.Morfeusz, paragraphs: Iterable[Paragraph]):
+def analyze_tokenized(morf, paragraphs: Iterable[Paragraph]):
     for p in paragraphs:
         for s in p:
             for token in s:

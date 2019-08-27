@@ -130,7 +130,7 @@ class Preprocess:
                     sample.features['maca_lemmas'] = interpretations
 
                     # TODO: cleanup space before
-                    sample.features['space_before'] = ['space_before'] if space_before == 'space' else [
+                    sample.features['space_before'] = ['space_before'] if space_before !='none' else [
                         'no_space_before']
                     sample.features['space_before'].append(space_before)
                     sample.features['start'] = start

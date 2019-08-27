@@ -12,21 +12,6 @@ def test_nic(token):
     assert ["NIC"] == FeaturePreprocessor.nic(token)
 
 
-@pytest.mark.xfail
-@pytest.mark.parametrize('token, expected', [('kot', 'islower'),
-                                             ('Kot', 'istitle'),
-                                             ('KOT', 'isupper'),
-                                             ('2019', 'isdigit'),
-                                             ('Kot:)', 'ismixed'),
-                                             ('kot:)', 'ismixed'),
-                                             ('KOT:)', 'ismixed'),
-                                             ('2019:)', 'ismixed')])
-def test_cases(token, expected):
-    features = FeaturePreprocessor.cases(token)
-    assert features[0] == expected
-    assert len(features) == 1
-
-
 def test_interps():
     assert ["."] == FeaturePreprocessor.interps('.', {'tags': ['interp']})
     assert [] == FeaturePreprocessor.interps('.', {'tags': ['subst']})
@@ -107,7 +92,7 @@ def test_create_token_features(benchmark):
     tags = ['subst:sg:loc:m3', 'subst:sg:voc:m3', 'subst:sg:dat:f', 'subst:sg:loc:f',
             'fin:sg:ter:perf']
     space_before = ['space_before']
-    features=['islower', 'l', 'P0o', 'P1b', 'P2e', 'S1e', 'S2i', 'S3m', '1subst:loc', '2subst:sg:m3',
+    features=['l', 'P0o', 'P1b', 'P2e', 'S1e', 'S2i', 'S3m', '1subst:loc', '2subst:sg:m3',
                           '1subst:voc', '1subst:dat', '2subst:sg:f', '1fin:ter', '2fin:sg:perf', 'sg:loc:m3', 'loc',
                           'sg:voc:m3', 'voc', 'sg:dat:f', 'dat', 'sg:loc:f', 'sg', 'space_before']
 

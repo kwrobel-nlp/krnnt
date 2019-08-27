@@ -29,19 +29,6 @@ class FeaturePreprocessor:
         return ['NIC']
 
     @staticmethod
-    def cases(form, features=None) -> List[str]: #TODO: wyrzucić? shape to realizuje
-        if form.islower():
-            return ['islower']
-        elif form.isupper():
-            return ['isupper']
-        elif form.istitle():
-            return ['istitle']
-        elif form.isdigit():
-            return ['isdigit']
-        else:
-            return ['ismixed']
-
-    @staticmethod
     def interps(form, features) -> List[str]:
         if 'interp' in features['tags'] and len(form) == 1:
             return [form]
@@ -51,7 +38,7 @@ class FeaturePreprocessor:
     @staticmethod
     def qubliki(form, features=None) -> List[str]:
         if form.lower() in FeaturePreprocessor.qubs:
-            return [form] #TODO: form.lower()
+            return [form.lower()] #TODO: form.lower()
         else:
             return []
 
@@ -195,7 +182,6 @@ class TagsPreprocessor:
 
 def create_token_features(token, tags, space_before) -> List[str]: #TODO
     f = []
-    f+=FeaturePreprocessor.cases(token)
     f+=FeaturePreprocessor.interps(token, {'tags':tags})
     f+=FeaturePreprocessor.qubliki(token)
     f+=FeaturePreprocessor.shape(token)  # 90%
@@ -210,5 +196,4 @@ def create_token_features(token, tags, space_before) -> List[str]: #TODO
     f+=TagsPreprocessorCython.create_tags5_without_guesser(tags)  # 3%
     f+=space_before
 
-
-    return f   # TODO czy uniq potrzebne - niekoenicznie: ign się powtarza
+    return f
