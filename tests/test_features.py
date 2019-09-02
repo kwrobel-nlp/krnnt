@@ -47,7 +47,6 @@ def test_suffix3():
     assert ["S3k"] == FeaturePreprocessor.suffix3('kot')
 
 
-@pytest.mark.xfail
 def test_qubliki():
     assert [] == FeaturePreprocessor.qubliki('kot')
     assert ['ale'] == FeaturePreprocessor.qubliki('ale')
@@ -69,6 +68,7 @@ def test_shape(token, expected):
 @pytest.mark.parametrize('tags, expected', [
     (['fin:sg:ter:imperf', 'subst:sg:nom:f'], ['1fin:ter', '2fin:sg:imperf', '1subst:nom',
                                                '2subst:sg:f']),
+    (['adjp:dat'], ['1adjp:dat', '2adjp']),
     (['interp'], ['1interp', '2interp']),
     ([''], ['1', '2']),
     ([], [])])
@@ -79,6 +79,7 @@ def test_tags4(tags, expected):
 
 @pytest.mark.parametrize('tags, expected', [
     (['fin:sg:ter:imperf', 'subst:sg:nom:f'], ['sg', 'sg:nom:f', 'nom']),
+    (['adjp:dat'], ['dat']),
     (['interp'], []),
     ([''], []),
     ([], [])])

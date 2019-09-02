@@ -44,6 +44,9 @@ class KerasModel:
         self.model.load_weights(path)
         logging.info('Weights loaded')
 
+    def load_model(self, path):
+        self.model = keras.models.load_model(path)
+
     def yaml_model(self):
         model_yaml = self.model.to_yaml()
         # TODO

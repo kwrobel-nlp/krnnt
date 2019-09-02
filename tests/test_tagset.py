@@ -48,6 +48,7 @@ test_data = [
 ]
 
 @pytest.mark.parametrize('form, exist, not_exist', test_data)
+@pytest.mark.xfail
 def test_maca(maca, form, exist, not_exist):
     paragraph=maca.analyze(form)
     sentence=paragraph.sentences[0]
@@ -60,6 +61,7 @@ def test_maca(maca, form, exist, not_exist):
         assert not_exist not in tags
 
 @pytest.mark.parametrize('form, exist, not_exist', test_data)
+@pytest.mark.xfail
 def test_morfeusz(maca, form, exist, not_exist):
     morfeusz = get_morfeusz()
     tags=[tag for form, tag in analyze_token(morfeusz, form)]

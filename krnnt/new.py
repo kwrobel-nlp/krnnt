@@ -9,7 +9,7 @@ import time
 import traceback
 
 import collections
-from typing import List, Iterable
+from typing import List, Iterable, Tuple
 
 import numpy as np
 import regex
@@ -50,6 +50,26 @@ class Module(object):
     def output_path(self) -> str:
         return self.input_path + '_' + str(self.__class__.__name__)
 
+def preprocess_paragraph_preanalyzed(paragraph: Paragraph) -> List[Tuple[List[Sample], List[Sample]]]:
+    paragraph_sequence = []
+    for sentence in paragraph:
+        sequence = []
+        for token in sentence.tokens:
+            sample = Sample()
+            sequence.append(sample)
+            sample.features['token'] = token.form
+            sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
+            sample.features['label'] = token.gold_form.tags
+            sample.features['lemma'] = token.gold_form.lemma
+            sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else [
+                'no_space_before']
+            sample.features['tags4e3'] = create_token_features(sample.features['token'],
+                                                               sample.features['tags'],
+                                                               sample.features['space_before'])
+
+        paragraph_sequence.append((sequence, sequence))
+    return  paragraph_sequence
+
 
 class FormatDataPreAnalyzed(Module):
 
@@ -60,25 +80,59 @@ class FormatDataPreAnalyzed(Module):
         file2 = open(self.output_path(), 'wb')
         sp = SerialPickler(file2)
 
-        for paragraph in tqdm(su, total=18484, desc='Processing'):
-            paragraph_sequence = []
-            for sentence in paragraph:
-                sequence = []
-                for token in sentence.tokens:
-                    sample = Sample()
-                    sequence.append(sample)
-                    sample.features['token'] = token.form
-                    sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
-                    sample.features['label'] = token.gold_form.tags
-                    sample.features['lemma'] = token.gold_form.lemma
-                    sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else ['no_space_before']
+        paragraph: Paragraph
+        for paragraph in tqdm(su, total=18484, desc='Processing %s' % str(self.__class__.__name__)):
+            paragraph_sequence=preprocess_paragraph_preanalyzed(paragraph)
 
-                paragraph_sequence.append((sequence, sequence))
             sp.add(paragraph_sequence)
 
         file.close()
         file2.close()
 
+def preprocess_paragraph_reanalyzed(paragraph: Paragraph) -> List[Tuple[List[Sample], List[Sample]]]:
+    paragraph_sequence = []
+    for sentence, sentence_gold in zip(paragraph, paragraph.concraft):
+        valid_training_data = len(sentence_gold.tokens) == len(sentence.tokens) and len(
+            [token.gold_form for token in sentence.tokens if token.gold_form is None]) == 0
+
+        sequence = []
+        for token in sentence.tokens:
+            sample = Sample()
+            sequence.append(sample)
+            sample.features['token'] = token.form
+            sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
+            if valid_training_data:
+                sample.features['label'] = token.gold_form.tags
+                sample.features['lemma'] = token.gold_form.lemma
+            sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else [
+                'no_space_before']
+            sample.features['tags4e3'] = create_token_features(sample.features['token'],
+                                                               sample.features['tags'],
+                                                               sample.features['space_before'])
+
+        sequence_gold = []
+        for token_gold in sentence_gold.tokens:
+            sample = Sample()
+            sequence_gold.append(sample)
+            sample.features['token'] = token_gold.form
+            if token_gold.gold_form is None:
+                sample.features['label'] = 'ign'
+            else:
+                sample.features['label'] = token_gold.gold_form.tags
+                sample.features['lemma'] = token_gold.gold_form.lemma
+            sample.features['space_before'] = ['space_before'] if is_separator_before(token_gold.space_before) else [
+                'no_space_before']
+
+        paragraph_sequence.append((sequence, sequence_gold))
+    return paragraph_sequence
+
+def serialize_sample_paragraph(paragraph: List[Tuple[List[Sample], List[Sample]]]):
+    result=[]
+    for sequence, sequence_gold in paragraph:
+        a=[sample.features for sample in sequence]
+        b=[sample.features for sample in sequence_gold]
+        result+=((a,b),)
+    return result
 
 class FormatData2(Module):
 
@@ -89,45 +143,14 @@ class FormatData2(Module):
         file2 = open(self.output_path(), 'wb')
         sp = SerialPickler(file2)
 
+        import jsonlines
+        jf=jsonlines.open(self.output_path()+'.jsonl', mode='w')
+
         paragraph: Paragraph
-        for paragraph in tqdm(su, total=18484, desc='Processing'):
-            paragraph_sequence = []
-            for sentence, sentence_gold in zip(paragraph, paragraph.concraft):
-                sequence = []
-                if len(sentence_gold.tokens) == len(sentence.tokens) and len(
-                        [token.gold_form for token in sentence.tokens if token.gold_form is None]) == 0:
-                    for token in sentence.tokens:
-                        sample = Sample()
-                        sequence.append(sample)
-                        sample.features['token'] = token.form
-                        sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
-                        sample.features['label'] = token.gold_form.tags
-                        sample.features['lemma'] = token.gold_form.lemma
-                        sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else [
-                            'no_space_before']
-                else:
-                    for token in sentence.tokens:
-                        sample = Sample()
-                        sequence.append(sample)
-                        sample.features['token'] = token.form
-                        sample.features['tags'] = uniq(map(lambda form: form.tags, token.interpretations))
-                        sample.features['space_before'] = ['space_before'] if is_separator_before(token.space_before) else [
-                            'no_space_before']
+        for paragraph in tqdm(su, total=18484, desc='Processing %s' % str(self.__class__.__name__)):
+            paragraph_sequence = preprocess_paragraph_reanalyzed(paragraph)
 
-                sequence2 = []
-                for token_gold in sentence_gold.tokens:
-                    sample = Sample()
-                    sequence2.append(sample)
-                    sample.features['token'] = token_gold.form
-                    if token_gold.gold_form is None:
-                        sample.features['label'] = 'ign'
-                    else:
-                        sample.features['label'] = token_gold.gold_form.tags
-                        sample.features['lemma'] = token_gold.gold_form.lemma
-                    sample.features['space_before'] = ['space_before'] if is_separator_before(token_gold.space_before) else [
-                        'no_space_before']
-
-                paragraph_sequence.append((sequence, sequence2))
+            jf.write(serialize_sample_paragraph(paragraph_sequence))
             sp.add(paragraph_sequence)
 
         file.close()
@@ -137,11 +160,8 @@ def is_separator_before(separator) -> bool:
     return separator is True or (separator is not False and separator!='none')
 
 class PreprocessData(Module):
-    def __init__(self, input_path: str, operations: List = None):
+    def __init__(self, input_path: str):
         super(PreprocessData, self).__init__(input_path)
-        if operations is None:
-            operations = []
-        self.operations = operations
 
     def _create(self):
         file = open(self.input_path, 'rb')
@@ -150,55 +170,79 @@ class PreprocessData(Module):
         file2 = open(self.output_path(), 'wb')
         sp = SerialPickler(file2)
 
+        paragraph: Paragraph
         for paragraph in tqdm(su, total=18484, desc='Processing %s' % str(self.__class__.__name__)):
             paragraph_sequence = []
-            for sentence, sentence_orig in paragraph:
+            for sentence, sentence_gold in paragraph:
                 sequence = list(sentence)
                 for sample in sentence:
                     sample.features['tags4e3'] = create_token_features(sample.features['token'],
                                                                        sample.features['tags'],
                                                                        sample.features['space_before'])
-                    # print(sample.features)
 
-                    # for operation in self.operations:
-                #     for sample in sentence:
-                #         operation.apply(sample, sentence)
-
-                paragraph_sequence.append((sequence, sentence_orig))
+                paragraph_sequence.append((sequence, sentence_gold))
             sp.add(paragraph_sequence)
 
         file.close()
         file2.close()
 
 
+def create_dict(paragraphs):
+    unique_dict = collections.defaultdict(dict)
+    index = collections.defaultdict(int)
+    for paragraph in tqdm(paragraphs, total=85663, desc='Processing'):
+        for sentence, sentence_orig in paragraph:
+            for sample in sentence:
+                for name, values in sample.features.items():
+                    if isinstance(values, str) or isinstance(values, numbers.Number):
+                        values = [values]
+
+                    for value in values:
+                        if value not in unique_dict[name]:
+                            unique_dict[name][value] = index[name]
+                            index[name] += 1
+
+            for sample in sentence_orig:
+                for name, values in sample.features.items():
+                    if isinstance(values, str) or isinstance(values, numbers.Number):
+                        values = [values]
+
+                    for value in values:
+                        if value not in unique_dict[name]:
+                            unique_dict[name][value] = index[name]
+                            index[name] += 1
+    return unique_dict
+
 class UniqueFeaturesValues(Module):
     def _create(self):
         file = open(self.input_path, 'rb')
         su = SerialUnpickler(file)
 
-        unique_dict = collections.defaultdict(dict)
-        index = collections.defaultdict(int)
-        for paragraph in tqdm(su, total=85663, desc='Processing %s' % str(self.__class__.__name__)):
-            for sentence, sentence_orig in paragraph:
-                for sample in sentence:
-                    for name, values in sample.features.items():
-                        if isinstance(values, str) or isinstance(values, numbers.Number):
-                            values = [values]
+        unique_dict = create_dict(su)
 
-                        for value in values:
-                            if value not in unique_dict[name]:
-                                unique_dict[name][value] = index[name]
-                                index[name] += 1
-
-                for sample in sentence_orig:
-                    for name, values in sample.features.items():
-                        if isinstance(values, str) or isinstance(values, numbers.Number):
-                            values = [values]
-
-                        for value in values:
-                            if value not in unique_dict[name]:
-                                unique_dict[name][value] = index[name]
-                                index[name] += 1
+        # unique_dict = collections.defaultdict(dict)
+        # index = collections.defaultdict(int)
+        # for paragraph in tqdm(su, total=85663, desc='Processing %s' % str(self.__class__.__name__)):
+        #     for sentence, sentence_orig in paragraph:
+        #         for sample in sentence:
+        #             for name, values in sample.features.items():
+        #                 if isinstance(values, str) or isinstance(values, numbers.Number):
+        #                     values = [values]
+        #
+        #                 for value in values:
+        #                     if value not in unique_dict[name]:
+        #                         unique_dict[name][value] = index[name]
+        #                         index[name] += 1
+        #
+        #         for sample in sentence_orig:
+        #             for name, values in sample.features.items():
+        #                 if isinstance(values, str) or isinstance(values, numbers.Number):
+        #                     values = [values]
+        #
+        #                 for value in values:
+        #                     if value not in unique_dict[name]:
+        #                         unique_dict[name][value] = index[name]
+        #                         index[name] += 1
 
         file.close()
 
@@ -423,7 +467,9 @@ def pad_generator(generator, sequence_length=20):
         max_sentence_length = max([len(x) for x in batch_X])
         # print('max_sentence_length',max_sentence_length)
         yield (sequence.pad_sequences(batch_X, maxlen=max_sentence_length),
-               sequence.pad_sequences(batch_y, maxlen=max_sentence_length), sentences, sentences_orig)
+               sequence.pad_sequences(batch_y, maxlen=max_sentence_length),
+               sentences,
+               sentences_orig)
 
 
 def Xy_generator(generator):
