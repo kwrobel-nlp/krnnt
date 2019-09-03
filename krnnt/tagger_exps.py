@@ -414,9 +414,12 @@ class RunExperiment2:
 
         callbacks = [dev_loss_history, loss_history,
                      keras.callbacks.ModelCheckpoint(pref['weight_path'], save_best_only=True, monitor='dev_val_score'),
-                     keras.callbacks.EarlyStopping(monitor='dev_val_score', patience=pref['patience'], mode='max'),
-                     keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1, batch_size=32, write_graph=True,
-                                                 write_grads=True, write_images=True)]  # , save_weights_only=True
+                     keras.callbacks.EarlyStopping(monitor='dev_val_score', patience=pref['patience'], mode='max'),]  # , save_weights_only=True
+
+        if pref['tensor_board']:
+            callbacks.append(keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1, batch_size=32, write_graph=True,
+                                                 write_grads=True, write_images=True))
+
         logging.info('Training...')
         print(len(self.keras_data.test_data2), len(self.keras_data.test_data.get()), len(self.keras_data.dev_data.get()))
         # self.train_data = pad_generator(

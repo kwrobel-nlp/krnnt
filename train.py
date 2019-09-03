@@ -40,6 +40,9 @@ if __name__ == '__main__':
     parser.add_argument('--maca_config',
                         default='morfeusz2-nkjp',
                         help='Maca config')
+    parser.add_argument('--tensor_board',
+                        action='store_true',
+                        help='save data for TensorBoard')
     parser.add_argument('-g', '--debug', action='store_true', dest='debug_mode')  # TODO
     parser.add_argument('--hash', action='store', default=None, dest='hash')
     parser.add_argument('--reproducible', action='store_true', default=False, help='set seeds')
@@ -69,6 +72,8 @@ if __name__ == '__main__':
     pref['reanalyze'] = args.reanalyzed
     pref['train_data_ratio'] = float(args.train_ratio)
     pref['dev_data_ratio'] = float(args.dev_ratio)
+
+    pref['tensor_board']= args.tensor_board
 
     pref['dev_data'] = args.dev_data
     pref['test_data'] = args.test_data
