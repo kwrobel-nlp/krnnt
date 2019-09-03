@@ -428,24 +428,21 @@ class RunExperiment2:
         #                                   stop=pref['train_data_size'], keep_infinity=False, keep_unaligned=True),
         #         batch_size=pref['batch_size']))
 
-        try:
-            self.keras_model.model.fit_generator(Xy_generator(pad_generator(
+
+        self.keras_model.model.fit_generator(Xy_generator(pad_generator(
                 batch_generator(
-                    generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
-                                              pref['feature_name'], pref['label_name'],
+                    generate_arrays_from_file(self.keras_data.data_path,
+                                              self.keras_data.unique_features_dict,
+                                              pref['feature_name'],
+                                              pref['label_name'],
                                               stop=pref['train_data_size']),
                     batch_size=pref['batch_size']))),
-                steps_per_epoch=int(pref['samples_per_epoch'] / pref['batch_size']), nb_epoch=pref['nb_epoch'],
-                validation_data=self.keras_data.test_data2, callbacks=callbacks)
-        except TypeError:
-            self.keras_model.model.fit_generator(Xy_generator(pad_generator(
-                batch_generator(
-                    generate_arrays_from_file(self.keras_data.data_path, self.keras_data.unique_features_dict,
-                                              pref['feature_name'], pref['label_name'],
-                                              stop=pref['train_data_size']),
-                    batch_size=pref['batch_size']))),
-                samples_per_epoch=int(pref['samples_per_epoch']), nb_epoch=pref['nb_epoch'],
-                validation_data=self.keras_data.test_data2, callbacks=callbacks)
+
+            steps_per_epoch=int(pref['samples_per_epoch'] / pref['batch_size']),
+            epochs=pref['nb_epoch'],
+            validation_data=self.keras_data.test_data2,
+            callbacks=callbacks)
+
 
     def propagate_data_info(self):
         pref = self.keras_model.parameters.pref
