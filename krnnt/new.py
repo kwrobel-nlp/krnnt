@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
 import numbers
 import os.path
 import pickle
@@ -359,7 +360,19 @@ class Lemmatisation():
                     if 'lemma' in sample.features:  # some samples doesnt have lemma, because not on gold segmentation
                         lemma_count[(sample.features['token'], sample.features['label'])][sample.features['lemma']] += 1
 
+        # print(lemma_count[('Morawieckiego','subst:sg:gen:m1')])
+        # defaultdict(<class 'int'>, {'morawieckiego': 7, 'Morawiecki': 7, 'Morawieckiego': 1})
+
         for k, v in lemma_count.items():
+            # try:
+            #     xxx = sorted(v.items(), key=lambda x: (x[1], x[0]), reverse=True)
+            #     if xxx[0][1]==xxx[1][1]:
+            #         print(k, xxx)
+            # except: pass
+
+            # if len(v)>1: print(k, sorted(v.items(), key=lambda x: (x[1], x[0]), reverse=True))
+            # TODO: lematyzacja w zależności od pozycji słowa w zdaniu - nie pierwsze słowo wtedy również wielka litera
+
             best = sorted(v.items(), key=lambda x: (x[1], x[0]), reverse=True)[0]  # TODO kilka z taka sama statystyka
             self.lemmas[k] = best[0]
 
@@ -371,12 +384,14 @@ class Lemmatisation():
 
         if not ilosc_disamb:
             ilosc_disamb = [(form, predicted_tag)]
-
+        # print(form, ilosc_disamb, predicted_tag)
         if (form, tag) in self.lemmas:
             pred_lemma = self.lemmas[(form, tag)]
         else:
             interp_lemmas = [lemma for (lemma, tag) in ilosc_disamb]
             pred_lemma = random.choice(interp_lemmas)
+            if len(interp_lemmas)>1:
+                logging.info('Random choice lemma %s: %s' % (form, interp_lemmas))
         return pred_lemma
         # print('\t%s\t%s\tdisamb' % (pred_lemma, tag))
 

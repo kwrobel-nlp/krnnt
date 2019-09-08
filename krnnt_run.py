@@ -13,19 +13,11 @@ from krnnt.readers import read_xces, read_jsonl
 from krnnt.writers import results_to_jsonl_str, results_to_conll_str, results_to_conllu_str, \
     results_to_xces_str, results_to_plain_str
 
-usage = """%prog MODEL LEMMATISATION_MODEL DICTIONARY < CORPUS_PATH
-
-
-
-E.g. %prog
-"""
-
-
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser(usage=usage)
+    parser = ArgumentParser(description='Run tagger')
     parser.add_argument('weight_path', help='path to weights, lemmatisation data and dictionary')
     parser.add_argument('lemmatisation_data', help='path to lemmatisation data')
     parser.add_argument('dictionary', help='path to dictionary')
@@ -38,7 +30,7 @@ if __name__ == '__main__':
                       default='xces', dest='output_format',
                       help='output format: xces, plain, conll, conllu, jsonl')
     parser.add_argument('--maca_config',
-                      default='morfeusz-nkjp-official',
+                      default='morfeusz2-nkjp',
                       help='Maca config')
     parser.add_argument('--toki_config_path',
                       default='',

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 import pickle
+import re
 import sys
 from typing import List, Iterable, Generator, Union
 
@@ -127,7 +128,9 @@ class Preprocess:
                     sequence.append(sample)
                     sample.features['token'] = form
                     sample.features['tags'] = uniq([t for l, t in interpretations])
-                    sample.features['maca_lemmas'] = interpretations
+                    interpretations = [(re.sub(r':[abcdijnopqsv]\d?$', '', l), t) for l, t in
+                                       interpretations]
+                    sample.features['maca_lemmas'] = [(l.replace('_', ' '), t) for l, t in uniq(interpretations)]
 
                     # TODO: cleanup space before
                     sample.features['space_before'] = ['space_before'] if space_before !='none' else [

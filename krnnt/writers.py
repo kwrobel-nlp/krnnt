@@ -1,4 +1,7 @@
 import io
+import logging
+import sys
+from typing import Callable
 
 import jsonlines
 
@@ -106,3 +109,24 @@ def results_to_xces_str(result_paragraphs):
 def escape_xml(s):
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace('\'',
                                                                                                             '&apos;')
+
+
+def get_output_converter(output_format: str) -> Callable:
+    output_format=output_format.lower()
+    if output_format == 'xces':
+        conversion = results_to_xces_str
+    elif output_format == 'plain':
+        conversion = results_to_plain_str
+    elif output_format in ('conll','tsv'):
+        conversion = results_to_conll_str
+    elif output_format == 'conllu':
+        conversion = results_to_conllu_str
+    elif output_format == 'jsonl':
+        conversion = results_to_jsonl_str
+    elif output_format in ('txt','text'):
+        conversion = results_to_txt_str
+    else:
+        logging.error('Wrong output format.')
+        sys.exit(1)
+
+    return conversion

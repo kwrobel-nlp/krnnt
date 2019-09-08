@@ -74,12 +74,15 @@ if __name__ == '__main__':
     pref['dev_data_ratio'] = float(args.dev_ratio)
 
     pref['tensor_board']= args.tensor_board
+    pref['nb_epoch'] = args.epochs
 
     pref['dev_data'] = args.dev_data
+    if pref['dev_data']=='0.0':
+        pref['patience'] = pref['nb_epoch']
     pref['test_data'] = args.test_data
     pref['load_model'] = args.load_model
 
-    pref['nb_epoch'] = int(args.epochs)
+
     # pref['corpus_path'] = args.corpus_path
     pref['patience'] = args.patience
     pref['maca_config'] = args.maca_config
@@ -91,8 +94,9 @@ if __name__ == '__main__':
     keras_model_class = pref['keras_model_class']
 
     if args.cv:
-        rf = RunFolds2(keras_model_class, pref)
-        rf.run()
+        logging.error('CV is not supported')
+        # rf = RunFolds2(keras_model_class, pref)
+        # rf.run()
     else:
         parameters = ExperimentParameters(pref)
 

@@ -22,25 +22,51 @@ if __name__ == '__main__':
     stats_forms = collections.defaultdict(int)
     stats_tags = collections.defaultdict(int)
 
+    count_sentences=0
+    count_igns=0
+    count_blanks=0
+    count_wo_disamb=0
+    count_problems=0
     for path in glob.iglob(args.corpus_path):
         print(path, file=sys.stderr)
         for paragraph in read_xces(path):
+
             for sentence in paragraph:
+                count_sentences += 1
+                ign = False
+                blank = False
+                wo_disamb = False
                 for token in sentence:
                     form = token.form
                     try:
                         tag = token.gold_form.tags
                         stats_forms[(form, tag)] += 1
                         stats_tags[tag] += 1
+                        if tag=='ign':
+                            ign=True
+                        elif tag=='blank':
+                            blank=True
                     except:  # no disamb
                         print("Missing disamb", path, form, file=sys.stderr)
+                        wo_disamb=True
                         pass
+                if ign: count_igns+=1
+                if blank: count_blanks+=1
+                if wo_disamb: count_wo_disamb+=1
+                if ign or blank or wo_disamb: count_problems+=1
 
     # stats
+    print('Sentences: %s' % count_sentences)
+    print('Sentences wo disamb: %s' % count_wo_disamb)
+    print('Sentences with ign: %s' % count_igns)
+    print('Sentences with blank: %s' % count_blanks)
+    print('Sentences with problems: %s' % count_problems)
     print('Tokens: %s' % sum(stats_forms.values()))
     print('Unique tokens: %s' % len(set([x[0] for x in stats_forms])))
     print('Unique token+tag: %s' % len(stats_forms))
     print('Unique tags: %s' % len(stats_tags))
+    print('Tokens with tag ign: %s' % stats_tags['ign'])
+    print('Tokens with tag blank: %s' % stats_tags['blank'])
     print()
 
     # analyse

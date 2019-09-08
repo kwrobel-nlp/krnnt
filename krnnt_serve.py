@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import logging
 import sys
 from argparse import ArgumentParser
 
@@ -11,8 +10,7 @@ from krnnt.additional_format import additional_format
 from krnnt.analyzers import MacaAnalyzer
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
-from krnnt.writers import results_to_conll_str, results_to_jsonl_str, results_to_conllu_str, results_to_plain_str, \
-    results_to_xces_str
+from krnnt.writers import get_output_converter
 from krnnt.readers import json_to_objects, json_compact_to_objects
 from krnnt.pipeline import KRNNTSingle
 
@@ -105,23 +103,6 @@ def maca():
     results = list(results)
     return str(results)
 
-def get_output_converter(output_format):
-    output_format=output_format.lower()
-    if output_format == 'xces':
-        conversion = results_to_xces_str
-    elif output_format == 'plain':
-        conversion = results_to_plain_str
-    elif output_format in ('conll','tsv'):
-        conversion = results_to_conll_str
-    elif output_format == 'conllu':
-        conversion = results_to_conllu_str
-    elif output_format == 'jsonl':
-        conversion = results_to_jsonl_str
-    else:
-        logging.error('Wrong output format.')
-        sys.exit(1)
-
-    return conversion
 
 def main(argv=sys.argv[1:]):
     print(argv)
@@ -172,7 +153,7 @@ def main(argv=sys.argv[1:]):
 
     krnntx.tag_sentences(['Ala'])
 
-    conversion=get_output_converter(args.output_format)
+    conversion= get_output_converter(args.output_format)
 
     return app, args.host, args.port
 

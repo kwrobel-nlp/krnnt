@@ -1,6 +1,6 @@
 # KRNNT
 
-KRNNT is a morphological tagger for Polish based on recurrent naural networks. It was presented at 8th Language & Technology Conference. More details are available in the paper:
+KRNNT is a morphological tagger for Polish based on recurrent neural networks. It was presented at 8th Language & Technology Conference. More details are available in the paper:
 ```
 @inproceedings{wrobel2017,
   author       = "Wróbel, Krzysztof",
@@ -16,6 +16,8 @@ KRNNT is a morphological tagger for Polish based on recurrent naural networks. I
 
 Online version is available at: http://ltc.amu.edu.pl/book/papers/PolEval1-6.pdf
 
+Copy: https://www.researchgate.net/publication/333566748_KRNNT_Polish_Recurrent_Neural_Network_Tagger
+
 ## External tools
 
 The tagger uses external tools: tokenizer Toki and morphological analyzer Morfeusz. Maca (http://nlp.pwr.wroc.pl/redmine/projects/libpltagger/wiki) integrates both tools.
@@ -30,11 +32,11 @@ You can run KRNNT using docker or by manual installation.
 
 Docker image was prepared by Aleksander Smywiński-Pohl and instrutions are available at: https://hub.docker.com/r/djstrong/krnnt/
 
-1. Download and starte the server.
+1. Download and start the server.
 ```bash
 docker run -it -p 9200:9200 djstrong/krnnt:0.1 python3 /home/krnnt/krnnt/krnnt_serve.py /home/krnnt/krnnt/data
 ```
-2. Tag a text usig POST request or open http://localhost:9200 in a browser.
+2. Tag a text using POST request or open http://localhost:9200 in a browser.
 ```bash
 $ curl -XPOST localhost:9200 -d "Ala ma kota."
 Ala    none
@@ -49,11 +51,13 @@ kota    space
 
 ### Manual installation
 
+Please refer to the docker file: https://github.com/kwrobel-nlp/dockerfiles/blob/morfeusz2/tagger/Dockerfile
+
 1. Install Maca: http://nlp.pwr.wroc.pl/redmine/projects/libpltagger/wiki
 
 Make sure that command `maca-analyse` works:
 ```bash
-echo "Ala ma kota." | maca-analyse -qc morfeusz-nkjp-official
+echo "Ala ma kota." | maca-analyse -qc morfeusz2-nkjp
 Ala	newline
 	Al	subst:sg:gen:m1
 	Al	subst:sg:acc:m1
@@ -96,9 +100,9 @@ Accuracy lower bound | Accuracy lower bound for unknown tokens
 
 ## PolEval
 
-The tagger particaipated in PolEval 2017 competition: http://poleval.pl/
+The tagger participated in PolEval 2017 competition: http://2017.poleval.pl/index.php/results/
 
-There is some problem with Keras version higher than 2.1.2.
+The original submission was created using tag `poleval`.
 
 ### Training
 
@@ -112,8 +116,8 @@ krnnt]$ pip3 install -e .
 2. Prepare training data.
 
 ```
-krnnt]$ time python3 process_xces.py train-gold.xml train-gold.spickle
-real	0m37.769s
+krnnt]$ time process_xces.py train-gold.xml train-gold.spickle 
+0:14.75
 ```
 
 
@@ -121,10 +125,15 @@ real	0m37.769s
 
 ```
 krnnt]$ python3 reanalyze.py train-gold.spickle train-reanalyzed.spickle
-0 MACA 9 10
-1 MACA 7 8
+Number of sentences by Maca vs gold 9 10
+Number of sentences by Maca vs gold 7 8                                                                                                                                         | 2/18484 [00:00<15:41, 19.63it/s]Number of sentences by Maca vs gold 7 6
+Number of sentences by Maca vs gold 8 10
+Number of sentences by Maca vs gold 3 3
+Number of sentences by Maca vs gold 3 3
+Number of sentences by Maca vs gold 7 7
+Number of sentences by Maca vs gold 4 4
 ...
-real	26m35.013s
+1:30.30
 ```
 Ensure that last two numbers in each row are usually the same. Zeros indicates problems with Maca.
 
@@ -132,28 +141,59 @@ Ensure that last two numbers in each row are usually the same. Zeros indicates p
 
 ```
 krnnt]$ time python3 shuffle.py train-reanalyzed.spickle train-reanalyzed.shuf.spickle
-real	1m26.350s
+0:28.95
+```
+
+5. Preprocess data.
+
+```
+krnnt]$ time python3 preprocess_data.py train-reanalyzed.shuf.spickle train-reanalyzed.shuf.spickle.preprocessed
+0:56.80
+```
+
+6. Create dictionary for all features.
+
+```
+krnnt]$ time python3 create_dict.py train-reanalyzed.shuf.spickle.preprocessed train-reanalyzed.shuf.spickle.dict
+0:18.93
+```
+
+7. Train lemmatization module.
+
+```
+krnnt]$ time python3 train_lemmatization.py train-reanalyzed.shuf.spickle.preprocessed --hash model_nkjp
+0:09.55
 ```
 
 
-5. Train for 100 epochs. Add `-d 0.1` for using 10% of training data as development data set. 
+8. Train for 150 epochs. Add `-d 0.1` for using 10% of training data as development data set. 
 
 ```
-krnnt]$ time python3 krnnt_train.py train-reanalyzed.shuf.spickle --patience 100
-Model is saved under: weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final
-Lemmatisation model is saved under: lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl
-Dictionary is saved under: train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues
-real    197m44,568s
-```
-Check `~/.keras/keras.json` for `"image_dim_ordering": "th"` (for old Keras) and `"image_data_format": "channels_first"` (for Keras 2).
-
-6. Testing.
+krnnt]$ python3 train.py train-reanalyzed.shuf.spickle.preprocessed train-reanalyzed.shuf.spickle.dict -e 150 --patience 150 --hash model_nkjp --test_data poleval-reanalyzed.shuf.spickle.preprocessed
 
 ```
-krnnt]$ time python3 krnnt_run.py weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues < train-raw.txt
-real	7m22.892s
-```
+Check `~/.keras/keras.json` for `"image_data_format": "channels_first"`.
 
+9. Testing.
+
+```
+krnnt]$ time python3 krnnt_run.py weight_model_nkjp.hdf5.final lemmatisation_model_nkjp.pkl train-reanalyzed.shuf.spickle.dict < test-raw.txt > test-raw.xml
+0:09.02
+```
+10. Evaluate.
+
+```
+krnnt]$ python2 tagger-eval.py gold-task-c.xml test-raw.xml -t poleval -s
+PolEval 2017 competition scores
+-------------------------------
+POS accuracy (Subtask A score): 	92.3308%
+POS accuracy (known words): 	92.3308%
+POS accuracy (unknown words): 	0.0000%
+Lemmatization accuracy (Subtask B score): 	96.8816%
+Lemmatization accuracy (known words): 	96.8816%
+Lemmatization accuracy (unknown words): 	0.0000%
+Overall accuracy (Subtask C score): 	94.6062%
+```
 
 ## Training on gold segmentation
 
@@ -161,13 +201,13 @@ real	7m22.892s
 
 ```
 krnnt]$ time python3 process_xces.py train-analyzed.xml train-analyzed.spickle
-real	1m51.836s
+real	0m37.211s
 
 krnnt]$ time python3 process_xces.py train-gold.xml train-gold.spickle
-real	0m37.769s
+real	0m14.750s
 
 krnnt]$ time python3 merge_analyzed_gold.py train-gold.spickle train-analyzed.spickle train-merged.spickle
-real	0m36.049s
+real	0m18.215s
 ```
 
 
@@ -175,26 +215,59 @@ real	0m36.049s
 
 ```
 krnnt]$ time python3 shuffle.py train-merged.spickle train-merged.shuf.spickle
-real	1m41.192s
+real	0m21,636s
 ```
 
-
-4. Train for 100 epochs.
-
-```
-krnnt]$ time python3 krnnt_train.py -p train-merged.shuf.spickle --patience 100
-Model is saved under: weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final
-Lemmatisation model is saved under: lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl
-Dictionary is saved under: train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues
-real    190m44,568s
-```
-
-5. Testing.
+4. Preprocess data.
 
 ```
-krnnt]$ time python3 krnnt_run.py -p weight_1810e860-6351-11e7-ae0b-a0000220fe80.hdf5.final lemmatisation_1810e860-6351-11e7-ae0b-a0000220fe80.pkl train-reanalyzed.shuf.spickle_FormatData2_PreprocessData_UniqueFeaturesValues < train-analyzed.xces
-real	7m38.660s
+time python3 preprocess_data.py -p train-merged.shuf.spickle train-merged.shuf.spickle.preprocessed
+real	0m52,872s
 ```
+
+6. Create dictionary for all features.
+
+```
+krnnt]$ time python3 create_dict.py train-merged.shuf.spickle.preprocessed train-merged.shuf.spickle.dict
+real	0m19,756s
+```
+
+7. Train lemmatization module.
+
+```
+krnnt]$ time python3 train_lemmatization.py train-merged.shuf.spickle.preprocessed --hash model_nkjp_pre
+real	0m7,184s
+```
+
+8. Train for 150 epochs.
+
+```
+krnnt]$ python3 train.py train-merged.shuf.spickle.preprocessed train-merged.shuf.spickle.dict -e 150 --patience 150 --hash model_nkjp_pre --test_data poleval-reanalyzed.shuf.spickle.preprocessed
+
+```
+
+9. Testing.
+
+```
+krnnt]$ time python3 krnnt_run.py -p weight_model_nkjp_pre.hdf5.final lemmatisation_model_nkjp_pre.pkl train-merged.shuf.spickle.dict < test-analyzed.xml > test-analyzed.xml.pred
+real	0m8,426s
+```
+
+10. Evaluate.
+
+```
+krnnt]$ python2 tagger-eval.py gold-task-a-b.xml test-analyzed.xml.pred -t poleval -s
+PolEval 2017 competition scores
+-------------------------------
+POS accuracy (Subtask A score): 	93.9106%
+POS accuracy (known words): 	93.9106%
+POS accuracy (unknown words): 	0.0000%
+Lemmatization accuracy (Subtask B score): 	97.8654%
+Lemmatization accuracy (known words): 	97.8654%
+Lemmatization accuracy (unknown words): 	0.0000%
+Overall accuracy (Subtask C score): 	95.8880%
+```
+
 ## Testing
 
 Trained models are available with releases: https://github.com/kwrobel-nlp/krnnt/releases

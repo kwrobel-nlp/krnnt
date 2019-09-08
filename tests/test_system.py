@@ -99,7 +99,7 @@ def test_train_lemmatization(bash, rootdir):
     commands = [
         'cd %s' % rootdir,
         'cd ..',
-        'python3 train-lemmatization.py tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle.preprocess --reproducible --hash test',
+        'python3 train_lemmatization.py tests/data/reference/nkjp1m-1.2-reanalyzed.shuf.spickle.preprocess --reproducible --hash test',
         'diff lemmatisation_test.pkl tests/data/reference/lemmatisation_test.pkl',
     ]
 
