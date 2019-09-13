@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from flask import Flask
 from flask import request
 from krnnt.additional_format import additional_format
+from krnnt.aglt import remove_aglt_from_results_rule1_3
 from krnnt.analyzers import MacaAnalyzer
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
@@ -52,8 +53,12 @@ def tag_raw():
 
     input_format = request.args.get('input_format', default=None, type=str)
     output_format = request.args.get('output_format', default='plain', type=str)
+    remove_aglt = request.args.get('remove_aglt', default='0', type=str)
 
-    conversion = get_output_converter(output_format)
+    conversion2 = get_output_converter(output_format)
+
+    if remove_aglt!='0':
+        conversion2=lambda x: remove_aglt_from_results_rule1_3(conversion2(x))
 
     if request.is_json:
         data = request.get_json()
@@ -68,7 +73,7 @@ def tag_raw():
 
             corpus = analyze_tokenized(morfeusz, paragraphs)
             results = krnntx.tag_paragraphs(corpus, preana=True)
-            return conversion(results)
+            return conversion2(results)
     elif 'text' in request.form:
         text = request.form['text']
 
@@ -131,6 +136,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('-b', '--batch_size',
                         default=32, type=int,
                         help='batch size')
+    parser.add_argument('--remove_aglt', action='store_true')
     args = parser.parse_args(argv)
 
     pref = {'keras_batch_size': args.batch_size, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
@@ -154,6 +160,9 @@ def main(argv=sys.argv[1:]):
     krnntx.tag_sentences(['Ala'])
 
     conversion= get_output_converter(args.output_format)
+
+    if args.remove_aglt:
+        conversion=lambda x: remove_aglt_from_results_rule1_3(conversion(x))
 
     return app, args.host, args.port
 

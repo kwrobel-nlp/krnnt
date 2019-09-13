@@ -5,7 +5,7 @@ import sys
 
 from argparse import ArgumentParser
 
-
+from krnnt.aglt import remove_aglt_from_results_rule1_3
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
 from krnnt.pipeline import KRNNTSingle, chunk
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--chunk_size',
                         default=100000, type=int,
                         help='chunk size')
+    parser.add_argument('--remove_aglt', action='store_true')
     args = parser.parse_args()
 
     if args.reproducible:
@@ -121,5 +122,9 @@ if __name__ == '__main__':
     else:
         print('Wrong output format.')
         sys.exit(1)
+
+
+    if args.remove_aglt:
+        remove_aglt_from_results_rule1_3(results)
 
     print(conversion(results))
