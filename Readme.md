@@ -474,6 +474,8 @@ kota	kot	1	subst:sg:acc:m2	7	11
 .	.	0	interp	11	12
 ```
 
+`remove_aglt` (default `0`) - indicates if aglt should be removed 
+
 # Scripts
 
 * `analyze_corpus_tagset_date.py` - analyze corpus tagset version

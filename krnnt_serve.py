@@ -37,7 +37,8 @@ def render(text='', str_results=''):
 </form>
 <pre>%s</pre>
 <p>The tagset is described here: <a href="http://nkjp.pl/poliqarp/help/ense2.html">http://nkjp.pl/poliqarp/help/ense2.html</a></p>
-<p>Wróbel Krzysztof, <a href="http://ltc.amu.edu.pl/book/papers/PolEval1-6.pdf">KRNNT: Polish Recurrent Neural Network Tagger</a></p>
+<p>Wróbel Krzysztof, <a href="https://www.researchgate.net/publication/333566748_KRNNT_Polish_Recurrent_Neural_Network_Tagger">KRNNT: Polish Recurrent Neural Network Tagger</a></p>
+<p>Source code: <a href="https://github.com/kwrobel-nlp/krnnt">https://github.com/kwrobel-nlp/krnnt</a></p>
 </body>
 </html>""" % (text, str_results)
 
