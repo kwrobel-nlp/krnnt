@@ -34,7 +34,7 @@ Docker image was prepared by Aleksander Smywiński-Pohl and instrutions are avai
 
 1. Download and start the server.
 ```bash
-docker run -it -p 9200:9200 djstrong/krnnt:0.1 python3 /home/krnnt/krnnt/krnnt_serve.py /home/krnnt/krnnt/data
+docker run -p 9200:9200 -it krnnt:1.0.0 bash -c "cd /home/krnnt/krnnt/ && ./start_gunicorn_server.sh"
 ```
 2. Tag a text using POST request or open http://localhost:9200 in a browser.
 ```bash

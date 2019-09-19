@@ -54,7 +54,7 @@ class MacaAnalyzer:
         return paragraph_reanalyzed
 
     def _maca_process(self, text: str) -> Generator[str, None, None]:
-        cmd = ['maca-analyse', '-c', self.maca_config, '-l']
+        cmd = ['maca-analyse', '-c', self.maca_config, '-l'] #TODO: -l ?
         if self.toki_config_path:
             cmd.extend(['--toki-config-path', self.toki_config_path])
         p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
