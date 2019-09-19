@@ -10,7 +10,7 @@ setup(name='krnnt',
       license='LGPL',
       python_requires='>=3, <4',
       install_requires=[
-          'Cython', 'h5py', 'Keras', 'numpy', 'regex', 'requests', 'jsonlines', 'tqdm', 'flask', 'gunicorn',
+          'Cython', 'h5py', 'Keras==2.2.5', 'numpy', 'regex', 'requests', 'jsonlines', 'tqdm', 'flask', 'gunicorn',
           'krnnt_utils @ git+https://github.com/Zhylkaaa/krnnt_text_utils@cython'
       ],
       extras_require={
