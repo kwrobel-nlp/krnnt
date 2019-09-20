@@ -115,6 +115,8 @@ def rewrite_praet(aglt_token, praet_token, by_token=None):
 
     if by_token:
         praet_tags[0] = 'cond'
+        if aglt_token is None:
+            praet_tags.insert(3, 'ter')
 
     praet_token['tag'] = ':'.join(praet_tags)
 
