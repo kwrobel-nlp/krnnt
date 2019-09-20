@@ -117,8 +117,8 @@ def main(argv=sys.argv[1:]):
     parser = ArgumentParser(usage='HTTP Tagger server')
     parser.add_argument('model_path', help='path to directory woth weights, lemmatisation data and dictionary')
     parser.add_argument('-p', '--port',
-                        default=9200,
-                        help='server port (defaults to 9200)')
+                        default=9003,
+                        help='server port (defaults to 9003)')
     parser.add_argument('-t', '--host',
                         default='0.0.0.0',
                         help='server host (defaults to localhost)')
@@ -183,4 +183,4 @@ def start(*args, **kwargs):
     app, host, port = main(args)
     return app
 
-#gunicorn -b 127.0.0.1:9200 -w 4 -k gevent -t 3600 --threads 4 'krnnt_serve:start("model_data","--maca_config","morfeusz2-nkjp","--toki_config_path","/home/krnnt/")'
+#gunicorn -b 127.0.0.1:9003 -w 4 -k gevent -t 3600 --threads 4 'krnnt_serve:start("model_data","--maca_config","morfeusz2-nkjp","--toki_config_path","/home/krnnt/")'

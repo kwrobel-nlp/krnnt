@@ -6,13 +6,13 @@ import requests
 
 
 def test_api(rootdir):
-    url = 'http://localhost:9200'
+    url = 'http://localhost:9003'
 
     for line in open(os.path.join(rootdir, 'data/full/test-raw.txt')):
         line=line.strip()
         if not line: continue
 
-        tag('http://localhost:9200', line)
+        tag('http://localhost:9003', line)
 
 def tag(url, data):
     payload = data.encode('utf-8')
@@ -44,7 +44,7 @@ def test_parallel_api(rootdir, chunk_size):
     print(len(batches))
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_url = {executor.submit(tag, 'http://localhost:9200', "\n\n".join(batch)): "\n\n".join(batch) for batch in batches}
+        future_to_url = {executor.submit(tag, 'http://localhost:9003', "\n\n".join(batch)): "\n\n".join(batch) for batch in batches}
         for future in concurrent.futures.as_completed(future_to_url):
             r=future.result()
             # print(r.text)
@@ -61,6 +61,6 @@ def test_parallel_api_maca(rootdir, chunk_size):
     batches = list(chunk(lines, chunk_size))
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future_to_url = {executor.submit(tag, 'http://localhost:9200/maca/', "\n\n".join(batch)): "\n\n".join(batch) for batch in batches}
+        future_to_url = {executor.submit(tag, 'http://localhost:9003/maca/', "\n\n".join(batch)): "\n\n".join(batch) for batch in batches}
         for future in concurrent.futures.as_completed(future_to_url):
             r=future.result()

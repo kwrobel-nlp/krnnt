@@ -34,11 +34,11 @@ Docker image was prepared by Aleksander Smywiński-Pohl and instrutions are avai
 
 1. Download and start the server.
 ```bash
-docker run -p 9200:9200 -it krnnt:1.0.0 bash -c "cd /home/krnnt/krnnt/ && ./start_gunicorn_server.sh"
+docker run -p 9003:9003 -it djstrong/krnnt:1.0.0
 ```
-2. Tag a text using POST request or open http://localhost:9200 in a browser.
+2. Tag a text using POST request or open http://localhost:9003 in a browser.
 ```bash
-$ curl -XPOST localhost:9200 -d "Ala ma kota."
+$ curl -XPOST localhost:9003 -d "Ala ma kota."
 Ala    none
     Ala    subst:sg:nom:f    disamb
 ma    space
@@ -467,7 +467,7 @@ Default output format is `plain`. It can be changed by request parameter `output
 e.g.:
 
 ```bash
-$ curl -X POST "localhost:9200/?output_format=conll" -d "Ala ma kota."
+$ curl -X POST "localhost:9003/?output_format=conll" -d "Ala ma kota."
 Ala	Ala	1	subst:sg:nom:f	0	3
 ma	mieć	1	fin:sg:ter:imperf	4	6
 kota	kot	1	subst:sg:acc:m2	7	11

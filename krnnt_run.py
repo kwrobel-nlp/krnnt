@@ -95,6 +95,7 @@ if __name__ == '__main__':
         results=[]
         for batch in chunk(data, args.chunk_size):
             results += krnnt.tag_paragraphs(batch) # ['Ala ma kota.', 'Ale nie ma psa.']
+            #TODO: print here
     else:
         #f = io.StringIO(sys.stdin.read())
         if args.input_format== 'xces':
@@ -127,4 +128,4 @@ if __name__ == '__main__':
     if args.remove_aglt:
         remove_aglt_from_results_rule1_3(results)
 
-    print(conversion(results))
+    print(conversion(results), end='')

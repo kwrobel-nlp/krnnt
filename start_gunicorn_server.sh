@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PORT=${PORT:-9200}
+PORT=${PORT:-9003}
 WORKERS=${WORKERS:-1}
 
 echo "Starting server with $WORKERS workers."
