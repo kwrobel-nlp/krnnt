@@ -158,7 +158,8 @@ def remove_aglt_from_results(results, rules):
     for paragraph in results:
         for sentence in paragraph:
             remove_aglt(sentence, rules)
+    return results
 
 
 def remove_aglt_from_results_rule1_3(results):
-    return remove_aglt_from_results(results, [rule1, rule3])
+    return remove_aglt_from_results(results, [rule1b, rule3])

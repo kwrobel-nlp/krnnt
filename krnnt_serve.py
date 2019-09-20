@@ -56,10 +56,12 @@ def tag_raw():
     output_format = request.args.get('output_format', default='plain', type=str)
     remove_aglt = request.args.get('remove_aglt', default='0', type=str)
 
-    conversion2 = get_output_converter(output_format)
+    conversionx = get_output_converter(output_format)
 
     if remove_aglt!='0':
-        conversion2=lambda x: remove_aglt_from_results_rule1_3(conversion2(x))
+        conversion2=lambda x: conversionx(remove_aglt_from_results_rule1_3(x))
+    else:
+        conversion2=conversionx
 
     if request.is_json:
         data = request.get_json()
@@ -91,7 +93,7 @@ def tag_raw():
             data = [text.decode('utf-8')]
 
         results = krnntx.tag_paragraphs(data)
-        return conversion(results)
+        return conversion2(results)
 
 
 @app.route('/tag/', methods=['POST'])
