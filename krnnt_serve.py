@@ -9,6 +9,7 @@ from flask import request
 from krnnt.additional_format import additional_format
 from krnnt.aglt import remove_aglt_from_results_rule1_3
 from krnnt.analyzers import MacaAnalyzer
+from krnnt.blanks import remove_blanks_from_results
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
 from krnnt.writers import get_output_converter
@@ -55,13 +56,17 @@ def tag_raw():
     input_format = request.args.get('input_format', default=None, type=str)
     output_format = request.args.get('output_format', default='plain', type=str)
     remove_aglt = request.args.get('remove_aglt', default='0', type=str)
+    remove_blank = request.args.get('remove_blank', default='0', type=str)
 
-    conversionx = get_output_converter(output_format)
+    conversion2 = get_output_converter(output_format)
 
     if remove_aglt!='0':
+        conversionx=conversion2
         conversion2=lambda x: conversionx(remove_aglt_from_results_rule1_3(x))
-    else:
-        conversion2=conversionx
+
+    if remove_blank!='0':
+        conversionx2=conversion2
+        conversion2=lambda x: conversionx2(remove_blanks_from_results(x))
 
     if request.is_json:
         data = request.get_json()
@@ -140,6 +145,7 @@ def main(argv=sys.argv[1:]):
                         default=32, type=int,
                         help='batch size')
     parser.add_argument('--remove_aglt', action='store_true')
+    parser.add_argument('--remove_blank', action='store_true')
     args = parser.parse_args(argv)
 
     pref = {'keras_batch_size': args.batch_size, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
@@ -165,7 +171,13 @@ def main(argv=sys.argv[1:]):
     conversion= get_output_converter(args.output_format)
 
     if args.remove_aglt:
-        conversion=lambda x: remove_aglt_from_results_rule1_3(conversion(x))
+        conversionx = conversion
+        conversion=lambda x: conversionx(remove_aglt_from_results_rule1_3(x))
+
+    if args.remove_blank:
+        conversionx2 = conversion
+        conversion=lambda x: conversionx2(remove_blanks_from_results(x))
+
 
     return app, args.host, args.port
 
