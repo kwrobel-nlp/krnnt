@@ -94,7 +94,7 @@ def test_post_tokenized_json(bash, rootdir):
         'cd %s' % rootdir,
         'cd ..',
         'curl -X POST -H "Content-Type: application/json" "http://localhost:9003" -d @tests/data/server/in_tokenized.json > /tmp/out.txt',
-        'diff /tmp/out.txt tests/data/server/out_raw.plain'
+        'diff -B /tmp/out.txt tests/data/server/out_raw.plain'
     ]
 
     with bash() as s:
@@ -106,7 +106,7 @@ def test_post_tokenized_compact_json(bash, rootdir):
         'cd %s' % rootdir,
         'cd ..',
         'curl -X POST -H "Content-Type: application/json" "http://localhost:9003" -d @tests/data/server/in_tokenized_compact.json > /tmp/out.txt',
-        'diff /tmp/out.txt tests/data/server/out_raw.plain'
+        'diff -B /tmp/out.txt tests/data/server/out_raw.plain'
     ]
 
     with bash() as s:

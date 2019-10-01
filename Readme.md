@@ -474,7 +474,8 @@ kota	kot	1	subst:sg:acc:m2	7	11
 .	.	0	interp	11	12
 ```
 
-`remove_aglt` (default `0`) - indicates if aglt should be removed 
+`remove_aglt` (default `0`) - indicates if aglt tags should be removed 
+`remove_blank` (default `1`) - indicates if blank tags should be removed 
 
 # Scripts
 
