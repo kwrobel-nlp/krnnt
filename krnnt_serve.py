@@ -81,7 +81,7 @@ def tag_raw():
 
             corpus = analyze_tokenized(morfeusz, paragraphs)
             results = krnntx.tag_paragraphs(corpus, preana=True)
-            print(results)
+
             return conversion2(results)
     elif 'text' in request.form:
         text = request.form['text']
@@ -99,7 +99,7 @@ def tag_raw():
             data = [text.decode('utf-8')]
 
         results = krnntx.tag_paragraphs(data)
-        print(results)
+
         return conversion2(results)
 
 
