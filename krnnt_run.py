@@ -6,6 +6,7 @@ import sys
 from argparse import ArgumentParser
 
 from krnnt.aglt import remove_aglt_from_results_rule1_3
+from krnnt.blanks import remove_blanks_from_results
 from krnnt.keras_models import BEST
 from krnnt.new import Lemmatisation, Lemmatisation2, get_morfeusz, analyze_tokenized
 from krnnt.pipeline import KRNNTSingle, chunk
@@ -46,6 +47,7 @@ if __name__ == '__main__':
                         default=100000, type=int,
                         help='chunk size')
     parser.add_argument('--remove_aglt', action='store_true')
+    parser.add_argument('--dont_remove_blank', action='store_false')
     args = parser.parse_args()
 
     if args.reproducible:
@@ -127,5 +129,8 @@ if __name__ == '__main__':
 
     if args.remove_aglt:
         remove_aglt_from_results_rule1_3(results)
+
+    if args.dont_remove_blank:
+        remove_blanks_from_results(results)
 
     print(conversion(results), end='')

@@ -56,7 +56,7 @@ def tag_raw():
     input_format = request.args.get('input_format', default=None, type=str)
     output_format = request.args.get('output_format', default='plain', type=str)
     remove_aglt = request.args.get('remove_aglt', default='0', type=str)
-    remove_blank = request.args.get('remove_blank', default='0', type=str)
+    remove_blank = request.args.get('remove_blank', default='1', type=str)
 
     conversion2 = get_output_converter(output_format)
 
@@ -81,6 +81,7 @@ def tag_raw():
 
             corpus = analyze_tokenized(morfeusz, paragraphs)
             results = krnntx.tag_paragraphs(corpus, preana=True)
+
             return conversion2(results)
     elif 'text' in request.form:
         text = request.form['text']
@@ -98,6 +99,7 @@ def tag_raw():
             data = [text.decode('utf-8')]
 
         results = krnntx.tag_paragraphs(data)
+
         return conversion2(results)
 
 
@@ -145,7 +147,7 @@ def main(argv=sys.argv[1:]):
                         default=32, type=int,
                         help='batch size')
     parser.add_argument('--remove_aglt', action='store_true')
-    parser.add_argument('--remove_blank', action='store_true')
+    parser.add_argument('--dont_remove_blank', action='store_false')
     args = parser.parse_args(argv)
 
     pref = {'keras_batch_size': args.batch_size, 'internal_neurons': 256, 'feature_name': 'tags4e3', 'label_name': 'label',
@@ -174,7 +176,7 @@ def main(argv=sys.argv[1:]):
         conversionx = conversion
         conversion=lambda x: conversionx(remove_aglt_from_results_rule1_3(x))
 
-    if args.remove_blank:
+    if args.dont_remove_blank:
         conversionx2 = conversion
         conversion=lambda x: conversionx2(remove_blanks_from_results(x))
 
