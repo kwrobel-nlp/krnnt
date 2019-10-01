@@ -42,7 +42,7 @@
   <chunk type="s">
    <tok>
     <orth>Raz</orth>
-    <lex disamb="1"><base>raz</base><ctag>subst:sg:nom:m3</ctag></lex>
+    <lex disamb="1"><base>raz</base><ctag>subst:sg:acc:m3</ctag></lex>
    </tok>
    <tok>
     <orth>dwa</orth>

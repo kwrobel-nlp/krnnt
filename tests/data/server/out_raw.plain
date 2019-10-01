@@ -15,7 +15,7 @@ kota	space
 	.	interp	disamb
 
 Raz	newline
-	raz	subst:sg:nom:m3	disamb
+	raz	subst:sg:acc:m3	disamb
 dwa	space
 	dwa	num:pl:nom:m3:congr	disamb
 trzy	space

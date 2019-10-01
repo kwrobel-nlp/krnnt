@@ -91,7 +91,7 @@ def test_rewrite_cond():
 def test_rewrite_cond2():
     sentence1 = copy.deepcopy(paragraph[4])
     rewrite_praet(None, sentence1[0], sentence1[1])
-    assert sentence1[0]['tag'] == 'cond:sg:m1:perf'
+    assert sentence1[0]['tag'] == 'cond:sg:m1:ter:perf'
 
 def test_rule1_cond():
     sentence1 = copy.deepcopy(paragraph[0])
@@ -139,7 +139,7 @@ def test_rule3_3():
 
     remove_aglt(sentence1, [rule1b, rule3])
     print(sentence1)
-    assert sentence1[0]['tag'] == 'cond:sg:m1:perf'
+    assert sentence1[0]['tag'] == 'cond:sg:m1:ter:perf'
     assert sentence1[0]['token'] == 'Zrobiłby'
     assert sentence1[0]['end'] == 8
     assert sentence1[1]['token'] != 'by'
@@ -149,5 +149,5 @@ def test_rule3_4():
 
     remove_aglt(sentence1, [rule1b, rule3])
     print(sentence1)
-    assert sentence1[3]['tag'] == 'cond:sg:m1:perf'
+    assert sentence1[3]['tag'] == 'cond:sg:m1:ter:perf'
     assert sentence1[3]['token'] == 'zrobił'

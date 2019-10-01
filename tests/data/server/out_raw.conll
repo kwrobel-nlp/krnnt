@@ -8,7 +8,7 @@ kota	kot	1	subst:sg:acc:m2	21	25
 .	.	0	interp	25	26
 
 
-Raz	raz	1	subst:sg:nom:m3	0	3
+Raz	raz	1	subst:sg:acc:m3	0	3
 dwa	dwa	1	num:pl:nom:m3:congr	4	7
 trzy	trzy	1	num:pl:nom:m3:congr	8	12
 .	.	0	interp	12	13
