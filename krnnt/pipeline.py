@@ -261,7 +261,7 @@ class KerasThread():
                 # response.append(sample.features['token']+'\t'+sep)
                 token_response['token'] = sample.features['token']
                 token_response['sep'] = sep
-                token_response['prob'] = prob
+                token_response['prob'] = float(prob)
                 token_response['document_id'] = sample.features['document_id']
 
                 lemmas = [x for x in sample.features['maca_lemmas']]

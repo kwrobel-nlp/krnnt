@@ -1,4 +1,5 @@
 import io
+import json
 import logging
 import sys
 from typing import Callable
@@ -52,6 +53,9 @@ def results_to_jsonl_str(result_paragraphs):
                 output_paragraph+=(ss,)
             writer.write(output_paragraph)
     return fp.getvalue()
+
+def results_to_json_str(result_paragraphs):
+    return json.dumps(result_paragraphs)
 
 
 def results_to_conllu_str(result_paragraphs):
@@ -123,6 +127,8 @@ def get_output_converter(output_format: str) -> Callable:
         conversion = results_to_conllu_str
     elif output_format == 'jsonl':
         conversion = results_to_jsonl_str
+    elif output_format == 'json':
+        conversion = results_to_json_str
     elif output_format in ('txt','text'):
         conversion = results_to_txt_str
     else:
