@@ -80,7 +80,7 @@ class MacaAnalyzer:
         self.text = text
         self.last_offset = 0
 
-        output_text = maca_analyse(self.maca_config, self.toki_config_path, self.text)
+        output_text = maca_analyse(self.maca_config, self.toki_config_path, self.text, False, False)
 
         for i in output_text.split('\n\n'):
             if len(i) > 0:
