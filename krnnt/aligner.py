@@ -43,6 +43,12 @@ def align(pred, ref, ref_text_old=''):
             else:
 
                 print('break2', pred_text, ref_text, ref_text[len(pred_text):], file=sys.stderr)
+
+                # print([x.form for x in pred_buffer])
+                # print([x.space_before for x in pred_buffer])
+                # print([x.form for x in ref_buffer])
+                # print([x.space_before for x in ref_buffer])
+
                 #skroc ref_buffer
                 asd=[]
                 for x in ref_buffer:
@@ -98,4 +104,33 @@ def align_paragraphs(paragraph_reanalyzed: Paragraph, paragraph_gold: Paragraph)
                 if len(p) == len(r):
                     for p1, r1 in zip(p, r):
                         p1.gold_form = r1.gold_form
+    return paragraph_reanalyzed
+
+def align_paragraphs2(paragraph_reanalyzed: Paragraph, paragraph_gold: Paragraph) -> Paragraph:
+    tokens_gold = []
+    for sentence_gold in paragraph_gold:
+        for token_gold in sentence_gold:
+            tokens_gold.append(token_gold)
+            token_gold.form = token_gold.form.replace('\xa0', ' ')  # "a j e n t a"
+
+
+    ref_text_old = ''
+    paragraph_reanalyzed.concraft = []
+    for sentence_reanalyzed in paragraph_reanalyzed:
+        # print('XXXXXXXXXXXXXXXXXXXXXXXXXXXNEW')
+        sentence_reanalyzed_gold = Sentence()
+        paragraph_reanalyzed.concraft.append(sentence_reanalyzed_gold)
+        for p, r, ref_text_old in align([token for token in sentence_reanalyzed.tokens], tokens_gold, ref_text_old):
+
+            if p:
+                for r1 in r:
+                    sentence_reanalyzed_gold.add_token(r1)
+                if text(p) != text(r):
+                    print('ERR', [t.form for t in p], [t.form for t in r], file=sys.stderr)
+                # if len(p)!=len(r):
+                # print(text(p),'_____', text(r))
+                # print(len(tokens_gold))
+                if len(p) == len(r):
+                    for p1, r1 in zip(p, r):
+                        p1.interpretations = r1.interpretations
     return paragraph_reanalyzed

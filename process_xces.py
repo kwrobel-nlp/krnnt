@@ -15,7 +15,7 @@ E.g. %prog train-analyzed.xml train-analyzed.spickle
 """
 
 if __name__ == '__main__':
-    parser = ArgumentParser(usage=usage)
+    parser = ArgumentParser(usage="usage")
     parser.add_argument('file_path', type=str, help='path to XCES corpus (or path with wildcard)')
     parser.add_argument('output_path', type=str, help='save path')
     args = parser.parse_args()

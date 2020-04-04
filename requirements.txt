@@ -1,3 +1,4 @@
+Cython
 scikit-learn
 flask
 tqdm
@@ -11,5 +12,5 @@ tensorflow-gpu==1.12.0
 pytest
 gunicorn
 git+https://github.com/djstrong/pytest-shell.git#egg=pytest-shell
-git+https://github.com/Zhylkaaa/krnnt_text_utils.git@cython
+git+https://github.com/djstrong/krnnt_text_utils.git@cython
 pytest-benchmark

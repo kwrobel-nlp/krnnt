@@ -9,11 +9,11 @@ from krnnt.analyzers import MacaAnalyzer
 from krnnt.structure import Paragraph
 from krnnt.serial_pickle import SerialPickler, SerialUnpickler
 
-usage = """%prog CORPUS_GOLD CORPUS_SAVE
+usage = """prog CORPUS_GOLD CORPUS_SAVE
 
 Reanalyze corpus with Maca.
 
-E.g. %prog train-gold.spickle train-reanalyzed.spickle
+E.g. prog train-gold.spickle train-reanalyzed.spickle
 """
 
 if __name__ == '__main__':
