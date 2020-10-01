@@ -250,9 +250,9 @@ class KerasThread():
                 else:
                     sep = 'none'
 
-                if 'newline' in sample.features['space_before']:
+                if 'newline' in sample.features['space_before'] or 'newlines' in sample.features['space_before']:
                     sep = 'newline'
-                elif 'space' in sample.features['space_before']:
+                elif 'space' in sample.features['space_before'] or 'spaces' in sample.features['space_before']:
                     sep = 'space'
                 elif 'none' in sample.features['space_before']:
                     sep = 'none'
