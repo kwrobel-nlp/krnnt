@@ -18,6 +18,6 @@ setup(name='krnnt',
           'pytest': ['pytest', 'pytest-benchmark',
                      'pytest-shell @ https://api.github.com/repos/djstrong/pytest-shell/tarball/'],
           'tfcpu': ['tensorflow==1.14.0'],
-          'tfgpu': ['tensorflow-gpu==1.12.0']
+          'tfgpu': ['tensorflow-gpu==2.3.1']
       },
       zip_safe=False)
