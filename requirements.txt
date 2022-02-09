@@ -8,7 +8,7 @@ numpy==1.16.4
 regex==2019.6.8
 requests==2.22.0
 jsonlines==1.2.0
-tensorflow-gpu==1.12.0
+tensorflow-gpu==2.5.3
 pytest
 gunicorn
 git+https://github.com/djstrong/pytest-shell.git#egg=pytest-shell
