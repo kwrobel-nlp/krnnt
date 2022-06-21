@@ -4,7 +4,7 @@ flask
 tqdm
 h5py==2.9.0
 Keras==2.2.4
-numpy==1.16.4
+numpy==1.22.0
 regex==2019.6.8
 requests==2.22.0
 jsonlines==1.2.0
